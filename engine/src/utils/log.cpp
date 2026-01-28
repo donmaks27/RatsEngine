@@ -36,6 +36,6 @@ namespace engine::log
 
 	void print(const type t, std::string_view msg)
 	{
-		fmt::println("{} {}", fmt::styled(typeToString(t), fmt::fg(typeToColor(t))), msg);
+		fmt::print(fmt::fg(typeToColor(t)), "{} {}\n", typeToString(t), msg);
 	}
 }

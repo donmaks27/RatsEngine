@@ -28,7 +28,8 @@ list(APPEND RATS_ENGINE_PUBLIC_MODULES
 	"modules/utils/utils.cppm"
 	"modules/utils/log.cppm"
 	"modules/utils/uuid.cppm")
-list(APPEND RATS_ENGINE_HEADERS)
+list(APPEND RATS_ENGINE_HEADERS
+	"include/engine/macro/defer.h")
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
 	"src/utils/eastl_operator_new.cpp"
@@ -43,7 +44,7 @@ set_target_properties(rats-engine PROPERTIES
 	CXX_VISIBILITY_PRESET hidden
 	VISIBILITY_INLINES_HIDDEN ON)
 generate_export_header(rats-engine EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/include/engine_export.h")
-target_include_directories(rats-engine PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/include")
+target_include_directories(rats-engine PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_sources(rats-engine PUBLIC
 	FILE_SET CXX_MODULES
