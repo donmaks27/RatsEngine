@@ -1,5 +1,9 @@
 {
   "dependencies": [
-    "fmt"
+    "fmt",
+    "eastl",
+    "glm",
+    "glfw3",
+    "vulkan"
   ]
 }

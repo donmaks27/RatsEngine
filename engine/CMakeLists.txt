@@ -12,7 +12,15 @@ if(MSVC)
 endif()
 
 find_package(fmt CONFIG REQUIRED)
-list(APPEND RATS_ENGINE_PUBLIC_LIBS fmt::fmt)
+find_package(EASTL CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+list(APPEND RATS_ENGINE_PUBLIC_LIBS 
+	fmt::fmt 
+	EASTL
+	glm::glm)
+list(APPEND RATS_ENGINE_PRIVATE_LIBS
+	glfw)
 
 
 
@@ -32,10 +40,11 @@ target_sources(rats-engine PUBLIC
 		FILES
 			"src/engine.cppm"
 			"src/utils/utils.cppm"
-			"src/utils/log.cppm")
+			"src/utils/log.cppm" "src/utils/uuid.cppm")
 target_sources(rats-engine PRIVATE
 	"src/engine_export.h"
 	"src/engine.cpp"
-	"src/utils/log.cpp" )
+	"src/utils/log.cpp"
+	"src/utils/eastl_operator_new.cpp" "src/utils/uuid.cpp")
 
-target_link_libraries(rats-engine PUBLIC ${RATS_ENGINE_PUBLIC_LIBS})
+target_link_libraries(rats-engine PUBLIC ${RATS_ENGINE_PUBLIC_LIBS} PRIVATE ${RATS_ENGINE_PRIVATE_LIBS})
