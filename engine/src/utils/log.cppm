@@ -1,52 +1,39 @@
 module;
 
-#include "engine_export.h"
+#include <engine_export.h>
 
-#include <cstdint>
-#include <format>
+#include <fmt/format.h>
 
 export module rats_engine.utils:log;
 
-export namespace rats_engine
+export namespace engine::log
 {
-	namespace log
-	{
-		enum class RATS_ENGINE_EXPORT type : std::uint8_t { log, info, warning, error, fatal };
+	enum class RATS_ENGINE_EXPORT type : std::uint8_t { log, info, warning, error, fatal };
 
-		RATS_ENGINE_EXPORT void print(type t, std::string_view msg);
-		/*template<typename... Args>
-		void print(const type t, std::format_string<Args...> fmtStr, Args&&... args)
-		{
-			log::print(t, std::format(fmtStr, std::forward<Args>(args)...));
-		}*/
-
-		/*enum class ENGINE_API type : std::uint8_t { log, info, warning, error, fatal };
-
-	ENGINE_API void print(type t, std::string_view msg);
+	RATS_ENGINE_EXPORT void print(type t, std::string_view msg);
 	template<typename... Args>
 	void print(const type t, fmt::format_string<Args...> fmtStr, Args&&... args)
 	{
-		print(t, fmt::format(fmtStr, std::forward<Args>(args)...));
+		log::print(t, fmt::format(fmtStr, std::forward<Args>(args)...));
 	}
 
-	inline void log(const std::string_view msg) { print(type::log, msg); }
+	inline void log(const std::string_view msg) { log::print(type::log, msg); }
 	template<typename... Args>
-	void log(fmt::format_string<Args...> fmtStr, Args&&... args) { print(type::log, fmtStr, std::forward<Args>(args)...); }
+	void log(fmt::format_string<Args...> fmtStr, Args&&... args) { log::print(type::log, fmtStr, std::forward<Args>(args)...); }
 
-	inline void info(const std::string_view msg) { print(type::info, msg); }
+	inline void info(const std::string_view msg) { log::print(type::info, msg); }
 	template<typename... Args>
-	void info(fmt::format_string<Args...> fmtStr, Args&&... args) { print(type::info, fmtStr, std::forward<Args>(args)...); }
+	void info(fmt::format_string<Args...> fmtStr, Args&&... args) { log::print(type::info, fmtStr, std::forward<Args>(args)...); }
 
-	inline void warning(const std::string_view msg) { print(type::warning, msg); }
+	inline void warning(const std::string_view msg) { log::print(type::warning, msg); }
 	template<typename... Args>
-	void warning(fmt::format_string<Args...> fmtStr, Args&&... args) { print(type::warning, fmtStr, std::forward<Args>(args)...); }
+	void warning(fmt::format_string<Args...> fmtStr, Args&&... args) { log::print(type::warning, fmtStr, std::forward<Args>(args)...); }
 
-	inline void error(const std::string_view msg) { print(type::error, msg); }
+	inline void error(const std::string_view msg) { log::print(type::error, msg); }
 	template<typename... Args>
-	void error(fmt::format_string<Args...> fmtStr, Args&&... args) { print(type::error, fmtStr, std::forward<Args>(args)...); }
+	void error(fmt::format_string<Args...> fmtStr, Args&&... args) { log::print(type::error, fmtStr, std::forward<Args>(args)...); }
 
-	inline void fatal(const std::string_view msg) { print(type::fatal, msg); }
+	inline void fatal(const std::string_view msg) { log::print(type::fatal, msg); }
 	template<typename... Args>
-	void fatal(fmt::format_string<Args...> fmtStr, Args&&... args) { print(type::fatal, fmtStr, std::forward<Args>(args)...); }*/
-	}
+	void fatal(fmt::format_string<Args...> fmtStr, Args&&... args) { log::print(type::fatal, fmtStr, std::forward<Args>(args)...); }
 }

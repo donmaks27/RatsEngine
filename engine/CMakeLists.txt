@@ -12,7 +12,9 @@ if(MSVC)
 endif()
 
 find_package(fmt CONFIG REQUIRED)
-list(APPEND RATS_ENGINE_PUBLIC_LIBS fmt::fmt-header-only)
+list(APPEND RATS_ENGINE_PUBLIC_LIBS fmt::fmt)
+
+
 
 add_library(rats-engine SHARED)
 
@@ -34,7 +36,6 @@ target_sources(rats-engine PUBLIC
 target_sources(rats-engine PRIVATE
 	"src/engine_export.h"
 	"src/engine.cpp"
-	
 	"src/utils/log.cpp" )
 
 target_link_libraries(rats-engine PUBLIC ${RATS_ENGINE_PUBLIC_LIBS})

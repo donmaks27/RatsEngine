@@ -3,6 +3,6 @@ import rats_engine.utils;
 
 int main()
 {
-	rats_engine::log::print(rats_engine::log::type::fatal, "Test");
+	engine::log::print(engine::log::type::fatal, "Test");
 	return 0;
 }
