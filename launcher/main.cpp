@@ -1,7 +1,8 @@
-import engine;
+import rats_engine;
+import rats_engine.utils;
 
 int main()
 {
-	MyFunc();
-    return 0;
+	rats_engine::log::print(rats_engine::log::type::fatal, "Test");
+	return 0;
 }

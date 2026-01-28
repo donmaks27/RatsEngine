@@ -19,4 +19,4 @@ endif()
 add_subdirectory(engine)
 
 add_executable(test_game "launcher/main.cpp")
-target_link_libraries(test_game PRIVATE engine)
+target_link_libraries(test_game PRIVATE rats-engine)

@@ -1,6 +1,8 @@
-import engine;
+module;
 
 #include <iostream>
+
+module rats_engine;
 
 void MyFunc()
 {
