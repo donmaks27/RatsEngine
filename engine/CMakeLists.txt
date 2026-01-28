@@ -23,28 +23,30 @@ list(APPEND RATS_ENGINE_PRIVATE_LIBS
 	glfw)
 
 
+list(APPEND RATS_ENGINE_PUBLIC_MODULES
+	"modules/engine.cppm"
+	"modules/utils/utils.cppm"
+	"modules/utils/log.cppm"
+	"modules/utils/uuid.cppm")
+list(APPEND RATS_ENGINE_HEADERS)
+list(APPEND RATS_ENGINE_SRC_FILES
+	"src/engine.cpp"
+	"src/utils/eastl_operator_new.cpp"
+	"src/utils/log.cpp"
+	"src/utils/uuid.cpp")
+
 
 add_library(rats-engine SHARED)
+target_link_libraries(rats-engine PUBLIC ${RATS_ENGINE_PUBLIC_LIBS} PRIVATE ${RATS_ENGINE_PRIVATE_LIBS})
 
 set_target_properties(rats-engine PROPERTIES 
 	CXX_VISIBILITY_PRESET hidden
 	VISIBILITY_INLINES_HIDDEN ON)
-generate_export_header(rats-engine EXPORT_FILE_NAME "${CMAKE_CURRENT_SOURCE_DIR}/src/engine_export.h")
-target_include_directories(rats-engine
-	PRIVATE src
-)
+generate_export_header(rats-engine EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/include/engine_export.h")
+target_include_directories(rats-engine PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 target_sources(rats-engine PUBLIC
 	FILE_SET CXX_MODULES
-		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/src"
-		FILES
-			"src/engine.cppm"
-			"src/utils/utils.cppm"
-			"src/utils/log.cppm" "src/utils/uuid.cppm")
-target_sources(rats-engine PRIVATE
-	"src/engine_export.h"
-	"src/engine.cpp"
-	"src/utils/log.cpp"
-	"src/utils/eastl_operator_new.cpp" "src/utils/uuid.cpp")
-
-target_link_libraries(rats-engine PUBLIC ${RATS_ENGINE_PUBLIC_LIBS} PRIVATE ${RATS_ENGINE_PRIVATE_LIBS})
+		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/modules"
+		FILES ${RATS_ENGINE_PUBLIC_MODULES})
+target_sources(rats-engine PRIVATE ${RATS_ENGINE_HEADERS} ${RATS_ENGINE_SRC_FILES})
