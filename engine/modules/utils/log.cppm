@@ -8,7 +8,7 @@ export module rats_engine.utils:log;
 
 export namespace engine::log
 {
-	enum class RATS_ENGINE_EXPORT type : std::uint8_t { log, info, warning, error, fatal };
+	enum class type : std::uint8_t { log, info, warning, error, fatal };
 
 	RATS_ENGINE_EXPORT void print(type t, std::string_view msg);
 	template<typename... Args>

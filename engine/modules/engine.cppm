@@ -3,7 +3,8 @@ module;
 #include <engine_export.h>
 
 export module rats_engine;
-export import rats_engine.utils;
+
+export import rats_engine.window;
 
 export namespace engine
 {
@@ -28,6 +29,8 @@ export namespace engine
 		[[nodiscard]] bool is_started() const { return m_engineStarted; }
 
 	private:
+
+		window_manager* m_windowManager = nullptr;
 
 		bool m_engineStarted = false;
 
