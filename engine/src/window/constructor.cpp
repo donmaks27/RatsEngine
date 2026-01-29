@@ -1,4 +1,4 @@
-module rats_engine.window.contructor;
+module rats_engine.window_contructor;
 
 import rats_engine.utils;
 

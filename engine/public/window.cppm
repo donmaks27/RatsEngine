@@ -2,15 +2,17 @@ module;
 
 #include <engine_export.h>
 
-export module rats_engine.window;
+export module rats_engine:window;
 
-export import rats_engine.utils;
+import :engine;
 
 export namespace engine
 {
 	class RATS_ENGINE_EXPORT window_manager
 	{
-	public:
+		friend engine;
+
+	protected:
 		window_manager() = default;
 		virtual ~window_manager() = default;
 	public:
@@ -22,6 +24,8 @@ export namespace engine
 
 		[[nodiscard]] virtual bool shouldCloseMainWindow() const { return true; }
 		virtual void on_frame_end() {}
+
+	protected:
 
 		[[nodiscard]] virtual bool init_window_manager() { return false; }
 		virtual void clear_window_manager() {}

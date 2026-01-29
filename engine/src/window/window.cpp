@@ -1,3 +1,3 @@
 module;
 
-module rats_engine.window;
+module rats_engine;

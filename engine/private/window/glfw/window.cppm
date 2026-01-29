@@ -2,8 +2,9 @@ module;
 
 #include <GLFW/glfw3.h>
 
-export module rats_engine.window.glfw;
-export import rats_engine.window;
+export module rats_engine.glfw;
+
+import rats_engine;
 
 export namespace engine
 {
@@ -15,6 +16,8 @@ export namespace engine
 
 		virtual bool shouldCloseMainWindow() const override;
 		virtual void on_frame_end() override;
+
+	protected:
 
 		virtual bool init_window_manager() override;
 		virtual void clear_window_manager() override;

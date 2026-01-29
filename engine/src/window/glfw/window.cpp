@@ -2,7 +2,7 @@ module;
 
 #include <GLFW/glfw3.h>
 
-module rats_engine.window.glfw;
+module rats_engine.glfw;
 
 namespace
 {

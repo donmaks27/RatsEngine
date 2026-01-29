@@ -1,6 +1,6 @@
-module rats_engine.window.contructor;
+module rats_engine.window_contructor;
 
-import rats_engine.window.glfw;
+import rats_engine.glfw;
 
 namespace engine
 {

@@ -25,11 +25,12 @@ list(APPEND RATS_ENGINE_PUBLIC_LIBS
 list(APPEND RATS_ENGINE_PRIVATE_LIBS)
 
 list(APPEND RATS_ENGINE_PUBLIC_MODULES
-	"modules/engine.cppm"
-	"modules/window.cppm"
-	"modules/utils/utils.cppm"
-	"modules/utils/log.cppm"
-	"modules/utils/uuid.cppm")
+	"public/core.cppm"
+	"public/engine.cppm"
+	"public/window.cppm"
+	"public/utils/utils.cppm"
+	"public/utils/log.cppm"
+	"public/utils/uuid.cppm")
 list(APPEND RATS_ENGINE_PRIVATE_MODULES
 	"private/window/contructor.cppm")
 list(APPEND RATS_ENGINE_HEADERS
@@ -71,7 +72,7 @@ target_include_directories(rats-engine PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/incl
 target_sources(rats-engine PUBLIC
 	FILE_SET public_modules 
 		TYPE CXX_MODULES
-		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/modules"
+		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/public"
 		FILES ${RATS_ENGINE_PUBLIC_MODULES})
 target_sources(rats-engine PRIVATE
 	FILE_SET private_modules 

@@ -1,5 +1,6 @@
-export module rats_engine.window.contructor;
-export import rats_engine.window;
+export module rats_engine.window_contructor;
+
+import rats_engine;
 
 export namespace engine
 {

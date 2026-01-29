@@ -4,7 +4,7 @@ module;
 
 module rats_engine;
 
-import rats_engine.window.contructor;
+import rats_engine.window_contructor;
 
 namespace engine
 {
