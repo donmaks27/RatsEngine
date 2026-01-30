@@ -1,4 +1,4 @@
-export module rats_engine.window_contructor;
+export module rats_engine.window_constructor;
 
 import rats_engine;
 

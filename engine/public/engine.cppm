@@ -7,6 +7,7 @@ export module rats_engine:engine;
 namespace engine
 {
 	class window_manager;
+	class render_manager;
 
 	export class RATS_ENGINE_EXPORT engine final
 	{
@@ -31,6 +32,7 @@ namespace engine
 	private:
 
 		window_manager* m_windowManager = nullptr;
+		render_manager* m_renderManager = nullptr;
 
 		bool m_engineStarted = false;
 

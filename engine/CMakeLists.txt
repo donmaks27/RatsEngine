@@ -28,16 +28,19 @@ list(APPEND RATS_ENGINE_PUBLIC_MODULES
 	"public/core.cppm"
 	"public/engine.cppm"
 	"public/window.cppm"
+	"public/render.cppm"
 	"public/utils/utils.cppm"
 	"public/utils/log.cppm"
 	"public/utils/uuid.cppm")
 list(APPEND RATS_ENGINE_PRIVATE_MODULES
-	"private/window/contructor.cppm")
+	"private/window/constructor.cppm"
+	"private/render/constructor.cppm")
 list(APPEND RATS_ENGINE_HEADERS
 	"include/engine/macro/defer.h")
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
 	"src/window/window.cpp"
+	"src/render/render.cpp"
 	"src/utils/eastl_operator_new.cpp"
 	"src/utils/log.cpp"
 	"src/utils/uuid.cpp")

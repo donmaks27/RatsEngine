@@ -27,7 +27,12 @@ export namespace engine
 
 	protected:
 
-		[[nodiscard]] virtual bool init_window_manager() { return false; }
-		virtual void clear_window_manager() {}
+		virtual bool init_window_manager_impl() { return false; }
+		virtual void clear_window_manager_impl() {}
+
+	private:
+
+		[[nodiscard]] bool init();
+		void clear();
 	};
 }

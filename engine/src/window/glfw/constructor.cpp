@@ -1,4 +1,4 @@
-module rats_engine.window_contructor;
+module rats_engine.window_constructor;
 
 import rats_engine.glfw;
 

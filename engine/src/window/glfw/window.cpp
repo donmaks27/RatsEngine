@@ -24,7 +24,7 @@ namespace engine
 		glfwPollEvents();
 	}
 
-	bool window_manager_glfw::init_window_manager()
+	bool window_manager_glfw::init_window_manager_impl()
 	{
 		glfwSetErrorCallback(glfw_error_callback);
 
@@ -46,10 +46,10 @@ namespace engine
 		return true;
 	}
 
-	void window_manager_glfw::clear_window_manager()
+	void window_manager_glfw::clear_window_manager_impl()
 	{
 		clear_GLFW();
-		window_manager::clear_window_manager();
+		window_manager::clear_window_manager_impl();
 	}
 
 	void window_manager_glfw::clear_GLFW()

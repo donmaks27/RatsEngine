@@ -4,7 +4,8 @@ module;
 
 module rats_engine;
 
-import rats_engine.window_contructor;
+import rats_engine.window_constructor;
+import rats_engine.render_constructor;
 
 namespace engine
 {
@@ -26,6 +27,7 @@ namespace engine
 		m_engineStarted = true;
 
 		RATS_ENGINE_DEFER([this] { clear_engine(); });
+
 		log::log("[engine::start] Initializing engine...");
 		if (!init_engine())
 		{
@@ -45,20 +47,39 @@ namespace engine
 
 	bool engine::init_engine()
 	{
-		log::log("[engine::init_engine] Creating window manager...");
-		m_windowManager = create_window_manager();
-		if (m_windowManager == nullptr)
 		{
-			log::fatal("[engine::init_engine] Failed to create window manager!");
-			return false;
+			log::log("[engine::init_engine] Creating window manager...");
+			auto windowManager = create_window_manager();
+			if (windowManager == nullptr)
+			{
+				log::fatal("[engine::init_engine] Failed to create window manager!");
+				return false;
+			}
+			log::info("[engine::init_engine] Window manager created successfully");
+			if (!windowManager->init())
+			{
+				delete windowManager;
+				return false;
+			}
+			m_windowManager = windowManager;
 		}
-		if (!m_windowManager->init_window_manager())
-		{
-			log::fatal("[engine::init_engine] Window manager initialization failed!");
-			return false;
-		}
-		log::info("[engine::init_engine] Window manager created successfully");
 
+		{
+			log::log("[engine::init_engine] Creating render manager ({})...", render_api::vulkan);
+			auto renderManager = create_render_manager(render_api::vulkan);
+			if (renderManager == nullptr)
+			{
+				log::fatal("[engine::init_engine] Failed to create render manager!");
+				return false;
+			}
+			log::info("[engine::init_engine] render manager created successfully");
+			if (!renderManager->init())
+			{
+				delete renderManager;
+				return false;
+			}
+			m_renderManager = renderManager;
+		}
 		return true;
 	}
 
@@ -66,13 +87,17 @@ namespace engine
 	{
 		log::log("[engine::clear_engine] Clearing engine...");
 
+		if (m_renderManager != nullptr)
+		{
+			m_renderManager->clear();
+			delete m_renderManager;
+			m_renderManager = nullptr;
+		}
 		if (m_windowManager != nullptr)
 		{
-			log::log("[engine::clear_engine] Clearing window manager...");
-			m_windowManager->clear_window_manager();
+			m_windowManager->clear();
 			delete m_windowManager;
 			m_windowManager = nullptr;
-			log::info("[engine::clear_engine] Window manager cleared successfully");
 		}
 
 		log::info("[engine::clear_engine] Engine cleared successfully");
