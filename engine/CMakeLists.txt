@@ -25,22 +25,20 @@ list(APPEND RATS_ENGINE_PUBLIC_LIBS
 list(APPEND RATS_ENGINE_PRIVATE_LIBS)
 
 list(APPEND RATS_ENGINE_PUBLIC_MODULES
-	"public/core.cppm"
 	"public/engine.cppm"
-	"public/window.cppm"
-	"public/render.cppm"
+	"public/render/render.cppm"
+	"public/render/window_manager.cppm"
+	"public/render/render_manager.cppm"
 	"public/utils/utils.cppm"
 	"public/utils/log.cppm"
 	"public/utils/uuid.cppm")
-list(APPEND RATS_ENGINE_PRIVATE_MODULES
-	"private/window/constructor.cppm"
-	"private/render/constructor.cppm")
+list(APPEND RATS_ENGINE_PRIVATE_MODULES)
 list(APPEND RATS_ENGINE_HEADERS
 	"include/engine/macro/defer.h")
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
-	"src/window/window.cpp"
-	"src/render/render.cpp"
+	"src/render/window/window_manager.cpp"
+	"src/render/render_manager.cpp"
 	"src/utils/eastl_operator_new.cpp"
 	"src/utils/log.cpp"
 	"src/utils/uuid.cpp")
@@ -51,15 +49,15 @@ if(${RATS_ENGINE_WINDOW_GLFW})
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
 
 	list(APPEND RATS_ENGINE_PRIVATE_MODULES
-		"private/window/glfw/window.cppm")
+		"private/render/window/glfw/window_manager_glfw.cppm")
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/window/glfw/constructor.cpp"
-		"src/window/glfw/window.cpp")
+		"src/render/window/glfw/constructor.cpp"
+		"src/render/window/glfw/window_manager_glfw.cpp")
 
 else()
 
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/window/constructor.cpp")
+		"src/render/window/default_constructor.cpp")
 
 endif()
 

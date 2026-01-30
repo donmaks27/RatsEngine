@@ -4,8 +4,8 @@ module;
 
 module rats_engine;
 
-import rats_engine.window_constructor;
-import rats_engine.render_constructor;
+import rats_engine.utils;
+import rats_engine.render;
 
 namespace engine
 {
@@ -47,38 +47,16 @@ namespace engine
 
 	bool engine::init_engine()
 	{
+		m_windowManager = window_manager::instance({});
+		if (m_windowManager == nullptr)
 		{
-			log::log("[engine::init_engine] Creating window manager...");
-			auto windowManager = create_window_manager();
-			if (windowManager == nullptr)
-			{
-				log::fatal("[engine::init_engine] Failed to create window manager!");
-				return false;
-			}
-			log::info("[engine::init_engine] Window manager created successfully");
-			if (!windowManager->init())
-			{
-				delete windowManager;
-				return false;
-			}
-			m_windowManager = windowManager;
+			return false;
 		}
 
+		m_renderManager = render_manager::instance({ .api = render_api::vulkan });
+		if (m_renderManager == nullptr)
 		{
-			log::log("[engine::init_engine] Creating render manager ({})...", render_api::vulkan);
-			auto renderManager = create_render_manager(render_api::vulkan);
-			if (renderManager == nullptr)
-			{
-				log::fatal("[engine::init_engine] Failed to create render manager!");
-				return false;
-			}
-			log::info("[engine::init_engine] render manager created successfully");
-			if (!renderManager->init())
-			{
-				delete renderManager;
-				return false;
-			}
-			m_renderManager = renderManager;
+			return false;
 		}
 		return true;
 	}
@@ -87,18 +65,10 @@ namespace engine
 	{
 		log::log("[engine::clear_engine] Clearing engine...");
 
-		if (m_renderManager != nullptr)
-		{
-			m_renderManager->clear();
-			delete m_renderManager;
-			m_renderManager = nullptr;
-		}
-		if (m_windowManager != nullptr)
-		{
-			m_windowManager->clear();
-			delete m_windowManager;
-			m_windowManager = nullptr;
-		}
+		render_manager::clear_instance();
+		window_manager::clear_instance();
+		m_renderManager = nullptr;
+		m_windowManager = nullptr;
 
 		log::info("[engine::clear_engine] Engine cleared successfully");
 		m_engineStarted = false;

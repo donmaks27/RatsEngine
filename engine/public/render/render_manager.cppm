@@ -6,15 +6,14 @@ module;
 
 #include <fmt/format.h>
 
-export module rats_engine:render;
+export module rats_engine.render:render_manager;
 
-import :engine;
-import :window;
+import :window_manager;
 
 export namespace engine
 {
 	enum class render_api : std::uint8_t { vulkan, opengl, directx11, directx12 };
-	constexpr std::string_view render_api_to_string(const render_api api)
+	[[nodiscard]] constexpr std::string_view render_api_to_string(const render_api api)
 	{
 		switch (api)
 		{
@@ -29,9 +28,7 @@ export namespace engine
 
 	class RATS_ENGINE_EXPORT render_manager
 	{
-		friend engine;
-
-	public:
+	protected:
 		render_manager() = default;
 		virtual ~render_manager() = default;
 	public:
@@ -41,18 +38,26 @@ export namespace engine
 		render_manager& operator=(const render_manager&) = delete;
 		render_manager& operator=(render_manager&&) = delete;
 
+		struct create_info
+		{
+			render_api api = render_api::vulkan;
+		};
+		static render_manager* instance(const create_info& info);
+		static void clear_instance();
+
 	protected:
 
 		window_manager* m_windowManager = nullptr;
 
 
-		virtual bool init_render_manager_impl() { return false; }
-		virtual void clear_render_manager_impl() {}
+		[[nodiscard]] virtual bool init() { return false; }
+		virtual void clear() {}
 
 	private:
 
-		[[nodiscard]] bool init();
-		void clear();
+		static render_manager* s_instance;
+
+		static render_manager* create_instance_impl(const create_info& info) { return nullptr; }
 	};
 }
 

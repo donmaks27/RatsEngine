@@ -1,0 +1,46 @@
+module;
+
+module rats_engine.render;
+
+import rats_engine.utils;
+
+namespace engine
+{
+	window_manager* window_manager::s_instance = nullptr;
+	window_manager* window_manager::instance(const create_info& info)
+	{
+		if (s_instance != nullptr)
+		{
+			return s_instance;
+		}
+
+		log::log("[window_manager::instance] Creating instance of window manager...");
+		s_instance = create_instance_impl(info);
+		if (s_instance == nullptr)
+		{
+			log::fatal("[window_manager::instance] Failed to create instance of window manager!");
+			return nullptr;
+		}
+		if (!s_instance->init())
+		{
+			log::fatal("[window_manager::instance] Failed to initialize window manager instance!");
+			s_instance->clear();
+			delete s_instance;
+			s_instance = nullptr;
+			return nullptr;
+		}
+		log::info("[window_manager::instance] Window manager instance created successfully");
+		return s_instance;
+	}
+	void window_manager::clear_instance()
+	{
+		if (s_instance != nullptr)
+		{
+			log::log("[window_manager::clear_instance] Clearing instance of window manager...");
+			s_instance->clear();
+			delete s_instance;
+			s_instance = nullptr;
+			log::info("[window_manager::clear_instance] Window manager instance cleared successfully");
+		}
+	}
+}

@@ -2,7 +2,7 @@ module;
 
 #include <GLFW/glfw3.h>
 
-module rats_engine.glfw;
+module rats_engine.render.glfw;
 
 namespace
 {
@@ -24,7 +24,7 @@ namespace engine
 		glfwPollEvents();
 	}
 
-	bool window_manager_glfw::init_window_manager_impl()
+	bool window_manager_glfw::init()
 	{
 		glfwSetErrorCallback(glfw_error_callback);
 
@@ -46,10 +46,10 @@ namespace engine
 		return true;
 	}
 
-	void window_manager_glfw::clear_window_manager_impl()
+	void window_manager_glfw::clear()
 	{
 		clear_GLFW();
-		window_manager::clear_window_manager_impl();
+		window_manager::clear();
 	}
 
 	void window_manager_glfw::clear_GLFW()

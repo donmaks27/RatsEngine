@@ -2,9 +2,10 @@ module;
 
 #include <GLFW/glfw3.h>
 
-export module rats_engine.glfw;
+export module rats_engine.render.glfw;
 
-import rats_engine;
+import rats_engine.render;
+import rats_engine.utils;
 
 export namespace engine
 {
@@ -19,8 +20,8 @@ export namespace engine
 
 	protected:
 
-		virtual bool init_window_manager_impl() override;
-		virtual void clear_window_manager_impl() override;
+		virtual bool init() override;
+		virtual void clear() override;
 
 	private:
 

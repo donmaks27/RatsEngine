@@ -2,13 +2,12 @@ module;
 
 #include <engine_export.h>
 
-export module rats_engine:engine;
+export module rats_engine;
+
+import rats_engine.render;
 
 namespace engine
 {
-	class window_manager;
-	class render_manager;
-
 	export class RATS_ENGINE_EXPORT engine final
 	{
 		engine() = default;
