@@ -14,7 +14,7 @@ namespace engine
 			return s_instance;
 		}
 
-		log::log("[render_manager::instance] Creating instance of render manager...");
+		log::log("[render_manager::instance] Creating instance of render manager ({})...", info.api);
 		s_instance = create_instance_impl(info);
 		if (s_instance == nullptr)
 		{
@@ -42,5 +42,16 @@ namespace engine
 			s_instance = nullptr;
 			log::info("[render_manager::clear_instance] Render manager instance cleared successfully");
 		}
+	}
+
+	render_manager* render_manager::create_instance_impl(const create_info& info)
+	{
+		switch (info.api)
+		{
+		case render_api::vulkan: return create_instance_impl_vulkan(info);
+		default:;
+		}
+		log::fatal("[render_manager::create_instance_impl] Render API '{}' is not implemented", info.api);
+		return nullptr;
 	}
 }

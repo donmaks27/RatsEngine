@@ -2,30 +2,13 @@ module;
 
 #include <engine_export.h>
 
-#include <cstdint>
-
-#include <fmt/format.h>
-
 export module rats_engine.render:render_manager;
 
+import :render_api;
 import :window_manager;
 
 export namespace engine
 {
-	enum class render_api : std::uint8_t { vulkan, opengl, directx11, directx12 };
-	[[nodiscard]] constexpr std::string_view render_api_to_string(const render_api api)
-	{
-		switch (api)
-		{
-		case render_api::vulkan: return "Vulkan";
-		case render_api::opengl: return "OpenGL";
-		case render_api::directx11: return "DirectX11";
-		case render_api::directx12: return "DirectX12";
-		default:;
-		}
-		return "NONE";
-	}
-
 	class RATS_ENGINE_EXPORT render_manager
 	{
 	protected:
@@ -57,16 +40,7 @@ export namespace engine
 
 		static render_manager* s_instance;
 
-		static render_manager* create_instance_impl(const create_info& info) { return nullptr; }
+		static render_manager* create_instance_impl(const create_info& info);
+		static render_manager* create_instance_impl_vulkan(const create_info& info);
 	};
 }
-
-export template<>
-struct RATS_ENGINE_EXPORT fmt::formatter<engine::render_api> : formatter<std::string_view>
-{
-	template <typename FormatContext>
-	auto format(const engine::render_api api, FormatContext& ctx) const
-	{
-		return formatter<std::string_view>::format(engine::render_api_to_string(api), ctx);
-	}
-};

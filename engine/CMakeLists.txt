@@ -12,6 +12,7 @@ if(MSVC)
 endif()
 
 option(RATS_ENGINE_WINDOW_GLFW "Use GLFW for window managing" OFF)
+option(RATS_ENGINE_RENDER_VULKAN "Add support of Vulkan render API" OFF)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(EASTL CONFIG REQUIRED)
@@ -43,21 +44,40 @@ list(APPEND RATS_ENGINE_SRC_FILES
 	"src/utils/log.cpp"
 	"src/utils/uuid.cpp")
 
+if(${RATS_ENGINE_RENDER_VULKAN})
+
+	find_package(Vulkan REQUIRED)
+	list(APPEND RATS_ENGINE_PRIVATE_LIBS Vulkan::Vulkan)
+
+	list(APPEND RATS_ENGINE_PRIVATE_MODULES
+		"private/render/vulkan/vulkan.cppm"
+		"private/render/vulkan/render_manager.cppm")
+	list(APPEND RATS_ENGINE_SRC_FILES
+		"src/render/vulkan/constructor.cpp"
+		"src/render/vulkan/render_manager.cpp")
+
+else()
+
+	list(APPEND RATS_ENGINE_SRC_FILES
+		"src/render/vulkan/constructor_default.cpp")
+
+endif()
+
 if(${RATS_ENGINE_WINDOW_GLFW})
 
 	find_package(glfw3 CONFIG REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
 
 	list(APPEND RATS_ENGINE_PRIVATE_MODULES
-		"private/render/window/glfw/window_manager_glfw.cppm")
+		"private/render/window/glfw/window_manager.cppm")
 	list(APPEND RATS_ENGINE_SRC_FILES
 		"src/render/window/glfw/constructor.cpp"
-		"src/render/window/glfw/window_manager_glfw.cpp")
+		"src/render/window/glfw/window_manager.cpp")
 
 else()
 
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/window/default_constructor.cpp")
+		"src/render/window/constructor_default.cpp")
 
 endif()
 
@@ -74,7 +94,7 @@ target_sources(rats-engine PUBLIC
 	FILE_SET public_modules 
 		TYPE CXX_MODULES
 		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/public"
-		FILES ${RATS_ENGINE_PUBLIC_MODULES})
+		FILES ${RATS_ENGINE_PUBLIC_MODULES} "public/render/render_api.cppm")
 target_sources(rats-engine PRIVATE
 	FILE_SET private_modules 
 		TYPE CXX_MODULES

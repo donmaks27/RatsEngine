@@ -8,7 +8,8 @@
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "custom-triplet",
         "CMAKE_BUILD_TYPE": "Release",
-        "RATS_ENGINE_WINDOW_GLFW": "ON"
+        "RATS_ENGINE_WINDOW_GLFW": "ON",
+        "RATS_ENGINE_RENDER_VULKAN":  "ON"
       }
     },
     {
