@@ -21,7 +21,7 @@ namespace engine
 			log::fatal("[render_manager::instance] Failed to create instance of render manager!");
 			return nullptr;
 		}
-		if (!s_instance->init())
+		if (!s_instance->init(info))
 		{
 			log::fatal("[render_manager::instance] Failed to initialize render manager instance!");
 			s_instance->clear();
@@ -53,5 +53,22 @@ namespace engine
 		}
 		log::fatal("[render_manager::create_instance_impl] Render API '{}' is not implemented", info.api);
 		return nullptr;
+	}
+
+	bool render_manager::init(const create_info& info)
+	{
+		m_windowManager = window_manager::instance({});
+		if (m_windowManager == nullptr)
+		{
+			log::fatal("[render_manager::init] Failed to get window manager instance!");
+			return false;
+		}
+		return true;
+	}
+
+	void render_manager::clear()
+	{
+		window_manager::clear_instance();
+		m_windowManager = nullptr;
 	}
 }

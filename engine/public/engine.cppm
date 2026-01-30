@@ -30,7 +30,6 @@ namespace engine
 
 	private:
 
-		window_manager* m_windowManager = nullptr;
 		render_manager* m_renderManager = nullptr;
 
 		bool m_engineStarted = false;

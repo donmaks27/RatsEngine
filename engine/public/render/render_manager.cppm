@@ -28,13 +28,15 @@ export namespace engine
 		static render_manager* instance(const create_info& info);
 		static void clear_instance();
 
+		[[nodiscard]] window_manager* get_window_manager() const { return m_windowManager; }
+
 	protected:
 
 		window_manager* m_windowManager = nullptr;
 
 
-		[[nodiscard]] virtual bool init() { return false; }
-		virtual void clear() {}
+		[[nodiscard]] virtual bool init(const create_info& info);
+		virtual void clear();
 
 	private:
 

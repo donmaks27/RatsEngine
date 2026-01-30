@@ -4,8 +4,8 @@ module rats_engine.render.vulkan;
 
 namespace engine
 {
-	bool render_manager_vulkan::init()
+	bool render_manager_vulkan::init(const create_info& info)
 	{
-		return true;
+		return super::init(info);
 	}
 }

@@ -28,6 +28,7 @@ list(APPEND RATS_ENGINE_PRIVATE_LIBS)
 list(APPEND RATS_ENGINE_PUBLIC_MODULES
 	"public/engine.cppm"
 	"public/render/render.cppm"
+	"public/render/render_api.cppm"
 	"public/render/window_manager.cppm"
 	"public/render/render_manager.cppm"
 	"public/utils/utils.cppm"
@@ -38,7 +39,7 @@ list(APPEND RATS_ENGINE_HEADERS
 	"include/engine/macro/defer.h")
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
-	"src/render/window/window_manager.cpp"
+	"src/render/window_manager.cpp"
 	"src/render/render_manager.cpp"
 	"src/utils/eastl_operator_new.cpp"
 	"src/utils/log.cpp"
@@ -69,15 +70,15 @@ if(${RATS_ENGINE_WINDOW_GLFW})
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
 
 	list(APPEND RATS_ENGINE_PRIVATE_MODULES
-		"private/render/window/glfw/window_manager.cppm")
+		"private/render/glfw/window_manager.cppm")
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/window/glfw/constructor.cpp"
-		"src/render/window/glfw/window_manager.cpp")
+		"src/render/glfw/constructor.cpp"
+		"src/render/glfw/window_manager.cpp")
 
 else()
 
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/window/constructor_default.cpp")
+		"src/render/window_manager_default_constructor.cpp")
 
 endif()
 
@@ -94,7 +95,7 @@ target_sources(rats-engine PUBLIC
 	FILE_SET public_modules 
 		TYPE CXX_MODULES
 		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/public"
-		FILES ${RATS_ENGINE_PUBLIC_MODULES} "public/render/render_api.cppm")
+		FILES ${RATS_ENGINE_PUBLIC_MODULES})
 target_sources(rats-engine PRIVATE
 	FILE_SET private_modules 
 		TYPE CXX_MODULES

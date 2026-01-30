@@ -24,8 +24,13 @@ namespace engine
 		glfwPollEvents();
 	}
 
-	bool window_manager_glfw::init()
+	bool window_manager_glfw::init(const create_info& info)
 	{
+		if (!super::init(info))
+		{
+			return false;
+		}
+
 		glfwSetErrorCallback(glfw_error_callback);
 
 		if (!glfwInit())
@@ -49,7 +54,7 @@ namespace engine
 	void window_manager_glfw::clear()
 	{
 		clear_GLFW();
-		window_manager::clear();
+		super::clear();
 	}
 
 	void window_manager_glfw::clear_GLFW()

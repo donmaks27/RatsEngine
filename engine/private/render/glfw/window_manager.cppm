@@ -11,6 +11,8 @@ export namespace engine
 {
 	class window_manager_glfw : public window_manager
 	{
+		using super = window_manager;
+
 	public:
 		window_manager_glfw() = default;
 		virtual ~window_manager_glfw() override = default;
@@ -20,7 +22,7 @@ export namespace engine
 
 	protected:
 
-		virtual bool init() override;
+		virtual bool init(const create_info& info) override;
 		virtual void clear() override;
 
 	private:

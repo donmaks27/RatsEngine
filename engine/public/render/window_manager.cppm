@@ -27,7 +27,7 @@ export namespace engine
 
 	protected:
 
-		[[nodiscard]] virtual bool init() { return false; }
+		[[nodiscard]] virtual bool init(const create_info& info) { return true; }
 		virtual void clear() {}
 
 	private:

@@ -21,7 +21,7 @@ namespace engine
 			log::fatal("[window_manager::instance] Failed to create instance of window manager!");
 			return nullptr;
 		}
-		if (!s_instance->init())
+		if (!s_instance->init(info))
 		{
 			log::fatal("[window_manager::instance] Failed to initialize window manager instance!");
 			s_instance->clear();
