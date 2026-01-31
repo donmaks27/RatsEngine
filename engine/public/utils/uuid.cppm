@@ -37,31 +37,23 @@ export namespace engine::utils
 		uint64_t m_hi = 0;
 		uint64_t m_lo = 0;
 	};
+
+	struct RATS_ENGINE_EXPORT uuid_hash
+	{
+		[[nodiscard]] constexpr std::size_t operator()(const uuid& id) const noexcept
+		{
+			return id.hash();
+		}
+	};
+
+	RATS_ENGINE_EXPORT constexpr std::string_view format_as(const uuid& id)
+	{
+		return id.to_string();
+	}
 }
 
-export template<>
-struct RATS_ENGINE_EXPORT std::hash<engine::utils::uuid>
+export namespace eastl
 {
-	[[nodiscard]] std::size_t operator()(const engine::utils::uuid& id) const noexcept
-	{
-		return id.hash();
-	}
-};
-export template<>
-struct RATS_ENGINE_EXPORT eastl::hash<engine::utils::uuid>
-{
-	[[nodiscard]] std::size_t operator()(const engine::utils::uuid& id) const noexcept
-	{
-		return id.hash();
-	}
-};
-
-export template<>
-struct RATS_ENGINE_EXPORT fmt::formatter<engine::utils::uuid> : formatter<std::string>
-{
-	template <typename FormatContext>
-	auto format(const engine::utils::uuid& id, FormatContext& ctx) const
-	{
-		return formatter<std::string>::format(id.to_string(), ctx);
-	}
-};
+	template<>
+	struct RATS_ENGINE_EXPORT hash<engine::utils::uuid> : engine::utils::uuid_hash {};
+}

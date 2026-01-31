@@ -21,14 +21,9 @@ export namespace engine
 		}
 		return "NONE";
 	}
-}
 
-export template<>
-struct RATS_ENGINE_EXPORT fmt::formatter<engine::render_api> : formatter<std::string_view>
-{
-	template <typename FormatContext>
-	auto format(const engine::render_api api, FormatContext& ctx) const
+	RATS_ENGINE_EXPORT constexpr std::string_view format_as(const render_api api)
 	{
-		return formatter<std::string_view>::format(engine::render_api_to_string(api), ctx);
+		return render_api_to_string(api);
 	}
-};
+}

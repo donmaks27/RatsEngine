@@ -1,6 +1,6 @@
-module rats_engine.render;
+module rats_engine.render.glfw;
 
-import rats_engine.render.glfw;
+import rats_engine.render;
 
 namespace engine
 {

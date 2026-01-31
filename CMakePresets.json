@@ -1,24 +1,14 @@
 {
-  "configurePresets": [
-    {
-      "name": "vcpkg",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "custom-triplet",
-        "CMAKE_BUILD_TYPE": "Release",
-        "RATS_ENGINE_WINDOW_GLFW": "ON",
-        "RATS_ENGINE_RENDER_VULKAN":  "ON"
-      }
-    },
-    {
-      "name": "vcpkg-debug",
-      "inherits": "vcpkg",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    }
-  ],
-  "version": 2
+    "configurePresets": [
+        {
+            "name": "vcpkg",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "RATS_ENGINE_WINDOW_GLFW": "ON",
+                "RATS_ENGINE_RENDER_VULKAN":  "ON"
+            }
+        }
+    ],
+    "version": 2
 }

@@ -1,6 +1,6 @@
-module rats_engine.render;
+module rats_engine.render.vulkan;
 
-import rats_engine.render.vulkan;
+import rats_engine.render;
 import rats_engine.utils;
 
 namespace engine

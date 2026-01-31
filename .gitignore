@@ -1,3 +1,6 @@
 .vs/
+.idea/
 build/
+build-debug/
+CMakeUserPresets.json
 *.pdb
