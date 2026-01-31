@@ -6,13 +6,6 @@ import rats_engine.utils;
 
 namespace engine
 {
-	class render_manager_dummy final : public render_manager
-	{
-	public:
-		render_manager_dummy() = default;
-		virtual ~render_manager_dummy() override = default;
-	};
-
 	render_manager* render_manager::s_instance = nullptr;
 	render_manager* render_manager::instance(const create_info& info)
 	{
@@ -58,13 +51,13 @@ namespace engine
 		case render_api::vulkan: return create_instance_impl_vulkan(info);
 		default:;
 		}
-		log::warning("[render_manager::create_instance_impl] Render API '{}' is not implemented", info.api);
-		return new render_manager_dummy();
+		log::fatal("[render_manager::create_instance_impl] Render API '{}' is not implemented", info.api);
+		return nullptr;
 	}
 
 	bool render_manager::init(const create_info& info)
 	{
-		m_windowManager = window_manager::instance({});
+		m_windowManager = window_manager::instance({ .api = info.api });
 		if (m_windowManager == nullptr)
 		{
 			log::fatal("[render_manager::init] Failed to get window manager instance!");

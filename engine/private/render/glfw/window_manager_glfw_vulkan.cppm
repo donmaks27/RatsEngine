@@ -2,7 +2,7 @@ module;
 
 export module rats_engine.render.glfw.vulkan;
 
-export import rats_engine.render.glfw;
+import rats_engine.render.glfw;
 
 export namespace engine
 {

@@ -4,7 +4,8 @@ module;
 
 export module rats_engine;
 
-import rats_engine.render;
+export import rats_engine.utils;
+export import rats_engine.render;
 
 namespace engine
 {

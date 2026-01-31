@@ -2,7 +2,7 @@ module;
 
 export module rats_engine.render.vulkan:render_manager;
 
-export import rats_engine.render;
+import rats_engine.render;
 
 export namespace engine
 {

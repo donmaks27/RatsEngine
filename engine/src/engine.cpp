@@ -4,8 +4,6 @@ module;
 
 module rats_engine;
 
-import rats_engine.utils;
-
 namespace engine
 {
 	engine::~engine()
