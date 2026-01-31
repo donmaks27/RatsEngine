@@ -13,11 +13,12 @@ export namespace engine
 	{
 		using super = window_manager;
 
-	public:
+	protected:
 		window_manager_glfw() = default;
 		virtual ~window_manager_glfw() override = default;
+	public:
 
-		virtual bool shouldCloseMainWindow() const override;
+		[[nodiscard]] virtual bool shouldCloseMainWindow() const override;
 		virtual void on_frame_end() override;
 
 	protected:

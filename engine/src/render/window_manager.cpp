@@ -43,4 +43,15 @@ namespace engine
 			log::info("[window_manager::clear_instance] Window manager instance cleared successfully");
 		}
 	}
+
+	window_manager* window_manager::create_instance_impl(const create_info& info)
+	{
+		switch (info.api)
+		{
+		case render_api::vulkan: return create_instance_impl_vulkan(info);
+		default:;
+		}
+		log::fatal("[render_manager::create_instance_impl] Render API '{}' is not implemented", info.api);
+		return nullptr;
+	}
 }

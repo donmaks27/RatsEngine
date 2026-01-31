@@ -4,6 +4,8 @@ module;
 
 export module rats_engine.render:window_manager;
 
+import :render_api;
+
 export namespace engine
 {
 	class RATS_ENGINE_EXPORT window_manager
@@ -18,7 +20,10 @@ export namespace engine
 		window_manager& operator=(const window_manager&) = delete;
 		window_manager& operator=(window_manager&&) = delete;
 
-		struct create_info {};
+		struct create_info
+		{
+			render_api api = render_api::vulkan;
+		};
 		static window_manager* instance(const create_info& info);
 		static void clear_instance();
 
@@ -35,5 +40,6 @@ export namespace engine
 		static window_manager* s_instance;
 
 		static window_manager* create_instance_impl(const create_info& info);
+		static window_manager* create_instance_impl_vulkan(const create_info& info);
 	};
 }

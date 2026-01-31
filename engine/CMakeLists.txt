@@ -54,13 +54,12 @@ if(${RATS_ENGINE_RENDER_VULKAN})
 		"private/render/vulkan/vulkan.cppm"
 		"private/render/vulkan/render_manager.cppm")
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/vulkan/constructor.cpp"
 		"src/render/vulkan/render_manager.cpp")
 
 else()
 
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/vulkan/constructor_default.cpp")
+		"src/render/vulkan/default.cpp")
 
 endif()
 
@@ -72,13 +71,22 @@ if(${RATS_ENGINE_WINDOW_GLFW})
 	list(APPEND RATS_ENGINE_PRIVATE_MODULES
 		"private/render/glfw/window_manager.cppm")
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/glfw/constructor.cpp"
 		"src/render/glfw/window_manager.cpp")
+
+	if (${RATS_ENGINE_RENDER_VULKAN})
+		list(APPEND RATS_ENGINE_PRIVATE_MODULES
+			"private/render/glfw/vulkan.cppm")
+		list(APPEND RATS_ENGINE_SRC_FILES
+			"src/render/glfw/vulkan.cpp")
+	else()
+		list(APPEND RATS_ENGINE_SRC_FILES
+			"src/render/glfw/vulkan_default.cpp")
+	endif()
 
 else()
 
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/window_manager_default_constructor.cpp")
+		"src/render/window_manager_default.cpp")
 
 endif()
 
