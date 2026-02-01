@@ -12,6 +12,8 @@ import vulkan_hpp;
 
 export namespace engine::vulkan
 {
+	class render_manager;
+
 	class window_manager
 	{
 	protected:
@@ -27,6 +29,26 @@ export namespace engine::vulkan
 		[[nodiscard]] virtual eastl::vector<const char*> get_required_extensions() const = 0;
 	};
 
+	class render_api_context final
+	{
+		friend render_manager;
+
+	public:
+		render_api_context() = default;
+		render_api_context(const render_api_context&) = default;
+		~render_api_context() = default;
+
+		render_api_context& operator=(const render_api_context&) = default;
+
+		[[nodiscard]] const vk::DispatchLoaderDynamic& l() const { return m_loader; }
+		[[nodiscard]] const vk::Instance& i() const { return m_instance; }
+
+	private:
+
+		vk::DispatchLoaderDynamic m_loader;
+		vk::Instance m_instance;
+	};
+
 	class render_manager final : public engine::render_manager
 	{
 		using super = engine::render_manager;
@@ -34,6 +56,8 @@ export namespace engine::vulkan
 	public:
 		render_manager() = default;
 		virtual ~render_manager() override = default;
+
+		[[nodiscard]] const render_api_context& api_ctx() const { return m_apiCtx; }
 
 	protected:
 
@@ -44,8 +68,7 @@ export namespace engine::vulkan
 
 		window_manager* m_windowManagerVulkan = nullptr;
 
-		vk::Instance m_instance;
-		vk::DispatchLoaderDynamic m_loader;
+		render_api_context m_apiCtx;
 		vk::DebugUtilsMessengerEXT m_debugMessenger;
 	};
 }

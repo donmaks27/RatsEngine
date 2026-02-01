@@ -55,7 +55,7 @@ namespace engine
 		}
 		m_windowManagerVulkan = dynamic_cast<window_manager*>(engine::window_manager::instance());
 
-		m_loader.init(vkGetInstanceProcAddr);
+		m_apiCtx.m_loader.init(vkGetInstanceProcAddr);
 
 		eastl::vector<const char*> validationLayers;
 		vk::DebugUtilsMessengerCreateInfoEXT debugMessengerInfo{};
@@ -63,7 +63,7 @@ namespace engine
 		if constexpr (config::is_debug)
 		{
 			validationLayers.push_back("VK_LAYER_KHRONOS_validation");
-			if (!check_validation_layer_support(m_loader, validationLayers))
+			if (!check_validation_layer_support(m_apiCtx.l(), validationLayers))
 			{
 				log::fatal("[vulkan::render_manager::init] Some of the validation layers not supported on this device!");
 				return false;
@@ -89,19 +89,19 @@ namespace engine
 			debugMessengerInfo.pfnUserCallback = vulkan_debug_callback;
 			instanceInfo.pNext = &debugMessengerInfo;
 		}
-		const auto instance = vk::createInstance(instanceInfo, nullptr, m_loader);
+		const auto instance = vk::createInstance(instanceInfo, nullptr, m_apiCtx.l());
 		if (instance.result != vk::Result::eSuccess)
 		{
 			log::fatal("[vulkan::render_manager::init] Failed to create Vulkan instance! Error: {}", instance.result);
 			return false;
 		}
-		m_instance = instance.value;
-		m_loader.init(m_instance, vkGetInstanceProcAddr);
+		m_apiCtx.m_instance = instance.value;
+		m_apiCtx.m_loader.init(m_apiCtx.i(), vkGetInstanceProcAddr);
 
 		if constexpr (config::is_debug)
 		{
-			const auto debugMessenger = m_instance.createDebugUtilsMessengerEXT(
-				debugMessengerInfo, nullptr, m_loader
+			const auto debugMessenger = m_apiCtx.i().createDebugUtilsMessengerEXT(
+				debugMessengerInfo, nullptr, m_apiCtx.l()
 			);
 			if (debugMessenger.result != vk::Result::eSuccess)
 			{
@@ -116,21 +116,19 @@ namespace engine
 
 	void vulkan::render_manager::clear()
 	{
-		if (m_instance != nullptr)
+		if (m_apiCtx.m_instance != nullptr)
 		{
 			if constexpr (config::is_debug)
 			{
 				if (m_debugMessenger != nullptr)
 				{
-					m_instance.destroyDebugUtilsMessengerEXT(m_debugMessenger, nullptr, m_loader);
+					m_apiCtx.i().destroyDebugUtilsMessengerEXT(m_debugMessenger, nullptr, m_apiCtx.l());
 					m_debugMessenger = nullptr;
 				}
 			}
-
-			m_instance.destroy(nullptr, m_loader);
-			m_loader = {};
-			m_instance = nullptr;
+			m_apiCtx.m_instance.destroy(nullptr, m_apiCtx.l());
 		}
+		m_apiCtx = {};
 
 		super::clear();
 	}
