@@ -28,10 +28,9 @@ export namespace engine
 
 			render_api api = render_api::vulkan;
 		};
-		static render_manager* instance(const create_info& info);
+		static render_manager* create_instance(const create_info& info);
+		[[nodiscard]] static render_manager* instance() { return s_instance; }
 		static void clear_instance();
-
-		[[nodiscard]] window_manager* get_window_manager() const { return m_windowManager; }
 
 	protected:
 
@@ -43,7 +42,5 @@ export namespace engine
 		static render_manager* s_instance;
 		static render_manager* create_instance_impl(const create_info& info);
 		static render_manager* create_instance_impl_vulkan(const create_info& info);
-
-		window_manager* m_windowManager = nullptr;
 	};
 }

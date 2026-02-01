@@ -7,29 +7,29 @@ import rats_engine.utils;
 namespace engine
 {
 	render_manager* render_manager::s_instance = nullptr;
-	render_manager* render_manager::instance(const create_info& info)
+	render_manager* render_manager::create_instance(const create_info& info)
 	{
 		if (s_instance != nullptr)
 		{
 			return s_instance;
 		}
 
-		log::log("[render_manager::instance] Creating instance of render manager ({})...", info.api);
+		log::log("[render_manager::create_instance] Creating create_instance of render manager ({})...", info.api);
 		s_instance = create_instance_impl(info);
 		if (s_instance == nullptr)
 		{
-			log::fatal("[render_manager::instance] Failed to create instance of render manager!");
+			log::fatal("[render_manager::create_instance] Failed to create create_instance of render manager!");
 			return nullptr;
 		}
 		if (!s_instance->init(info))
 		{
-			log::fatal("[render_manager::instance] Failed to initialize render manager instance!");
+			log::fatal("[render_manager::create_instance] Failed to initialize render manager create_instance!");
 			s_instance->clear();
 			delete s_instance;
 			s_instance = nullptr;
 			return nullptr;
 		}
-		log::info("[render_manager::instance] Render manager instance created successfully");
+		log::info("[render_manager::create_instance] Render manager create_instance created successfully");
 		return s_instance;
 	}
 	void render_manager::clear_instance()
@@ -57,8 +57,7 @@ namespace engine
 
 	bool render_manager::init(const create_info& info)
 	{
-		m_windowManager = window_manager::instance({ .api = info.api });
-		if (m_windowManager == nullptr)
+		if (window_manager::create_instance({ .api = info.api }) == nullptr)
 		{
 			log::fatal("[render_manager::init] Failed to get window manager instance!");
 			return false;
@@ -69,6 +68,5 @@ namespace engine
 	void render_manager::clear()
 	{
 		window_manager::clear_instance();
-		m_windowManager = nullptr;
 	}
 }

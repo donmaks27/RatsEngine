@@ -34,7 +34,7 @@ namespace engine
 		log::info("[engine::start] Engine initialized successfully");
 
 		log::log("[engine::start] Game loop started");
-		auto* windowManager = m_renderManager->get_window_manager();
+		auto* windowManager = window_manager::instance();
 		while (!windowManager->shouldCloseMainWindow())
 		{
 			windowManager->on_frame_end();
@@ -45,8 +45,7 @@ namespace engine
 
 	bool engine::init_engine()
 	{
-		m_renderManager = render_manager::instance({ .api = render_api::vulkan });
-		if (m_renderManager == nullptr)
+		if (render_manager::create_instance({ .api = render_api::vulkan }) == nullptr)
 		{
 			return false;
 		}
@@ -58,7 +57,6 @@ namespace engine
 		log::log("[engine::clear_engine] Clearing engine...");
 
 		render_manager::clear_instance();
-		m_renderManager = nullptr;
 
 		log::info("[engine::clear_engine] Engine cleared successfully");
 		m_engineStarted = false;

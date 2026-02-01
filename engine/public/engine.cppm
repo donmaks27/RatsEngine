@@ -31,8 +31,6 @@ namespace engine
 
 	private:
 
-		render_manager* m_renderManager = nullptr;
-
 		bool m_engineStarted = false;
 
 

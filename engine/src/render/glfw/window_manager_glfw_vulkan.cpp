@@ -11,10 +11,10 @@ namespace engine
 {
     window_manager* window_manager::create_instance_impl_vulkan(const create_info&)
     {
-        return new window_manager_glfw_vulkan();
+        return new vulkan::window_manager_glfw();
     }
 
-    eastl::vector<const char*> window_manager_glfw_vulkan::get_required_extensions() const
+    eastl::vector<const char*> vulkan::window_manager_glfw::get_required_extensions() const
     {
         uint32_t extensionCount = 0;
         const auto extensions = glfwGetRequiredInstanceExtensions(&extensionCount);

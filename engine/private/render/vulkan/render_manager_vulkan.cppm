@@ -10,30 +10,30 @@ export module rats_engine.render.vulkan:render_manager;
 import rats_engine.render;
 import vulkan_hpp;
 
-export namespace engine
+export namespace engine::vulkan
 {
-	class window_manager_vulkan
+	class window_manager
 	{
 	protected:
-		window_manager_vulkan() = default;
-		virtual ~window_manager_vulkan() = default;
+		window_manager() = default;
+		virtual ~window_manager() = default;
 	public:
-		window_manager_vulkan(const window_manager_vulkan&) = delete;
-		window_manager_vulkan(window_manager_vulkan&&) = delete;
+		window_manager(const window_manager&) = delete;
+		window_manager(window_manager&&) = delete;
 
-		window_manager_vulkan& operator=(const window_manager_vulkan&) = delete;
-		window_manager_vulkan& operator=(window_manager_vulkan&&) = delete;
+		window_manager& operator=(const window_manager&) = delete;
+		window_manager& operator=(window_manager&&) = delete;
 
 		[[nodiscard]] virtual eastl::vector<const char*> get_required_extensions() const = 0;
 	};
 
-	class render_manager_vulkan final : public render_manager
+	class render_manager final : public engine::render_manager
 	{
-		using super = render_manager;
+		using super = engine::render_manager;
 
 	public:
-		render_manager_vulkan() = default;
-		virtual ~render_manager_vulkan() override = default;
+		render_manager() = default;
+		virtual ~render_manager() override = default;
 
 	protected:
 
@@ -42,7 +42,7 @@ export namespace engine
 
 	private:
 
-		window_manager_vulkan* m_windowManagerVulkan = nullptr;
+		window_manager* m_windowManagerVulkan = nullptr;
 
 		vk::Instance m_instance;
 		vk::DispatchLoaderDynamic m_loader;

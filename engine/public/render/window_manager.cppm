@@ -24,7 +24,8 @@ export namespace engine
 		{
 			render_api api = render_api::vulkan;
 		};
-		static window_manager* instance(const create_info& info);
+		static window_manager* create_instance(const create_info& info);
+		[[nodiscard]] static window_manager* instance() { return s_instance; }
 		static void clear_instance();
 
 		[[nodiscard]] virtual bool shouldCloseMainWindow() const { return true; }

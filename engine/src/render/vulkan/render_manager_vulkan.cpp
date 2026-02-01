@@ -44,16 +44,16 @@ namespace engine
 
 	render_manager* render_manager::create_instance_impl_vulkan(const create_info& info)
 	{
-		return new render_manager_vulkan();
+		return new vulkan::render_manager();
 	}
 
-	bool render_manager_vulkan::init(const create_info& info)
+	bool vulkan::render_manager::init(const create_info& info)
 	{
 		if (!super::init(info))
 		{
 			return false;
 		}
-		m_windowManagerVulkan = dynamic_cast<window_manager_vulkan*>(get_window_manager());
+		m_windowManagerVulkan = dynamic_cast<window_manager*>(engine::window_manager::instance());
 
 		m_loader.init(vkGetInstanceProcAddr);
 
@@ -65,7 +65,7 @@ namespace engine
 			validationLayers.push_back("VK_LAYER_KHRONOS_validation");
 			if (!check_validation_layer_support(m_loader, validationLayers))
 			{
-				log::fatal("[render_manager_vulkan::init] Some of the validation layers not supported on this device!");
+				log::fatal("[vulkan::render_manager::init] Some of the validation layers not supported on this device!");
 				return false;
 			}
 			instanceExtensions.push_back(vk::EXTDebugUtilsExtensionName);
@@ -92,7 +92,7 @@ namespace engine
 		const auto instance = vk::createInstance(instanceInfo, nullptr, m_loader);
 		if (instance.result != vk::Result::eSuccess)
 		{
-			log::fatal("[render_manager_vulkan::init] Failed to create Vulkan instance! Error: {}", instance.result);
+			log::fatal("[vulkan::render_manager::init] Failed to create Vulkan instance! Error: {}", instance.result);
 			return false;
 		}
 		m_instance = instance.value;
@@ -105,7 +105,7 @@ namespace engine
 			);
 			if (debugMessenger.result != vk::Result::eSuccess)
 			{
-				log::fatal("[render_manager_vulkan::init] Failed to create Vulkan debug messenger! Error: {}", debugMessenger.result);
+				log::fatal("[vulkan::render_manager::init] Failed to create Vulkan debug messenger! Error: {}", debugMessenger.result);
 				return false;
 			}
 			m_debugMessenger = debugMessenger.value;
@@ -114,7 +114,7 @@ namespace engine
 		return true;
 	}
 
-	void render_manager_vulkan::clear()
+	void vulkan::render_manager::clear()
 	{
 		if (m_instance != nullptr)
 		{
@@ -132,6 +132,6 @@ namespace engine
 			m_instance = nullptr;
 		}
 
-		render_manager::clear();
+		super::clear();
 	}
 }
