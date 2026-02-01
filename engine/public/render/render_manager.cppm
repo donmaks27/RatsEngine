@@ -1,6 +1,7 @@
 module;
 
 #include <engine_export.h>
+#include <string>
 
 export module rats_engine.render:render_manager;
 
@@ -23,6 +24,8 @@ export namespace engine
 
 		struct create_info
 		{
+			std::string appName = "RatsEngine";
+
 			render_api api = render_api::vulkan;
 		};
 		static render_manager* instance(const create_info& info);
@@ -32,17 +35,15 @@ export namespace engine
 
 	protected:
 
-		window_manager* m_windowManager = nullptr;
-
-
 		[[nodiscard]] virtual bool init(const create_info& info);
 		virtual void clear();
 
 	private:
 
 		static render_manager* s_instance;
-
 		static render_manager* create_instance_impl(const create_info& info);
 		static render_manager* create_instance_impl_vulkan(const create_info& info);
+
+		window_manager* m_windowManager = nullptr;
 	};
 }

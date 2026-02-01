@@ -24,8 +24,11 @@ list(APPEND RATS_ENGINE_PUBLIC_LIBS
 	EASTL
 	glm::glm)
 list(APPEND RATS_ENGINE_PRIVATE_LIBS)
+list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS
+	"RATS_ENGINE_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
 
 list(APPEND RATS_ENGINE_PUBLIC_MODULES
+	"public/config.cppm"
 	"public/engine.cppm"
 	"public/render/render.cppm"
 	"public/render/render_api.cppm"
@@ -48,7 +51,23 @@ list(APPEND RATS_ENGINE_SRC_FILES
 if(${RATS_ENGINE_RENDER_VULKAN})
 
 	find_package(Vulkan REQUIRED)
-	list(APPEND RATS_ENGINE_PRIVATE_LIBS Vulkan::Vulkan)
+
+	add_library(VulkanCppModule)
+	add_library(Vulkan::cppm ALIAS VulkanCppModule)
+	target_compile_definitions(VulkanCppModule PUBLIC
+		"VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"
+		#"VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1"
+		"VULKAN_HPP_NO_EXCEPTIONS=1"
+	)
+	target_include_directories(VulkanCppModule PRIVATE "${Vulkan_INCLUDE_DIR}")
+	target_link_libraries(VulkanCppModule PUBLIC Vulkan::Vulkan)
+	target_sources(VulkanCppModule PUBLIC
+		FILE_SET cxx_modules
+			TYPE CXX_MODULES
+			BASE_DIRS "${Vulkan_INCLUDE_DIR}"
+			FILES "${Vulkan_INCLUDE_DIR}/vulkan/vulkan.cppm"
+	)
+	list(APPEND RATS_ENGINE_PRIVATE_LIBS Vulkan::cppm)
 
 	list(APPEND RATS_ENGINE_PRIVATE_MODULES
 		"private/render/vulkan/vulkan.cppm"
@@ -89,6 +108,7 @@ endif()
 
 add_library(rats-engine SHARED)
 target_link_libraries(rats-engine PUBLIC ${RATS_ENGINE_PUBLIC_LIBS} PRIVATE ${RATS_ENGINE_PRIVATE_LIBS})
+target_compile_definitions(rats-engine PRIVATE ${RATS_ENGINE_PRIVATE_DEFINITIONS})
 
 set_target_properties(rats-engine PROPERTIES 
 	CXX_VISIBILITY_PRESET hidden
