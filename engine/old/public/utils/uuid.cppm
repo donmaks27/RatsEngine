@@ -46,7 +46,7 @@ export namespace engine::utils
 		}
 	};
 
-	RATS_ENGINE_EXPORT constexpr std::string format_as(const uuid& id)
+	RATS_ENGINE_EXPORT std::string format_as(const uuid& id)
 	{
 		return id.to_string();
 	}

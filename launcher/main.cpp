@@ -1,5 +1,4 @@
-import rats_engine;
-import rats_engine.utils;
+#include <engine/engine.h>
 
 int main()
 {

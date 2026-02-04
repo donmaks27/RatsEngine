@@ -3,7 +3,7 @@ include(GenerateExportHeader)
 
 project(rats-engine CXX)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
@@ -17,68 +17,31 @@ option(RATS_ENGINE_RENDER_VULKAN "Add support of Vulkan render API" OFF)
 find_package(fmt CONFIG REQUIRED)
 find_package(EASTL CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-
-
 list(APPEND RATS_ENGINE_PUBLIC_LIBS 
 	fmt::fmt 
 	EASTL
 	glm::glm)
 list(APPEND RATS_ENGINE_PRIVATE_LIBS)
-list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS
-	"RATS_ENGINE_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
 
-list(APPEND RATS_ENGINE_PUBLIC_MODULES
-	"public/config.cppm"
-	"public/engine.cppm"
-	"public/render/render.cppm"
-	"public/render/render_api.cppm"
-	"public/render/window_manager.cppm"
-	"public/render/render_manager.cppm"
-	"public/utils/utils.cppm"
-	"public/utils/log.cppm"
-	"public/utils/uuid.cppm")
-list(APPEND RATS_ENGINE_PRIVATE_MODULES)
-list(APPEND RATS_ENGINE_HEADERS
-	"include/engine/macro/defer.h")
+list(APPEND RATS_ENGINE_PUBLIC_DEFINITIONS
+	"RATS_ENGINE_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
+list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS)
+list(APPEND RATS_ENGINE_PUBLIC_PCH
+	"include/engine/core.h")
+list(APPEND RATS_ENGINE_PUBLIC_HEADERS
+	"include/engine/engine.h"
+	"include/engine/utils/log.h"
+	"include/engine/utils/macro/defer.h")
+list(APPEND RATS_ENGINE_PRIVATE_HEADERS)
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
-	"src/render/window_manager.cpp"
-	"src/render/render_manager.cpp"
 	"src/utils/eastl_operator_new.cpp"
-	"src/utils/log.cpp"
-	"src/utils/uuid.cpp")
+	"src/utils/log.cpp")
 
 if(${RATS_ENGINE_RENDER_VULKAN})
 
 	find_package(Vulkan REQUIRED)
-
-	add_library(VulkanCppModule)
-	add_library(Vulkan::cppm ALIAS VulkanCppModule)
-	target_compile_definitions(VulkanCppModule PUBLIC
-		"VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"
-		#"VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1"
-		"VULKAN_HPP_NO_EXCEPTIONS=1"
-	)
-	target_include_directories(VulkanCppModule PRIVATE "${Vulkan_INCLUDE_DIR}")
-	target_link_libraries(VulkanCppModule PUBLIC Vulkan::Vulkan)
-	target_sources(VulkanCppModule PUBLIC
-		FILE_SET cxx_modules
-			TYPE CXX_MODULES
-			BASE_DIRS "${Vulkan_INCLUDE_DIR}"
-			FILES "${Vulkan_INCLUDE_DIR}/vulkan/vulkan.cppm"
-	)
-	list(APPEND RATS_ENGINE_PRIVATE_LIBS Vulkan::cppm)
-
-	list(APPEND RATS_ENGINE_PRIVATE_MODULES
-		"private/render/vulkan/vulkan.cppm"
-		"private/render/vulkan/render_manager_vulkan.cppm")
-	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/vulkan/render_manager_vulkan.cpp")
-
-else()
-
-	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/vulkan/default.cpp")
+	list(APPEND RATS_ENGINE_PRIVATE_LIBS Vulkan::Vulkan)
 
 endif()
 
@@ -87,43 +50,33 @@ if(${RATS_ENGINE_WINDOW_GLFW})
 	find_package(glfw3 CONFIG REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
 
-	list(APPEND RATS_ENGINE_PRIVATE_MODULES
-		"private/render/glfw/window_manager_glfw.cppm")
-	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/glfw/window_manager_glfw.cpp")
-
-	if (${RATS_ENGINE_RENDER_VULKAN})
-		list(APPEND RATS_ENGINE_PRIVATE_MODULES
-			"private/render/glfw/window_manager_glfw_vulkan.cppm")
-		list(APPEND RATS_ENGINE_SRC_FILES
-			"src/render/glfw/window_manager_glfw_vulkan.cpp")
-	endif()
-
-else()
-
-	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/window_manager_default.cpp")
-
 endif()
 
 add_library(rats-engine SHARED)
-target_link_libraries(rats-engine PUBLIC ${RATS_ENGINE_PUBLIC_LIBS} PRIVATE ${RATS_ENGINE_PRIVATE_LIBS})
-target_compile_definitions(rats-engine PRIVATE ${RATS_ENGINE_PRIVATE_DEFINITIONS})
+target_link_libraries(rats-engine
+	PUBLIC ${RATS_ENGINE_PUBLIC_LIBS}
+	PRIVATE ${RATS_ENGINE_PRIVATE_LIBS})
+target_compile_definitions(rats-engine
+	PUBLIC ${RATS_ENGINE_PUBLIC_DEFINITIONS}
+	PRIVATE ${RATS_ENGINE_PRIVATE_DEFINITIONS})
 
 set_target_properties(rats-engine PROPERTIES 
 	CXX_VISIBILITY_PRESET hidden
 	VISIBILITY_INLINES_HIDDEN ON)
-generate_export_header(rats-engine EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/include/engine_export.h")
-target_include_directories(rats-engine PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}/include")
+generate_export_header(rats-engine EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/include/engine/engine_export.h")
+target_include_directories(rats-engine
+	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
+	PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/private")
 
+target_precompile_headers(rats-engine PUBLIC ${RATS_ENGINE_PUBLIC_PCH})
 target_sources(rats-engine PUBLIC
-	FILE_SET public_modules 
-		TYPE CXX_MODULES
-		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/public"
-		FILES ${RATS_ENGINE_PUBLIC_MODULES})
+	FILE_SET public_headers
+		TYPE HEADERS
+		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
+		FILES ${RATS_ENGINE_PUBLIC_HEADERS})
 target_sources(rats-engine PRIVATE
-	FILE_SET private_modules 
-		TYPE CXX_MODULES
+		FILE_SET private_headers
+		TYPE HEADERS
 		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/private"
-		FILES ${RATS_ENGINE_PRIVATE_MODULES})
-target_sources(rats-engine PRIVATE ${RATS_ENGINE_HEADERS} ${RATS_ENGINE_SRC_FILES})
+		FILES ${RATS_ENGINE_PRIVATE_HEADERS})
+target_sources(rats-engine PRIVATE ${RATS_ENGINE_SRC_FILES})

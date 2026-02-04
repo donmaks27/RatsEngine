@@ -6,8 +6,7 @@
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
                 "RATS_ENGINE_WINDOW_GLFW": "ON",
-                "RATS_ENGINE_RENDER_VULKAN":  "ON",
-                "ENABLE_CPP20_MODULE": "ON"
+                "RATS_ENGINE_RENDER_VULKAN": "ON"
             }
         }
     ],
