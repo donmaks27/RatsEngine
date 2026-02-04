@@ -31,12 +31,14 @@ list(APPEND RATS_ENGINE_PUBLIC_PCH
 list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/engine.h"
 	"include/engine/utils/log.h"
+	"include/engine/utils/uuid.h"
 	"include/engine/utils/macro/defer.h")
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS)
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
 	"src/utils/eastl_operator_new.cpp"
-	"src/utils/log.cpp")
+	"src/utils/log.cpp"
+	"src/utils/uuid.cpp")
 
 if(${RATS_ENGINE_RENDER_VULKAN})
 

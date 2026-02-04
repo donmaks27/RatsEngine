@@ -1,9 +1,6 @@
-module;
+#include <engine/utils/uuid.h>
 
 #include <random>
-#include <fmt/format.h>
-
-module rats_engine.utils;
 
 namespace engine::utils
 {
