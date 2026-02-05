@@ -3,9 +3,16 @@
 #include <engine/core.h>
 
 #include <engine/render/render_api.h>
+#include <engine/utils/uuid.h>
+
+#include <EASTL/vector_map.h>
 
 namespace engine
 {
+    using window_id = utils::uuid;
+
+    struct window_create_info {};
+
     class RATS_ENGINE_EXPORT window_manager
     {
     protected:
@@ -26,18 +33,27 @@ namespace engine
         [[nodiscard]] static window_manager* instance() { return s_instance; }
         static void clear_instance();
 
-        [[nodiscard]] virtual bool shouldCloseMainWindow() const { return true; }
+        [[nodiscard]] window_id main_window_id() const { return m_mainWindowId; }
+        [[nodiscard]] virtual bool should_close_window(const window_id& id) const = 0;
+        [[nodiscard]] bool should_close_main_window() const { return should_close_window(main_window_id()); }
+
         virtual void on_frame_end() {}
 
     protected:
 
-        [[nodiscard]] virtual bool init(const create_info& info) { return true; }
-        virtual void clear() {}
+        [[nodiscard]] virtual bool init(const create_info& info);
+        virtual void clear();
+
+        [[nodiscard]] virtual bool create_window_impl(const window_id& id, const window_create_info& info) = 0;
 
     private:
 
         static window_manager* s_instance;
-
         static window_manager* create_instance_impl(const create_info& info);
+
+        struct window_data {};
+
+        eastl::vector_map<window_id, window_data> m_windowData;
+        window_id m_mainWindowId = window_id::invalid_id();
     };
 }

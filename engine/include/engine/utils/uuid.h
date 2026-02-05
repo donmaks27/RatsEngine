@@ -17,7 +17,7 @@ namespace engine::utils
 
         uuid& operator=(const uuid&) = default;
 
-        [[nodiscard]] static constexpr uuid invalid() { return {}; }
+        [[nodiscard]] static constexpr uuid invalid_id() { return {}; }
         [[nodiscard]] static uuid generate();
 
         [[nodiscard]] constexpr bool operator==(const uuid& other) const { return (m_hi == other.m_hi) && (m_lo == other.m_lo); }

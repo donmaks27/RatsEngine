@@ -16,7 +16,8 @@ namespace engine
         virtual ~window_manager_glfw() override = default;
     public:
 
-        [[nodiscard]] virtual bool shouldCloseMainWindow() const override;
+        [[nodiscard]] virtual bool should_close_window(const window_id& id) const override;
+
         virtual void on_frame_end() override;
 
     protected:
@@ -24,9 +25,11 @@ namespace engine
         virtual bool init(const create_info& info) override;
         virtual void clear() override;
 
+        virtual bool create_window_impl(const window_id& id, const window_create_info& info) override;
+
     private:
 
-        GLFWwindow* m_mainWindow = nullptr;
+        eastl::vector_map<window_id, GLFWwindow*> m_windowDataGLFW;
 
 
         void clear_GLFW();

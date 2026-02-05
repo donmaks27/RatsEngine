@@ -12,9 +12,10 @@ namespace
 
 namespace engine
 {
-    bool window_manager_glfw::shouldCloseMainWindow() const
+    bool window_manager_glfw::should_close_window(const window_id& id) const
     {
-        return glfwWindowShouldClose(m_mainWindow) == GLFW_TRUE;
+        const auto iter = m_windowDataGLFW.find(id);
+        return (iter != m_windowDataGLFW.end()) && glfwWindowShouldClose(iter->second);
     }
 
     void window_manager_glfw::on_frame_end()
@@ -24,29 +25,16 @@ namespace engine
 
     bool window_manager_glfw::init(const create_info& info)
     {
-        if (!super::init(info))
-        {
-            return false;
-        }
-
         glfwSetErrorCallback(glfw_error_callback);
-
         if (!glfwInit())
         {
-            log::fatal("[window_manager_glfw::init_window_manager] Failed to initialize GLFW!");
+            log::fatal("[window_manager_glfw::init] Failed to initialize GLFW!");
             return false;
         }
-        log::info("[window_manager_glfw::init_window_manager] GLFW initialized");
+        log::info("[window_manager_glfw::init] GLFW initialized");
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        m_mainWindow = glfwCreateWindow(static_cast<int>(800), static_cast<int>(600), "MainWindow", nullptr, nullptr);
-        if (m_mainWindow == nullptr)
-        {
-            log::fatal("[window_manager_glfw::init_window_manager] Failed to create main GLFW window");
-            return false;
-        }
-        log::info("[window_manager_glfw::init_window_manager] Created main GLFW window");
-        return true;
+        return super::init(info);
     }
 
     void window_manager_glfw::clear()
@@ -57,14 +45,23 @@ namespace engine
 
     void window_manager_glfw::clear_GLFW()
     {
-        if (m_mainWindow != nullptr)
+        for (const auto& [id, window] : m_windowDataGLFW)
         {
-            glfwDestroyWindow(m_mainWindow);
-            m_mainWindow = nullptr;
-            log::info("[window_manager_glfw::clear_GLFW] Main GLFW window destroyed");
+            glfwDestroyWindow(window);
         }
-
+        m_windowDataGLFW.clear();
         glfwTerminate();
-        log::info("[window_manager_glfw::clear_GLFW] GLFW terminated");
+    }
+
+    bool window_manager_glfw::create_window_impl(const window_id& id, const window_create_info& info)
+    {
+        const auto window = glfwCreateWindow(800, 600, "RatsEngine", nullptr, nullptr);
+        if (window == nullptr)
+        {
+            log::error("[window_manager_glfw::create_window_impl] Failed to create window");
+            return false;
+        }
+        m_windowDataGLFW.emplace(id, window);
+        return true;
     }
 }

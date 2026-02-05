@@ -35,7 +35,7 @@ namespace engine
 
         log::log("[engine::start] Game loop started");
         auto* windowManager = window_manager::instance();
-        while (!windowManager->shouldCloseMainWindow())
+        while (!windowManager->should_close_main_window())
         {
             windowManager->on_frame_end();
         }
