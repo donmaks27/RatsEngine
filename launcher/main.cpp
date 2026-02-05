@@ -1,4 +1,5 @@
 #include <engine/engine.h>
+#include <engine/utils/log.h>
 
 int main()
 {

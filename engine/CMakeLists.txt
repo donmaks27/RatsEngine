@@ -26,19 +26,23 @@ list(APPEND RATS_ENGINE_PRIVATE_LIBS)
 list(APPEND RATS_ENGINE_PUBLIC_DEFINITIONS
 	"RATS_ENGINE_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
 list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS)
-list(APPEND RATS_ENGINE_PUBLIC_PCH
-	"include/engine/core.h")
+list(APPEND RATS_ENGINE_PRIVATE_PCH
+	"private/pch.h")
 list(APPEND RATS_ENGINE_PUBLIC_HEADERS
+	"include/engine/core.h"
 	"include/engine/engine.h"
+	"include/engine/config.h"
 	"include/engine/utils/log.h"
 	"include/engine/utils/uuid.h"
 	"include/engine/utils/macro/defer.h")
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS)
-list(APPEND RATS_ENGINE_SRC_FILES
-	"src/engine.cpp"
+list(APPEND RATS_ENGINE_SRC_FILES_NO_PCH
 	"src/utils/eastl_operator_new.cpp"
 	"src/utils/log.cpp"
 	"src/utils/uuid.cpp")
+list(APPEND RATS_ENGINE_SRC_FILES
+	${RATS_ENGINE_SRC_FILES_NO_PCH}
+	"src/engine.cpp")
 
 if(${RATS_ENGINE_RENDER_VULKAN})
 
@@ -70,7 +74,7 @@ target_include_directories(rats-engine
 	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
 	PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/private")
 
-target_precompile_headers(rats-engine PUBLIC ${RATS_ENGINE_PUBLIC_PCH})
+target_precompile_headers(rats-engine PRIVATE ${RATS_ENGINE_PRIVATE_PCH})
 target_sources(rats-engine PUBLIC
 	FILE_SET public_headers
 		TYPE HEADERS
@@ -82,3 +86,5 @@ target_sources(rats-engine PRIVATE
 		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/private"
 		FILES ${RATS_ENGINE_PRIVATE_HEADERS})
 target_sources(rats-engine PRIVATE ${RATS_ENGINE_SRC_FILES})
+set_source_files_properties(${RATS_ENGINE_SRC_FILES_NO_PCH} PROPERTIES
+	SKIP_PRECOMPILE_HEADERS ON)

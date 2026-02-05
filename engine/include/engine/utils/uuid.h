@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/engine_export.h>
+#include <engine/core.h>
 
 #include <string>
 
