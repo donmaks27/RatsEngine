@@ -1,5 +1,7 @@
 #include <engine/engine.h>
 
+#include <engine/render/render_manager.h>
+#include <engine/render/window_manager.h>
 #include <engine/utils/macro/defer.h>
 
 namespace engine
@@ -32,21 +34,21 @@ namespace engine
         log::info("[engine::start] Engine initialized successfully");
 
         log::log("[engine::start] Game loop started");
-        // auto* windowManager = window_manager::instance();
-        // while (!windowManager->shouldCloseMainWindow())
-        // {
-        //     windowManager->on_frame_end();
-        // }
+        auto* windowManager = window_manager::instance();
+        while (!windowManager->shouldCloseMainWindow())
+        {
+            windowManager->on_frame_end();
+        }
         log::log("[engine::start] Game loop stopped");
         return true;
     }
 
     bool engine::init_engine()
     {
-        // if (render_manager::create_instance({ .api = render_api::vulkan }) == nullptr)
-        // {
-        //     return false;
-        // }
+        if (render_manager::create_instance({ .api = render_api::vulkan }) == nullptr)
+        {
+            return false;
+        }
         return true;
     }
 
@@ -54,7 +56,7 @@ namespace engine
     {
         log::log("[engine::clear_engine] Clearing engine...");
 
-        //render_manager::clear_instance();
+        render_manager::clear_instance();
 
         log::info("[engine::clear_engine] Engine cleared successfully");
         m_engineStarted = false;

@@ -27,11 +27,14 @@ list(APPEND RATS_ENGINE_PUBLIC_DEFINITIONS
 	"RATS_ENGINE_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
 list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS)
 list(APPEND RATS_ENGINE_PRIVATE_PCH
-	"private/pch.h")
+	"src/pch.h")
 list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/core.h"
 	"include/engine/engine.h"
 	"include/engine/config.h"
+	"include/engine/render/render_api.h"
+	"include/engine/render/render_manager.h"
+	"include/engine/render/window_manager.h"
 	"include/engine/utils/log.h"
 	"include/engine/utils/uuid.h"
 	"include/engine/utils/macro/defer.h")
@@ -42,7 +45,9 @@ list(APPEND RATS_ENGINE_SRC_FILES_NO_PCH
 	"src/utils/uuid.cpp")
 list(APPEND RATS_ENGINE_SRC_FILES
 	${RATS_ENGINE_SRC_FILES_NO_PCH}
-	"src/engine.cpp")
+	"src/engine.cpp"
+	"src/render/render_manager.cpp"
+	"src/render/window_manager.cpp")
 
 if(${RATS_ENGINE_RENDER_VULKAN})
 

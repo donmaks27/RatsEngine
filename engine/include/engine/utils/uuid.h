@@ -40,24 +40,18 @@ namespace engine::utils
 template<>
 struct std::hash<engine::utils::uuid>
 {
-    [[nodiscard]] std::size_t operator()(const engine::utils::uuid& id) const noexcept
+    [[nodiscard]] constexpr std::size_t operator()(const engine::utils::uuid& id) const noexcept
     {
         return id.hash();
     }
 };
 template<>
-struct eastl::hash<engine::utils::uuid>
-{
-    [[nodiscard]] std::size_t operator()(const engine::utils::uuid& id) const noexcept
-    {
-        return id.hash();
-    }
-};
+struct eastl::hash<engine::utils::uuid> : std::hash<engine::utils::uuid> {};
 
 template<>
 struct fmt::formatter<engine::utils::uuid> : formatter<std::string>
 {
-    template <typename FormatContext>
+    template<typename FormatContext>
     auto format(const engine::utils::uuid& id, FormatContext& ctx) const
     {
         return formatter<std::string>::format(id.to_string(), ctx);
