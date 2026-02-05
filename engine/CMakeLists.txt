@@ -39,15 +39,15 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/utils/uuid.h"
 	"include/engine/utils/macro/defer.h")
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS)
+list(APPEND RATS_ENGINE_SRC_FILES
+	"src/engine.cpp"
+	"src/render/render_manager.cpp"
+	"src/render/window_manager.cpp"
+	"src/render/window_manager_constructor.cpp")
 list(APPEND RATS_ENGINE_SRC_FILES_NO_PCH
 	"src/utils/eastl_operator_new.cpp"
 	"src/utils/log.cpp"
 	"src/utils/uuid.cpp")
-list(APPEND RATS_ENGINE_SRC_FILES
-	${RATS_ENGINE_SRC_FILES_NO_PCH}
-	"src/engine.cpp"
-	"src/render/render_manager.cpp"
-	"src/render/window_manager.cpp")
 
 if(${RATS_ENGINE_RENDER_VULKAN})
 
@@ -60,6 +60,13 @@ if(${RATS_ENGINE_WINDOW_GLFW})
 
 	find_package(glfw3 CONFIG REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
+
+	list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS
+		"RATS_ENGINE_WINDOW_GLFW")
+	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
+		"private/engine/render/glfw/window_manager_glfw.h")
+	list(APPEND RATS_ENGINE_SRC_FILES
+		"src/render/glfw/window_manager_glfw.cpp")
 
 endif()
 
@@ -90,6 +97,6 @@ target_sources(rats-engine PRIVATE
 		TYPE HEADERS
 		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/private"
 		FILES ${RATS_ENGINE_PRIVATE_HEADERS})
-target_sources(rats-engine PRIVATE ${RATS_ENGINE_SRC_FILES})
+target_sources(rats-engine PRIVATE ${RATS_ENGINE_SRC_FILES} ${RATS_ENGINE_SRC_FILES_NO_PCH})
 set_source_files_properties(${RATS_ENGINE_SRC_FILES_NO_PCH} PROPERTIES
 	SKIP_PRECOMPILE_HEADERS ON)

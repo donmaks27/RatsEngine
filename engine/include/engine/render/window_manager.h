@@ -39,6 +39,5 @@ namespace engine
         static window_manager* s_instance;
 
         static window_manager* create_instance_impl(const create_info& info);
-        static window_manager* create_instance_impl_vulkan(const create_info& info);
     };
 }
