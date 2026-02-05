@@ -42,17 +42,6 @@ namespace engine
         }
     }
 
-    render_manager* render_manager::create_instance_impl(const create_info& info)
-    {
-        switch (info.api)
-        {
-        case render_api::vulkan: return create_instance_impl_vulkan(info);
-        default:;
-        }
-        log::fatal("[render_manager::create_instance_impl] Render API '{}' is not implemented", info.api);
-        return nullptr;
-    }
-
     bool render_manager::init(const create_info& info)
     {
         if (window_manager::create_instance({ .api = info.api }) == nullptr)

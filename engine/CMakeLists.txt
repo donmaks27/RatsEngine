@@ -43,6 +43,7 @@ list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
 	"src/render/render_manager.cpp"
 	"src/render/window_manager.cpp"
+	"src/render/render_manager_constructor.cpp"
 	"src/render/window_manager_constructor.cpp")
 list(APPEND RATS_ENGINE_SRC_FILES_NO_PCH
 	"src/utils/eastl_operator_new.cpp"
@@ -53,20 +54,37 @@ if(${RATS_ENGINE_RENDER_VULKAN})
 
 	find_package(Vulkan REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS Vulkan::Vulkan)
+	list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS
+		"RATS_ENGINE_RENDER_VULKAN=1"
+		"VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"
+		"VULKAN_HPP_NO_EXCEPTIONS=1")
+	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
+		"private/engine/render/vulkan/render_manager_vulkan.h")
+	list(APPEND RATS_ENGINE_SRC_FILES
+		"src/render/vulkan/render_manager_vulkan.cpp")
 
+else()
+	list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS
+		"RATS_ENGINE_RENDER_VULKAN=0")
 endif()
 
 if(${RATS_ENGINE_WINDOW_GLFW})
 
 	find_package(glfw3 CONFIG REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
-
 	list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS
 		"RATS_ENGINE_WINDOW_GLFW")
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 		"private/engine/render/glfw/window_manager_glfw.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
 		"src/render/glfw/window_manager_glfw.cpp")
+
+	if(${RATS_ENGINE_RENDER_VULKAN})
+		list(APPEND RATS_ENGINE_PRIVATE_HEADERS
+			"private/engine/render/glfw/window_manager_glfw_vulkan.h")
+		list(APPEND RATS_ENGINE_SRC_FILES
+			"src/render/glfw/window_manager_glfw_vulkan.cpp")
+	endif()
 
 endif()
 

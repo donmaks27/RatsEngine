@@ -37,6 +37,5 @@ namespace engine
 
         static render_manager* s_instance;
         static render_manager* create_instance_impl(const create_info& info);
-        static render_manager* create_instance_impl_vulkan(const create_info& info);
     };
 }

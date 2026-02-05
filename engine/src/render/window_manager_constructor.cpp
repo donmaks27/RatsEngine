@@ -1,9 +1,15 @@
 #include <engine/render/window_manager.h>
 
-#ifdef RATS_ENGINE_WINDOW_GLFW
+#undef RATS_ENGINE_WINDOW_NONE
+#undef RATS_ENGINE_WINDOW_MANAGER_IMPL_VULKAN
 
+#ifdef RATS_ENGINE_WINDOW_GLFW
+    #if RATS_ENGINE_RENDER_VULKAN
+        #include <engine/render/glfw/window_manager_glfw_vulkan.h>
+        #define RATS_ENGINE_WINDOW_MANAGER_IMPL_VULKAN engine::vulkan::window_manager_glfw
+    #endif
 #else
-#define RATS_ENGINE_WINDOW_NONE
+    #define RATS_ENGINE_WINDOW_NONE
 #endif
 
 namespace engine
@@ -16,7 +22,9 @@ namespace engine
 #else
         switch (info.api)
         {
-        case render_api::vulkan: return nullptr;
+#ifdef RATS_ENGINE_WINDOW_MANAGER_IMPL_VULKAN
+        case render_api::vulkan: return new RATS_ENGINE_WINDOW_MANAGER_IMPL_VULKAN();
+#endif
         default:;
         }
         log::fatal("[window_manager::create_instance_impl] Render API '{}' is not implemented", info.api);
