@@ -22,15 +22,14 @@ namespace engine
 
     protected:
 
+        eastl::vector_map<window_id, GLFWwindow*> m_windowDataGLFW;
+
         virtual bool init(const create_info& info) override;
         virtual void clear() override;
 
         virtual bool create_window_impl(const window_id& id, const window_create_info& info) override;
 
     private:
-
-        eastl::vector_map<window_id, GLFWwindow*> m_windowDataGLFW;
-
 
         void clear_GLFW();
     };

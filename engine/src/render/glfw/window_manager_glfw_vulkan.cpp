@@ -10,4 +10,23 @@ namespace engine
         const auto extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
         return { extensions, extensions + extensionCount };
     }
+
+    vk::SurfaceKHR vulkan::window_manager_glfw::create_surface(const api_context& ctx, const window_id& id) const
+    {
+        const auto iter = m_windowDataGLFW.find(id);
+        if (iter == m_windowDataGLFW.end())
+        {
+            return nullptr;
+        }
+
+        VkSurfaceKHR surface;
+        const auto result = static_cast<vk::Result>(glfwCreateWindowSurface(ctx.i(), iter->second, nullptr, &surface));
+        if (result != vk::Result::eSuccess)
+        {
+            log::error("[vulkan::window_manager_glfw::create_surface] Failed to create window surface: {}", result);
+            return nullptr;
+        }
+
+        return surface;
+    }
 }

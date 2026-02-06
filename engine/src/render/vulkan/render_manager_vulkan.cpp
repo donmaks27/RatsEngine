@@ -45,6 +45,42 @@ namespace engine
 		}
 		m_windowManagerVulkan = dynamic_cast<window_manager*>(engine::window_manager::instance());
 
+		if (!create_instance(info))
+		{
+			log::fatal("[vulkan::render_manager::init] Failed to create Vulkan instance!");
+			return false;
+		}
+    	if (!m_windowManagerVulkan->on_instance_created(m_apiCtx))
+    	{
+    		log::fatal("[vulkan::render_manager::init] Failed to create Vulkan surfaces!");
+    		return false;
+    	}
+
+		return true;
+	}
+
+	void vulkan::render_manager::clear()
+	{
+		if (m_apiCtx.m_instance != nullptr)
+		{
+			m_windowManagerVulkan->clear_vulkan();
+			if constexpr (config::debug)
+			{
+				if (m_debugMessenger != nullptr)
+				{
+					m_apiCtx.i().destroyDebugUtilsMessengerEXT(m_debugMessenger);
+					m_debugMessenger = nullptr;
+				}
+			}
+			m_apiCtx.m_instance.destroy();
+		}
+		m_apiCtx = {};
+
+		super::clear();
+	}
+
+	bool vulkan::render_manager::create_instance(const create_info& info)
+	{
     	vk::detail::defaultDispatchLoaderDynamic.init(vkGetInstanceProcAddr);
 
 		eastl::vector<const char*> validationLayers;
@@ -98,26 +134,36 @@ namespace engine
 			}
 			m_debugMessenger = debugMessenger.value;
 		}
-
-		return true;
+    	return true;
 	}
 
-	void vulkan::render_manager::clear()
+	void vulkan::window_manager::clear_vulkan()
 	{
-		if (m_apiCtx.m_instance != nullptr)
-		{
-			if constexpr (config::debug)
-			{
-				if (m_debugMessenger != nullptr)
-				{
-					m_apiCtx.i().destroyDebugUtilsMessengerEXT(m_debugMessenger);
-					m_debugMessenger = nullptr;
-				}
+    	const auto renderManager = dynamic_cast<render_manager*>(engine::render_manager::instance());
+    	if (renderManager != nullptr)
+    	{
+    		const auto& ctx = renderManager->api_ctx();
+    		for (const auto& [id, data] : m_windowDataVulkan)
+    		{
+    			ctx.i().destroySurfaceKHR(data.surface);
 			}
-			m_apiCtx.m_instance.destroy();
-		}
-		m_apiCtx = {};
-
-		super::clear();
+    	}
+    	m_windowDataVulkan.clear();
 	}
+
+	bool vulkan::window_manager::on_instance_created(const api_context& ctx)
+    {
+    	const auto windowManager = engine::window_manager::instance();
+    	for (const auto& id : windowManager->window_ids())
+    	{
+    		const auto surface = create_surface(ctx, id);
+    		if (surface == nullptr)
+    		{
+    			log::error("[vulkan::window_manager::on_instance_created] Failed to create surface for window {}", id);
+    			return false;
+    		}
+    		m_windowDataVulkan.emplace(id, window_data_vulkan{ surface });
+    	}
+    	return true;
+    }
 }

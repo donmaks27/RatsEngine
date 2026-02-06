@@ -14,6 +14,9 @@ namespace engine::vulkan
         window_manager_glfw() = default;
         virtual ~window_manager_glfw() override = default;
 
+    protected:
+
         [[nodiscard]] virtual eastl::vector<const char*> get_required_extensions() const override;
+        [[nodiscard]] virtual vk::SurfaceKHR create_surface(const api_context& ctx, const window_id& id) const override;
     };
 }
