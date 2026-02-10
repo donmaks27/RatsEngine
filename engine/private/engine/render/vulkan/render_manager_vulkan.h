@@ -49,6 +49,8 @@ namespace engine::vulkan
         [[nodiscard]] virtual eastl::vector<const char*> get_required_extensions() const = 0;
         [[nodiscard]] virtual vk::SurfaceKHR create_surface(const api_context& ctx, const window_id& id) const = 0;
 
+        void on_destroy_window(const window_id& id);
+
     private:
 
         struct window_data_vulkan

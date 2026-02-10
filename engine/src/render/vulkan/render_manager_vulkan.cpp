@@ -154,16 +154,26 @@ namespace engine
 	bool vulkan::window_manager::on_instance_created(const api_context& ctx)
     {
     	const auto windowManager = engine::window_manager::instance();
-    	for (const auto& id : windowManager->window_ids())
-    	{
+    	return std::ranges::all_of(windowManager->window_ids(), [this, &ctx](const window_id& id) {
     		const auto surface = create_surface(ctx, id);
     		if (surface == nullptr)
     		{
-    			log::error("[vulkan::window_manager::on_instance_created] Failed to create surface for window {}", id);
-    			return false;
-    		}
-    		m_windowDataVulkan.emplace(id, window_data_vulkan{ surface });
+				log::error("[vulkan::window_manager::on_instance_created] Failed to create surface for window {}", id);
+				return false;
+			}
+			m_windowDataVulkan.emplace(id, window_data_vulkan{ surface });
+    		return true;
+    	});
+    }
+
+	void vulkan::window_manager::on_destroy_window(const window_id& id)
+    {
+    	const auto renderManager = dynamic_cast<render_manager*>(engine::render_manager::instance());
+    	const auto iter = m_windowDataVulkan.find(id);
+    	if (iter != m_windowDataVulkan.end())
+    	{
+    		renderManager->api_ctx().i().destroySurfaceKHR(iter->second.surface);
+    		m_windowDataVulkan.erase(iter);
     	}
-    	return true;
     }
 }

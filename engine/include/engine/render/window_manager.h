@@ -43,8 +43,11 @@ namespace engine
             });
         }
 
-        [[nodiscard]] window_id main_window_id() const { return m_mainWindowId; }
+        window_id create_window(const window_create_info& info);
         [[nodiscard]] virtual bool should_close_window(const window_id& id) const = 0;
+        bool destroy_window(const window_id& id);
+
+        [[nodiscard]] window_id main_window_id() const { return m_mainWindowId; }
         [[nodiscard]] bool should_close_main_window() const { return should_close_window(main_window_id()); }
 
         virtual void on_frame_end() {}
@@ -60,6 +63,7 @@ namespace engine
         virtual void clear();
 
         [[nodiscard]] virtual bool create_window_impl(const window_id& id, const window_create_info& info) = 0;
+        virtual void destroy_window_impl(const window_id& id) = 0;
 
     private:
 

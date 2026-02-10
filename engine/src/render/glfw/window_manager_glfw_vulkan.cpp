@@ -29,4 +29,10 @@ namespace engine
 
         return surface;
     }
+
+    void vulkan::window_manager_glfw::destroy_window_impl(const window_id& id)
+    {
+        vulkan::window_manager::on_destroy_window(id);
+        super::destroy_window_impl(id);
+    }
 }

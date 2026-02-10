@@ -58,10 +58,18 @@ namespace engine
         const auto window = glfwCreateWindow(800, 600, "RatsEngine", nullptr, nullptr);
         if (window == nullptr)
         {
-            log::error("[window_manager_glfw::create_window_impl] Failed to create window");
+            log::error("[window_manager_glfw::create_window_impl] Failed to create GLFW window");
             return false;
         }
+        log::log("[window_manager_glfw::create_window_impl] GLFW window created successfully");
         m_windowDataGLFW.emplace(id, window);
         return true;
+    }
+
+    void window_manager_glfw::destroy_window_impl(const window_id& id)
+    {
+        const auto iter = m_windowDataGLFW.find(id);
+        glfwDestroyWindow(iter->second);
+        m_windowDataGLFW.erase(iter);
     }
 }

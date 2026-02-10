@@ -28,6 +28,7 @@ namespace engine
         virtual void clear() override;
 
         virtual bool create_window_impl(const window_id& id, const window_create_info& info) override;
+        virtual void destroy_window_impl(const window_id& id) override;
 
     private:
 

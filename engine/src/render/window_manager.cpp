@@ -44,11 +44,14 @@ namespace engine
     {
         m_mainWindowId = window_id::generate();
         m_windowData.emplace(m_mainWindowId, window_data{});
+        log::log("[window_manager::init] Creating main window {}...", m_mainWindowId);
         if (!create_window_impl(m_mainWindowId, {}))
         {
             log::fatal("[window_manager::init] Failed to create main window!");
+            m_windowData = {};
             return false;
         }
+        log::info("[window_manager::init] Main window created successfully");
         return true;
     }
 
@@ -56,5 +59,42 @@ namespace engine
     {
         m_windowData.clear();
         m_mainWindowId = window_id::invalid_id();
+    }
+
+    window_id window_manager::create_window(const window_create_info& info)
+    {
+        window_id id = window_id::generate();
+        while (m_windowData.find(id) != m_windowData.end())
+        {
+            id = window_id::generate();
+        }
+
+        log::log("[window_manager::create_window] Creating window {}...", id);
+        m_windowData.emplace(id, window_data{});
+        if (!create_window_impl(m_mainWindowId, {}))
+        {
+            log::error("[window_manager::create_window] Failed to create window!");
+            m_windowData.erase(id);
+            return window_id::invalid_id();
+        }
+        log::log("[window_manager::create_window] Window created successfully");
+        return id;
+    }
+    bool window_manager::destroy_window(const window_id& id)
+    {
+        if (m_windowData.count(id) == 0)
+        {
+            return false;
+        }
+        if (id == m_mainWindowId)
+        {
+            log::warning("[window_manager::destroy_window] Can't destroy main window");
+            return false;
+        }
+        log::log("[window_manager::destroy_window] Destroying window {}...", id);
+        destroy_window_impl(id);
+        m_windowData.erase(id);
+        log::log("[window_manager::destroy_window] Window destroyed");
+        return true;
     }
 }

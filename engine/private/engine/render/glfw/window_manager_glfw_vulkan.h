@@ -18,5 +18,7 @@ namespace engine::vulkan
 
         [[nodiscard]] virtual eastl::vector<const char*> get_required_extensions() const override;
         [[nodiscard]] virtual vk::SurfaceKHR create_surface(const api_context& ctx, const window_id& id) const override;
+
+        virtual void destroy_window_impl(const window_id& id) override;
     };
 }
