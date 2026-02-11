@@ -44,6 +44,7 @@ namespace engine
 			return false;
 		}
 		m_windowManagerVulkan = dynamic_cast<window_manager*>(engine::window_manager::instance());
+    	m_windowManagerVulkan->m_renderManagerVulkan = this;
 
 		if (!create_instance(info))
 		{
@@ -53,6 +54,12 @@ namespace engine
     	if (!m_windowManagerVulkan->on_instance_created(m_apiCtx))
     	{
     		log::fatal("[vulkan::render_manager::init] Failed to create Vulkan surfaces!");
+    		return false;
+    	}
+
+    	if (!pick_physical_device())
+    	{
+    		log::fatal("[vulkan::render_manager::init] Failed to pick Vulkan physical device!");
     		return false;
     	}
 
@@ -137,18 +144,29 @@ namespace engine
     	return true;
 	}
 
+	bool vulkan::render_manager::pick_physical_device()
+	{
+    	const auto devices = m_apiCtx.i().enumeratePhysicalDevices();
+    	if (devices.result != vk::Result::eSuccess)
+    	{
+    		log::fatal("[vulkan::render_manager::pick_physical_device] Failed to enumerate Vulkan physical devices! Error: {}", devices.result);
+    		return false;
+    	}
+
+		return true;
+	}
+
 	void vulkan::window_manager::clear_vulkan()
 	{
-    	const auto renderManager = dynamic_cast<render_manager*>(engine::render_manager::instance());
-    	if (renderManager != nullptr)
+    	if (!m_windowDataVulkan.empty())
     	{
-    		const auto& ctx = renderManager->api_ctx();
+    		const auto& ctx = api_ctx();
     		for (const auto& [id, data] : m_windowDataVulkan)
     		{
     			ctx.i().destroySurfaceKHR(data.surface);
-			}
+    		}
+    		m_windowDataVulkan.clear();
     	}
-    	m_windowDataVulkan.clear();
 	}
 
 	bool vulkan::window_manager::on_instance_created(const api_context& ctx)
@@ -168,11 +186,10 @@ namespace engine
 
 	void vulkan::window_manager::on_destroy_window(const window_id& id)
     {
-    	const auto renderManager = dynamic_cast<render_manager*>(engine::render_manager::instance());
     	const auto iter = m_windowDataVulkan.find(id);
     	if (iter != m_windowDataVulkan.end())
     	{
-    		renderManager->api_ctx().i().destroySurfaceKHR(iter->second.surface);
+    		api_ctx().i().destroySurfaceKHR(iter->second.surface);
     		m_windowDataVulkan.erase(iter);
     	}
     }

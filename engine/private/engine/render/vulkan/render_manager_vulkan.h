@@ -30,7 +30,22 @@ namespace engine::vulkan
         vk::Instance m_instance;
     };
 
-    class window_manager
+    class render_object
+    {
+        friend render_manager;
+
+    protected:
+        render_object() = default;
+        ~render_object() = default;
+
+        [[nodiscard]] inline const api_context& api_ctx() const;
+
+    private:
+
+        render_manager* m_renderManagerVulkan = nullptr;
+    };
+
+    class window_manager : public render_object
     {
         friend render_manager;
 
@@ -86,9 +101,16 @@ namespace engine::vulkan
 
         api_context m_apiCtx;
         vk::DebugUtilsMessengerEXT m_debugMessenger;
+        vk::PhysicalDevice m_physicalDevice;
 
         [[nodiscard]] bool create_instance(const create_info& info);
+        [[nodiscard]] bool pick_physical_device();
     };
+
+    const api_context& render_object::api_ctx() const
+    {
+        return m_renderManagerVulkan->api_ctx();
+    }
 }
 
 template<>
