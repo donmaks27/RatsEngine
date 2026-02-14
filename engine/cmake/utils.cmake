@@ -1,0 +1,7 @@
+function(cmake_option_to_bool INPUT)
+    if(${INPUT})
+        set(${INPUT}_VALUE "true" PARENT_SCOPE)
+    else()
+        set(${INPUT}_VALUE "false" PARENT_SCOPE)
+    endif()
+endfunction()

@@ -7,9 +7,10 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-                "RATS_ENGINE_WINDOW_GLFW": "ON",
-                "RATS_ENGINE_RENDER_VULKAN": "ON"
-            }
+                "RATS_ENGINE_GLFW_ENABLE": "ON",
+                "RATS_ENGINE_VULKAN_ENABLE": "ON"
+            },
+            "hidden": true
         },
         {
             "name": "vcpkg-debug",
@@ -17,7 +18,8 @@
             "binaryDir": "${sourceDir}/build-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
-            }
+            },
+            "hidden": true
         }
     ],
     "version": 2

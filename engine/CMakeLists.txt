@@ -11,8 +11,15 @@ if(MSVC)
 	add_compile_options(/Zc:__cplusplus /permissive- /Zc:preprocessor)
 endif()
 
-option(RATS_ENGINE_WINDOW_GLFW "Use GLFW for window managing" OFF)
-option(RATS_ENGINE_RENDER_VULKAN "Add support of Vulkan render API" OFF)
+include(cmake/utils.cmake)
+
+option(RATS_ENGINE_GLFW_ENABLE "Use GLFW for window managing" OFF)
+option(RATS_ENGINE_VULKAN_ENABLE "Add support of Vulkan render API" OFF)
+option(RATS_ENGINE_VULKAN_ENABLE_VALIDATION_LAYERS "Enable validation layers for Vulkan render API" OFF)
+
+cmake_option_to_bool(RATS_ENGINE_GLFW_ENABLE)
+cmake_option_to_bool(RATS_ENGINE_VULKAN_ENABLE)
+cmake_option_to_bool(RATS_ENGINE_VULKAN_ENABLE_VALIDATION_LAYERS)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(EASTL CONFIG REQUIRED)
@@ -23,15 +30,13 @@ list(APPEND RATS_ENGINE_PUBLIC_LIBS
 	glm::glm)
 list(APPEND RATS_ENGINE_PRIVATE_LIBS)
 
-list(APPEND RATS_ENGINE_PUBLIC_DEFINITIONS
-	"RATS_ENGINE_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
+list(APPEND RATS_ENGINE_PUBLIC_DEFINITIONS)
 list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS)
 list(APPEND RATS_ENGINE_PRIVATE_PCH
 	"src/pch.h")
 list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/core.h"
 	"include/engine/engine.h"
-	"include/engine/config.h"
 	"include/engine/render/render_api.h"
 	"include/engine/render/render_manager.h"
 	"include/engine/render/window_manager.h"
@@ -55,7 +60,6 @@ if(${RATS_ENGINE_RENDER_VULKAN})
 	find_package(Vulkan REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS Vulkan::Vulkan)
 	list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS
-		"RATS_ENGINE_RENDER_VULKAN=1"
 		"VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"
 		"VULKAN_HPP_NO_EXCEPTIONS=1")
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
@@ -63,17 +67,12 @@ if(${RATS_ENGINE_RENDER_VULKAN})
 	list(APPEND RATS_ENGINE_SRC_FILES
 		"src/render/vulkan/render_manager_vulkan.cpp")
 
-else()
-	list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS
-		"RATS_ENGINE_RENDER_VULKAN=0")
 endif()
 
 if(${RATS_ENGINE_WINDOW_GLFW})
 
 	find_package(glfw3 CONFIG REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
-	list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS
-		"RATS_ENGINE_WINDOW_GLFW")
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 		"private/engine/render/glfw/window_manager_glfw.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
@@ -100,9 +99,21 @@ set_target_properties(rats-engine PROPERTIES
 	CXX_VISIBILITY_PRESET hidden
 	VISIBILITY_INLINES_HIDDEN ON)
 generate_export_header(rats-engine EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/include/engine/engine_export.h")
+configure_file(
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/config.h.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/include/engine/config.h"
+	@ONLY)
+configure_file(
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/private_config.h.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/private/engine/private_config.h"
+	@ONLY)
+configure_file(
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/private_config_macro.h.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/private/engine/private_config_macro.h"
+	@ONLY)
 target_include_directories(rats-engine
 	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
-	PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/private")
+	PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/private" "${CMAKE_CURRENT_BINARY_DIR}/private")
 
 target_precompile_headers(rats-engine PRIVATE ${RATS_ENGINE_PRIVATE_PCH})
 target_sources(rats-engine PUBLIC

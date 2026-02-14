@@ -1,0 +1,17 @@
+#pragma once
+
+#include <engine/config.h>
+
+namespace engine::config
+{
+    namespace glfw
+    {
+        constexpr bool enable = @RATS_ENGINE_GLFW_ENABLE_VALUE@;
+    }
+
+    namespace vulkan
+    {
+        constexpr bool enable = @RATS_ENGINE_VULKAN_ENABLE_VALUE@;
+        constexpr bool validation_layers = engine::config::vulkan::enable && engine::config::debug && @RATS_ENGINE_VULKAN_ENABLE_VALIDATION_LAYERS_VALUE@;
+    }
+}

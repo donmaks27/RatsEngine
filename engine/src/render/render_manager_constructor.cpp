@@ -1,6 +1,8 @@
 #include <engine/render/render_manager.h>
 
-#if RATS_ENGINE_RENDER_VULKAN
+#include <engine/private_config_macro.h>
+
+#if RATS_ENGINE_VULKAN_ENABLE
     #include <engine/render/vulkan/render_manager_vulkan.h>
 #endif
 
@@ -10,7 +12,7 @@ namespace engine
     {
         switch (info.api)
         {
-#if RATS_ENGINE_RENDER_VULKAN
+#if RATS_ENGINE_VULKAN_ENABLE
         case render_api::vulkan: return new vulkan::render_manager();
 #endif
         default:;

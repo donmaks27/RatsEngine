@@ -1,0 +1,4 @@
+#pragma once
+
+#cmakedefine01 RATS_ENGINE_GLFW_ENABLE
+#cmakedefine01 RATS_ENGINE_VULKAN_ENABLE

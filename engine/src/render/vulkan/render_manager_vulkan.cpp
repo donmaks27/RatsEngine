@@ -28,12 +28,19 @@ namespace engine
 
 		[[nodiscard]] bool check_validation_layer_support(const eastl::span<const char*> validationLayers)
 		{
-			const auto availableLayers = vk::enumerateInstanceLayerProperties().value;
-			return std::ranges::all_of(validationLayers, [&availableLayers](const char* layer) {
-				return std::ranges::any_of(availableLayers, [&layer](const vk::LayerProperties& availableLayer) {
-					return strcmp(availableLayer.layerName, layer) == 0;
+			if constexpr (config::vulkan::validation_layers)
+			{
+				const auto availableLayers = vk::enumerateInstanceLayerProperties().value;
+				return std::ranges::all_of(validationLayers, [&availableLayers](const char* layer) {
+					return std::ranges::any_of(availableLayers, [&layer](const vk::LayerProperties& availableLayer) {
+						return strcmp(availableLayer.layerName, layer) == 0;
+					});
 				});
-			});
+			}
+			else
+			{
+				return true;
+			}
 		}
 	}
 
@@ -71,7 +78,7 @@ namespace engine
 		if (m_apiCtx.m_instance != nullptr)
 		{
 			m_windowManagerVulkan->clear_vulkan();
-			if constexpr (config::debug)
+			if constexpr (config::vulkan::validation_layers)
 			{
 				if (m_debugMessenger != nullptr)
 				{
@@ -93,7 +100,7 @@ namespace engine
 		eastl::vector<const char*> validationLayers;
 		vk::DebugUtilsMessengerCreateInfoEXT debugMessengerInfo{};
 		auto instanceExtensions = m_windowManagerVulkan->get_required_extensions();
-		if constexpr (config::debug)
+		if constexpr (config::vulkan::validation_layers)
 		{
 			validationLayers.push_back("VK_LAYER_KHRONOS_validation");
 			if (!check_validation_layer_support(validationLayers))
@@ -113,7 +120,7 @@ namespace engine
 		vk::InstanceCreateInfo instanceInfo{
 			{}, &appInfo, validationLayers, instanceExtensions
 		};
-		if constexpr (config::debug)
+		if constexpr (config::vulkan::validation_layers)
 		{
 			debugMessengerInfo.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
 				| vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
@@ -131,7 +138,7 @@ namespace engine
 		m_apiCtx.m_instance = instance.value;
     	vk::detail::defaultDispatchLoaderDynamic.init(m_apiCtx.i(), vkGetInstanceProcAddr);
 
-		if constexpr (config::debug)
+		if constexpr (config::vulkan::validation_layers)
 		{
 			const auto debugMessenger = m_apiCtx.i().createDebugUtilsMessengerEXT(debugMessengerInfo);
 			if (debugMessenger.result != vk::Result::eSuccess)

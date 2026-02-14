@@ -1,10 +1,12 @@
 #include <engine/render/window_manager.h>
 
+#include <engine/private_config_macro.h>
+
 #undef RATS_ENGINE_WINDOW_NONE
 #undef RATS_ENGINE_WINDOW_MANAGER_IMPL_VULKAN
 
-#ifdef RATS_ENGINE_WINDOW_GLFW
-    #if RATS_ENGINE_RENDER_VULKAN
+#if RATS_ENGINE_GLFW_ENABLE
+    #if RATS_ENGINE_VULKAN_ENABLE
         #include <engine/render/glfw/window_manager_glfw_vulkan.h>
         #define RATS_ENGINE_WINDOW_MANAGER_IMPL_VULKAN engine::vulkan::window_manager_glfw
     #endif
