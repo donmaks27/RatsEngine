@@ -10,6 +10,10 @@ namespace engine
 {
     namespace
 	{
+    	constexpr eastl::array RequiredInstanceExtensions = { vk::KHRGetSurfaceCapabilities2ExtensionName };
+    	constexpr eastl::array RequiredDeviceExtensions = { vk::KHRSwapchainExtensionName };
+    	constexpr auto MinVulkanApiVersion = vk::ApiVersion11;
+
 		vk::Bool32 vulkan_debug_callback(const vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
 			const vk::DebugUtilsMessageTypeFlagsEXT type, const vk::DebugUtilsMessengerCallbackDataEXT* data, void* userData)
 		{
@@ -42,6 +46,86 @@ namespace engine
 				return true;
 			}
 		}
+
+    	struct physical_device_score
+		{
+			vk::PhysicalDevice device;
+			vk::PhysicalDeviceProperties properties;
+
+			std::uint32_t score = 0;
+		};
+    	physical_device_score calculate_physical_device_score(const vk::PhysicalDevice& device, const vk::SurfaceKHR& mainSurface)
+		{
+    		physical_device_score result{ .device = device };
+
+			const auto& properties = result.properties = device.getProperties2().properties;
+			if (properties.apiVersion < MinVulkanApiVersion)
+			{
+				return result;
+			}
+
+    		eastl::vector<const char*> requiredExtensions(RequiredDeviceExtensions.begin(), RequiredDeviceExtensions.end());
+    		vk::PhysicalDeviceFeatures2 features;
+    		// Core features
+    		vk::PhysicalDeviceVulkan13Features features13;
+    		// Extension features
+    		vk::PhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures;
+    		void** nextFeature = &features.pNext;
+    		if (properties.apiVersion >= vk::ApiVersion13)
+    		{
+    			*nextFeature = &features13;
+    			nextFeature = &features13.pNext;
+    		}
+    		else
+    		{
+    			requiredExtensions.push_back(vk::KHRDynamicRenderingExtensionName);
+    			*nextFeature = &dynamicRenderingFeatures;
+    			nextFeature = &dynamicRenderingFeatures.pNext;
+    		}
+
+			// Check device extensions
+			const bool hasAllExtensions = std::ranges::all_of(requiredExtensions, [extensions = device.enumerateDeviceExtensionProperties().value](const char* requiredExtension) {
+				return std::ranges::any_of(extensions, [&requiredExtension](const vk::ExtensionProperties& extension) {
+					return std::strcmp(requiredExtension, extension.extensionName) == 0;
+				});
+			});
+			if (!hasAllExtensions)
+			{
+				return result;
+			}
+
+    		// Check queue families
+			const auto queueFamilies = device.getQueueFamilyProperties2();
+			const bool hasGraphicsQueueFamily = std::ranges::any_of(queueFamilies, [](const vk::QueueFamilyProperties2& queueFamily) {
+				return !!(queueFamily.queueFamilyProperties.queueFlags & vk::QueueFlagBits::eGraphics);
+			});
+			if (!hasGraphicsQueueFamily)
+			{
+				return result;
+			}
+
+			// Check device features
+			device.getFeatures2(&features);
+			const bool dynamicRenderingSupported = properties.apiVersion >= vk::ApiVersion13 ? features13.dynamicRendering :dynamicRenderingFeatures.dynamicRendering;
+			const bool anisotropySupported = features.features.samplerAnisotropy;
+			if (!dynamicRenderingSupported || !anisotropySupported)
+			{
+				return result;
+			}
+
+			// Check surface support
+			if (device.getSurfacePresentModesKHR(mainSurface).value.empty())
+			{
+				return result;
+			}
+			if (device.getSurfaceFormats2KHR({ mainSurface }).value.empty())
+			{
+				return result;
+			}
+
+    		result.score = 1;
+			return result;
+		}
 	}
 
 	bool vulkan::render_manager::init(const create_info& info)
@@ -64,9 +148,9 @@ namespace engine
     		return false;
     	}
 
-    	if (!pick_physical_device())
+    	if (!create_device())
     	{
-    		log::fatal("[vulkan::render_manager::init] Failed to pick Vulkan physical device!");
+    		log::fatal("[vulkan::render_manager::init] Failed to create Vulkan device!");
     		return false;
     	}
 
@@ -99,7 +183,8 @@ namespace engine
 
 		eastl::vector<const char*> validationLayers;
 		vk::DebugUtilsMessengerCreateInfoEXT debugMessengerInfo{};
-		auto instanceExtensions = m_windowManagerVulkan->get_required_extensions();
+		auto instanceExtensions = m_windowManagerVulkan->required_instance_extensions();
+    	instanceExtensions.insert(instanceExtensions.end(), RequiredInstanceExtensions.begin(), RequiredInstanceExtensions.end());
 		if constexpr (config::vulkan::validation_layers)
 		{
 			validationLayers.push_back("VK_LAYER_KHRONOS_validation");
@@ -111,12 +196,14 @@ namespace engine
 			instanceExtensions.push_back(vk::EXTDebugUtilsExtensionName);
 		}
 
+    	constexpr auto maxInstanceVersion = vk::ApiVersion13;
+    	const auto supportedInstanceVersion = vk::enumerateInstanceVersion().value;
 		vk::ApplicationInfo appInfo{};
 		appInfo.pApplicationName = info.appName.c_str();
 		appInfo.applicationVersion = vk::makeApiVersion(0, 0, 1, 0);
 		appInfo.pEngineName = "RatsEngine";
 		appInfo.engineVersion = vk::makeApiVersion(0, 0, 1, 0);
-		appInfo.apiVersion = vk::ApiVersion14;
+		appInfo.apiVersion = std::min(maxInstanceVersion, supportedInstanceVersion);
 		vk::InstanceCreateInfo instanceInfo{
 			{}, &appInfo, validationLayers, instanceExtensions
 		};
@@ -151,13 +238,30 @@ namespace engine
     	return true;
 	}
 
-	bool vulkan::render_manager::pick_physical_device()
-	{
-    	const auto devices = m_apiCtx.i().enumeratePhysicalDevices();
-    	if (devices.result != vk::Result::eSuccess)
+	bool vulkan::render_manager::create_device()
+    {
+    	const auto mainSurface = m_windowManagerVulkan->surface(engine::window_manager::instance()->main_window_id());
+
+    	auto availableDevicesView = m_apiCtx.i().enumeratePhysicalDevices().value | std::ranges::views::transform([&](const vk::PhysicalDevice& device) {
+    		return calculate_physical_device_score(device, mainSurface);
+    	}) | std::ranges::views::filter([](const physical_device_score& data) {
+    		return data.score > 0;
+    	});
+    	if (availableDevicesView.empty())
     	{
-    		log::fatal("[vulkan::render_manager::pick_physical_device] Failed to enumerate Vulkan physical devices! Error: {}", devices.result);
+    		log::fatal("[engine::vulkan::render_manager::create_device] Couldn't find any supported physical devices!");
     		return false;
+    	}
+
+		std::vector devices(availableDevicesView.begin(), availableDevicesView.end());
+		std::ranges::sort(devices, std::greater<>(), [](const physical_device_score& data) {
+			return data.score;
+		});
+    	log::log("[engine::vulkan::render_manager::create_device] Found {} devices:", devices.size());
+    	for (std::size_t index = 0; index < devices.size(); ++index)
+    	{
+    		log::log("[engine::vulkan::render_manager::create_device]   {}. {}",
+    			index + 1, devices[index].properties.deviceName.data());
     	}
 
 		return true;
@@ -190,6 +294,12 @@ namespace engine
     		return true;
     	});
     }
+
+	vk::SurfaceKHR vulkan::window_manager::surface(const window_id& id) const
+	{
+    	const auto iter = m_windowDataVulkan.find(id);
+    	return iter != m_windowDataVulkan.end() ? iter->second.surface : nullptr;
+	}
 
 	void vulkan::window_manager::on_destroy_window(const window_id& id)
     {

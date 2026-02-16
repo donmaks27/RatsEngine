@@ -59,9 +59,11 @@ namespace engine::vulkan
         window_manager& operator=(const window_manager&) = delete;
         window_manager& operator=(window_manager&&) = delete;
 
+        [[nodiscard]] vk::SurfaceKHR surface(const window_id& id) const;
+
     protected:
 
-        [[nodiscard]] virtual eastl::vector<const char*> get_required_extensions() const = 0;
+        [[nodiscard]] virtual eastl::vector<const char*> required_instance_extensions() const = 0;
         [[nodiscard]] virtual vk::SurfaceKHR create_surface(const api_context& ctx, const window_id& id) const = 0;
 
         void on_destroy_window(const window_id& id);
@@ -104,7 +106,7 @@ namespace engine::vulkan
         vk::PhysicalDevice m_physicalDevice;
 
         [[nodiscard]] bool create_instance(const create_info& info);
-        [[nodiscard]] bool pick_physical_device();
+        [[nodiscard]] bool create_device();
     };
 
     const api_context& render_object::api_ctx() const

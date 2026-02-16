@@ -4,7 +4,7 @@
 
 namespace engine
 {
-    eastl::vector<const char*> vulkan::window_manager_glfw::get_required_extensions() const
+    eastl::vector<const char*> vulkan::window_manager_glfw::required_instance_extensions() const
     {
         uint32_t extensionCount = 0;
         const auto extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
