@@ -51,6 +51,7 @@ namespace engine
 		{
 			vk::PhysicalDevice device;
 			vk::PhysicalDeviceProperties properties;
+			vk::DeviceSize VRAM = 0;
 
 			std::uint32_t score = 0;
 		};
@@ -123,7 +124,23 @@ namespace engine
 				return result;
 			}
 
-    		result.score = 1;
+    		const auto& memoryProperties = device.getMemoryProperties2().memoryProperties;
+    		const auto iter = std::ranges::find_if(memoryProperties.memoryHeaps, [](const vk::MemoryHeap& heap) {
+    			return !!(heap.flags & vk::MemoryHeapFlagBits::eDeviceLocal);
+    		});
+    		if (iter == memoryProperties.memoryHeaps.end())
+    		{
+    			return result;
+    		}
+    		result.VRAM = iter->size;
+
+    		switch (properties.deviceType)
+    		{
+		    case vk::PhysicalDeviceType::eDiscreteGpu:   result.score += 1000; break;
+		    case vk::PhysicalDeviceType::eIntegratedGpu: result.score += 500;  break;
+		    default: ;
+    		}
+
 			return result;
 		}
 	}
@@ -253,8 +270,11 @@ namespace engine
     		return false;
     	}
 
-		std::vector devices(availableDevicesView.begin(), availableDevicesView.end());
-		std::ranges::sort(devices, std::greater<>(), [](const physical_device_score& data) {
+    	std::vector devices(availableDevicesView.begin(), availableDevicesView.end());
+    	std::ranges::max_element(devices, std::greater(), [](const physical_device_score& data) {
+			return data.VRAM;
+		})->score += 50;
+		std::ranges::sort(devices, std::greater(), [](const physical_device_score& data) {
 			return data.score;
 		});
     	log::log("[engine::vulkan::render_manager::create_device] Found {} devices:", devices.size());
