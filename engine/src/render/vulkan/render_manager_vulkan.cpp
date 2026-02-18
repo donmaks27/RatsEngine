@@ -230,21 +230,23 @@ namespace engine
     	}
 	}
 
+	render_manager_vulkan* render_manager_vulkan::s_instanceVulkan = nullptr;
+
 	bool render_manager_vulkan::init(const create_info& info)
 	{
+    	s_instanceVulkan = this;
+
 		if (!super::init(info))
 		{
 			return false;
 		}
-		m_windowManagerVulkan = dynamic_cast<window_manager_vulkan*>(engine::window_manager::instance());
-    	m_windowManagerVulkan->m_renderManagerVulkan = this;
 
 		if (!create_instance(info))
 		{
 			log::fatal("[render_manager_vulkan::init] Failed to create Vulkan instance!");
 			return false;
 		}
-    	if (!m_windowManagerVulkan->on_instance_created(m_apiCtx))
+    	if (!window_manager_vulkan::instance()->on_instance_created(m_ctx))
     	{
     		log::fatal("[render_manager_vulkan::init] Failed to create Vulkan surfaces!");
     		return false;
@@ -261,23 +263,24 @@ namespace engine
 
 	void render_manager_vulkan::clear()
 	{
-		if (m_apiCtx.m_instance != nullptr)
+		if (m_ctx.m_instance != nullptr)
 		{
-			m_windowManagerVulkan->clear_vulkan();
+			window_manager_vulkan::instance()->clear_vulkan();
 
-			m_apiCtx.m_device.destroy();
+			m_ctx.m_device.destroy();
 			if constexpr (config::vulkan::validation_layers)
 			{
 				if (m_debugMessenger != nullptr)
 				{
-					m_apiCtx.i().destroyDebugUtilsMessengerEXT(m_debugMessenger);
+					m_ctx.i().destroyDebugUtilsMessengerEXT(m_debugMessenger);
 					m_debugMessenger = nullptr;
 				}
 			}
-			m_apiCtx.m_instance.destroy();
+			m_ctx.m_instance.destroy();
 		}
-		m_apiCtx = {};
+		m_ctx = {};
 
+    	s_instanceVulkan = nullptr;
 		super::clear();
 	}
 
@@ -287,7 +290,7 @@ namespace engine
 
 		eastl::vector<const char*> validationLayers;
 		vk::DebugUtilsMessengerCreateInfoEXT debugMessengerInfo{};
-		auto instanceExtensions = m_windowManagerVulkan->required_instance_extensions();
+		auto instanceExtensions = window_manager_vulkan::instance()->required_instance_extensions();
     	instanceExtensions.insert(instanceExtensions.end(), RequiredInstanceExtensions.begin(), RequiredInstanceExtensions.end());
 		if constexpr (config::vulkan::validation_layers)
 		{
@@ -326,12 +329,12 @@ namespace engine
 			log::fatal("[render_manager_vulkan::init] Failed to create Vulkan instance! Error: {}", instance.result);
 			return false;
 		}
-		m_apiCtx.m_instance = instance.value;
-    	vk::detail::defaultDispatchLoaderDynamic.init(m_apiCtx.i(), vkGetInstanceProcAddr);
+		m_ctx.m_instance = instance.value;
+    	vk::detail::defaultDispatchLoaderDynamic.init(m_ctx.i(), vkGetInstanceProcAddr);
 
 		if constexpr (config::vulkan::validation_layers)
 		{
-			const auto debugMessenger = m_apiCtx.i().createDebugUtilsMessengerEXT(debugMessengerInfo);
+			const auto debugMessenger = m_ctx.i().createDebugUtilsMessengerEXT(debugMessengerInfo);
 			if (debugMessenger.result != vk::Result::eSuccess)
 			{
 				log::fatal("[render_manager_vulkan::init] Failed to create Vulkan debug messenger! Error: {}", debugMessenger.result);
@@ -344,9 +347,9 @@ namespace engine
 
 	bool render_manager_vulkan::create_device()
     {
-    	const auto mainSurface = m_windowManagerVulkan->surface(engine::window_manager::instance()->main_window_id());
+    	const auto mainSurface = window_manager_vulkan::instance()->surface(engine::window_manager::instance()->main_window_id());
 
-    	auto availableDevicesView = m_apiCtx.i().enumeratePhysicalDevices().value | std::ranges::views::transform([&](const vk::PhysicalDevice& device) {
+    	auto availableDevicesView = m_ctx.i().enumeratePhysicalDevices().value | std::ranges::views::transform([&](const vk::PhysicalDevice& device) {
     		return calculate_physical_device_score(device, mainSurface);
     	}) | std::ranges::views::filter([](const physical_device_data& data) {
     		return data.score > 0;
@@ -378,15 +381,17 @@ namespace engine
     		return false;
     	}
 
-    	m_apiCtx.m_device = deviceResult.value;
+    	m_ctx.m_device = deviceResult.value;
 		return true;
 	}
+
+	window_manager_vulkan* window_manager_vulkan::s_instanceVulkan = nullptr;
 
 	void window_manager_vulkan::clear_vulkan()
 	{
     	if (!m_windowDataVulkan.empty())
     	{
-    		const auto& ctx = api_ctx();
+    		const auto& ctx = render_manager_vulkan::instance()->ctx();
     		for (const auto& [id, data] : m_windowDataVulkan)
     		{
     			ctx.i().destroySurfaceKHR(data.surface);
@@ -416,12 +421,21 @@ namespace engine
     	return iter != m_windowDataVulkan.end() ? iter->second.surface : nullptr;
 	}
 
+	void window_manager_vulkan::on_init()
+	{
+		s_instanceVulkan = this;
+	}
+	void window_manager_vulkan::on_clear()
+	{
+		s_instanceVulkan = nullptr;
+	}
+
 	void window_manager_vulkan::on_destroy_window(const window_id& id)
     {
     	const auto iter = m_windowDataVulkan.find(id);
     	if (iter != m_windowDataVulkan.end())
     	{
-    		api_ctx().i().destroySurfaceKHR(iter->second.surface);
+    		render_manager_vulkan::instance()->ctx().i().destroySurfaceKHR(iter->second.surface);
     		m_windowDataVulkan.erase(iter);
     	}
     }

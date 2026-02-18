@@ -30,9 +30,20 @@ namespace engine
         return surface;
     }
 
+    bool window_manager_glfw_vulkan::init(const create_info& info)
+    {
+        super_vulkan::on_init();
+        return window_manager_glfw::init(info);
+    }
+    void window_manager_glfw_vulkan::clear()
+    {
+        super_vulkan::on_clear();
+        window_manager_glfw::clear();
+    }
+
     void window_manager_glfw_vulkan::destroy_window_impl(const window_id& id)
     {
-        window_manager_vulkan::on_destroy_window(id);
+        super_vulkan::on_destroy_window(id);
         super::destroy_window_impl(id);
     }
 }

@@ -6,9 +6,10 @@
 
 namespace engine
 {
-    class window_manager_glfw_vulkan : public engine::window_manager_glfw, public engine::window_manager_vulkan
+    class window_manager_glfw_vulkan : public window_manager_glfw, public window_manager_vulkan
     {
-        using super = engine::window_manager_glfw;
+        using super = window_manager_glfw;
+        using super_vulkan = window_manager_vulkan;
 
     public:
         window_manager_glfw_vulkan() = default;
@@ -18,6 +19,9 @@ namespace engine
 
         [[nodiscard]] virtual eastl::vector<const char*> required_instance_extensions() const override;
         [[nodiscard]] virtual vk::SurfaceKHR create_surface(const vulkan_context& ctx, const window_id& id) const override;
+
+        virtual bool init(const create_info& info) override;
+        virtual void clear() override;
 
         virtual void destroy_window_impl(const window_id& id) override;
     };

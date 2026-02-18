@@ -32,22 +32,7 @@ namespace engine
         vk::Device m_device;
     };
 
-    class vulkan_render_object
-    {
-        friend render_manager_vulkan;
-
-    protected:
-        vulkan_render_object() = default;
-        ~vulkan_render_object() = default;
-
-        [[nodiscard]] inline const vulkan_context& api_ctx() const;
-
-    private:
-
-        render_manager_vulkan* m_renderManagerVulkan = nullptr;
-    };
-
-    class window_manager_vulkan : public vulkan_render_object
+    class window_manager_vulkan
     {
         friend render_manager_vulkan;
 
@@ -61,12 +46,17 @@ namespace engine
         window_manager_vulkan& operator=(const window_manager_vulkan&) = delete;
         window_manager_vulkan& operator=(window_manager_vulkan&&) = delete;
 
+        [[nodiscard]] static window_manager_vulkan* instance() { return s_instanceVulkan; }
+
         [[nodiscard]] vk::SurfaceKHR surface(const window_id& id) const;
 
     protected:
 
         [[nodiscard]] virtual eastl::vector<const char*> required_instance_extensions() const = 0;
         [[nodiscard]] virtual vk::SurfaceKHR create_surface(const vulkan_context& ctx, const window_id& id) const = 0;
+
+        void on_init();
+        void on_clear();
 
         void on_destroy_window(const window_id& id);
 
@@ -77,6 +67,8 @@ namespace engine
             vk::SurfaceKHR surface;
         };
 
+        static window_manager_vulkan* s_instanceVulkan;
+
         eastl::vector_map<window_id, window_data_vulkan> m_windowDataVulkan;
 
         void clear_vulkan();
@@ -84,15 +76,17 @@ namespace engine
         [[nodiscard]] bool on_instance_created(const vulkan_context& ctx);
     };
 
-    class render_manager_vulkan final : public engine::render_manager
+    class render_manager_vulkan final : public render_manager
     {
-        using super = engine::render_manager;
+        using super = render_manager;
 
     public:
         render_manager_vulkan() = default;
         virtual ~render_manager_vulkan() override = default;
 
-        [[nodiscard]] const vulkan_context& api_ctx() const { return m_apiCtx; }
+        [[nodiscard]] static render_manager_vulkan* instance() { return s_instanceVulkan; }
+
+        [[nodiscard]] const vulkan_context& ctx() const { return m_ctx; }
 
     protected:
 
@@ -101,20 +95,15 @@ namespace engine
 
     private:
 
-        window_manager_vulkan* m_windowManagerVulkan = nullptr;
+        static render_manager_vulkan* s_instanceVulkan;
 
-        vulkan_context m_apiCtx;
+        vulkan_context m_ctx;
         vk::DebugUtilsMessengerEXT m_debugMessenger;
         vk::PhysicalDevice m_physicalDevice;
 
         [[nodiscard]] bool create_instance(const create_info& info);
         [[nodiscard]] bool create_device();
     };
-
-    const vulkan_context& vulkan_render_object::api_ctx() const
-    {
-        return m_renderManagerVulkan->api_ctx();
-    }
 }
 
 template<>
