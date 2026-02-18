@@ -47,17 +47,28 @@ namespace engine
 			}
 		}
 
-    	struct physical_device_score
+		enum class device_feature_type : std::uint8_t { none, extension, core };
+    	struct physical_device_queue_data
+    	{
+    		std::uint32_t familyIndex = 0;
+    		std::uint32_t queueIndex = 0;
+    	};
+    	struct physical_device_data
 		{
 			vk::PhysicalDevice device;
 			vk::PhysicalDeviceProperties properties;
+    		eastl::vector<vk::QueueFamilyProperties2> queueProperties;
 			vk::DeviceSize VRAM = 0;
-
 			std::uint32_t score = 0;
+
+    		physical_device_queue_data graphicsQueue;
+    		physical_device_queue_data transferQueue;
+
+    		device_feature_type dynamicRendering = device_feature_type::none;
 		};
-    	physical_device_score calculate_physical_device_score(const vk::PhysicalDevice& device, const vk::SurfaceKHR& mainSurface)
+    	physical_device_data calculate_physical_device_score(const vk::PhysicalDevice& device, const vk::SurfaceKHR& mainSurface)
 		{
-    		physical_device_score result{ .device = device };
+    		physical_device_data result{ .device = device };
 
 			const auto& properties = result.properties = device.getProperties2().properties;
 			if (properties.apiVersion < MinVulkanApiVersion)
@@ -76,12 +87,16 @@ namespace engine
     		{
     			*nextFeature = &features13;
     			nextFeature = &features13.pNext;
+
+    			result.dynamicRendering = device_feature_type::core;
     		}
     		else
     		{
     			requiredExtensions.push_back(vk::KHRDynamicRenderingExtensionName);
     			*nextFeature = &dynamicRenderingFeatures;
     			nextFeature = &dynamicRenderingFeatures.pNext;
+
+    			result.dynamicRendering = device_feature_type::extension;
     		}
 
 			// Check device extensions
@@ -96,14 +111,36 @@ namespace engine
 			}
 
     		// Check queue families
-			const auto queueFamilies = device.getQueueFamilyProperties2();
-			const bool hasGraphicsQueueFamily = std::ranges::any_of(queueFamilies, [](const vk::QueueFamilyProperties2& queueFamily) {
-				return !!(queueFamily.queueFamilyProperties.queueFlags & vk::QueueFlagBits::eGraphics);
+    		std::ranges::copy(device.getQueueFamilyProperties2(), std::back_inserter(result.queueProperties));
+    		auto graphicsIter = std::ranges::find_if(result.queueProperties, [](const vk::QueueFamilyProperties2& queueFamily) {
+				return (queueFamily.queueFamilyProperties.queueCount >= 2) &&
+					!!(queueFamily.queueFamilyProperties.queueFlags & (vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eTransfer));
 			});
-			if (!hasGraphicsQueueFamily)
-			{
-				return result;
-			}
+    		if (graphicsIter != result.queueProperties.end())
+    		{
+    			result.graphicsQueue.familyIndex = static_cast<std::uint32_t>(std::distance(result.queueProperties.begin(), graphicsIter));
+    			result.graphicsQueue.queueIndex = 0;
+    			result.transferQueue.familyIndex = result.graphicsQueue.familyIndex;
+    			result.transferQueue.queueIndex = 1;
+    		}
+    		else
+    		{
+    			graphicsIter = std::ranges::find_if(result.queueProperties, [](const vk::QueueFamilyProperties2& queueFamily) {
+					return !!(queueFamily.queueFamilyProperties.queueFlags & vk::QueueFlagBits::eGraphics);
+				});
+    			const auto transferIter = std::ranges::find_if(graphicsIter + 1, result.queueProperties.end(), [](const vk::QueueFamilyProperties2& queueFamily) {
+					return !!(queueFamily.queueFamilyProperties.queueFlags & vk::QueueFlagBits::eTransfer);
+				});
+    			if ((graphicsIter == result.queueProperties.end()) || (transferIter == result.queueProperties.end()))
+    			{
+    				return result;
+    			}
+
+    			result.graphicsQueue.familyIndex = static_cast<std::uint32_t>(std::distance(result.queueProperties.begin(), graphicsIter));
+    			result.graphicsQueue.queueIndex = 0;
+    			result.transferQueue.familyIndex = static_cast<std::uint32_t>(std::distance(result.queueProperties.begin(), transferIter));
+    			result.transferQueue.queueIndex = 0;
+    		}
 
 			// Check device features
 			device.getFeatures2(&features);
@@ -143,6 +180,57 @@ namespace engine
 
 			return result;
 		}
+
+    	struct device_data
+    	{
+    		vk::Device device = nullptr;
+    	};
+    	vk::ResultValue<vk::Device> create_device(const physical_device_data& data)
+    	{
+    		eastl::vector<const char*> extensions(RequiredDeviceExtensions.begin(), RequiredDeviceExtensions.end());
+    		vk::PhysicalDeviceFeatures deviceFeatures{};
+    		void* features = nullptr;
+    		// Core features
+    		vk::PhysicalDeviceVulkan13Features features13{};
+    		// Extension features
+    		vk::PhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures{};
+    		void** nextFeature = &features;
+    		if (data.properties.apiVersion >= vk::ApiVersion13)
+    		{
+    			*nextFeature = &features13;
+    			nextFeature = &features13.pNext;
+    		}
+
+    		deviceFeatures.samplerAnisotropy = vk::True;
+    		if (data.dynamicRendering == device_feature_type::core)
+    		{
+    			features13.dynamicRendering = vk::True;
+    		}
+    		else if (data.dynamicRendering == device_feature_type::extension)
+    		{
+    			extensions.push_back(vk::KHRDynamicRenderingExtensionName);
+    			*nextFeature = &dynamicRenderingFeatures;
+    			nextFeature = &dynamicRenderingFeatures.pNext;
+
+    			dynamicRenderingFeatures.dynamicRendering = vk::True;
+    		}
+
+    		constexpr float queuePriorities[] = { 1.f, 1.f };
+    		eastl::vector<vk::DeviceQueueCreateInfo> queueCreateInfo;
+    		if (data.graphicsQueue.familyIndex == data.transferQueue.familyIndex)
+    		{
+    			queueCreateInfo.push_back({ {}, data.graphicsQueue.familyIndex, 2, queuePriorities });
+    		}
+    		else
+    		{
+    			queueCreateInfo.push_back({ {}, data.graphicsQueue.familyIndex, 1, queuePriorities });
+    			queueCreateInfo.push_back({ {}, data.transferQueue.familyIndex, 1, queuePriorities });
+    		}
+
+    		return data.device.createDevice({ {},
+    			queueCreateInfo, {}, extensions, &deviceFeatures, features
+    		});
+    	}
 	}
 
 	bool vulkan::render_manager::init(const create_info& info)
@@ -179,6 +267,8 @@ namespace engine
 		if (m_apiCtx.m_instance != nullptr)
 		{
 			m_windowManagerVulkan->clear_vulkan();
+
+			m_apiCtx.m_device.destroy();
 			if constexpr (config::vulkan::validation_layers)
 			{
 				if (m_debugMessenger != nullptr)
@@ -261,7 +351,7 @@ namespace engine
 
     	auto availableDevicesView = m_apiCtx.i().enumeratePhysicalDevices().value | std::ranges::views::transform([&](const vk::PhysicalDevice& device) {
     		return calculate_physical_device_score(device, mainSurface);
-    	}) | std::ranges::views::filter([](const physical_device_score& data) {
+    	}) | std::ranges::views::filter([](const physical_device_data& data) {
     		return data.score > 0;
     	});
     	if (availableDevicesView.empty())
@@ -270,20 +360,28 @@ namespace engine
     		return false;
     	}
 
-    	std::vector devices(availableDevicesView.begin(), availableDevicesView.end());
-    	std::ranges::max_element(devices, std::greater(), [](const physical_device_score& data) {
+    	std::vector availableDevices(availableDevicesView.begin(), availableDevicesView.end());
+    	std::ranges::max_element(availableDevices, std::greater(), [](const physical_device_data& data) {
 			return data.VRAM;
 		})->score += 50;
-		std::ranges::sort(devices, std::greater(), [](const physical_device_score& data) {
+		std::ranges::sort(availableDevices, std::greater(), [](const physical_device_data& data) {
 			return data.score;
 		});
-    	log::log("[engine::vulkan::render_manager::create_device] Found {} devices:", devices.size());
-    	for (std::size_t index = 0; index < devices.size(); ++index)
+    	log::log("[engine::vulkan::render_manager::create_device] Found {} devices:", availableDevices.size());
+    	for (std::size_t index = 0; index < availableDevices.size(); ++index)
     	{
     		log::log("[engine::vulkan::render_manager::create_device]   {}. {}",
-    			index + 1, devices[index].properties.deviceName.data());
+    			index + 1, availableDevices[index].properties.deviceName.data());
     	}
 
+    	const auto deviceResult = engine::create_device(availableDevices[0]);
+    	if (deviceResult.result != vk::Result::eSuccess)
+    	{
+    		log::fatal("[engine::vulkan::render_manager::create_device] Failed to create Vulkan device! Error: {}", deviceResult.result);
+    		return false;
+    	}
+
+    	m_apiCtx.m_device = deviceResult.value;
 		return true;
 	}
 

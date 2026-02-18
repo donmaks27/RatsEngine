@@ -24,10 +24,12 @@ namespace engine::vulkan
         api_context& operator=(const api_context&) = default;
 
         [[nodiscard]] const vk::Instance& i() const { return m_instance; }
+        [[nodiscard]] const vk::Device& d() const { return m_device; }
 
     private:
 
         vk::Instance m_instance;
+        vk::Device m_device;
     };
 
     class render_object
