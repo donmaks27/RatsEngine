@@ -181,10 +181,6 @@ namespace engine
 			return result;
 		}
 
-    	struct device_data
-    	{
-    		vk::Device device = nullptr;
-    	};
     	vk::ResultValue<vk::Device> create_device(const physical_device_data& data)
     	{
     		eastl::vector<const char*> extensions(RequiredDeviceExtensions.begin(), RequiredDeviceExtensions.end());
@@ -233,36 +229,36 @@ namespace engine
     	}
 	}
 
-	bool vulkan::render_manager::init(const create_info& info)
+	bool render_manager_vulkan::init(const create_info& info)
 	{
 		if (!super::init(info))
 		{
 			return false;
 		}
-		m_windowManagerVulkan = dynamic_cast<window_manager*>(engine::window_manager::instance());
+		m_windowManagerVulkan = dynamic_cast<window_manager_vulkan*>(engine::window_manager::instance());
     	m_windowManagerVulkan->m_renderManagerVulkan = this;
 
 		if (!create_instance(info))
 		{
-			log::fatal("[vulkan::render_manager::init] Failed to create Vulkan instance!");
+			log::fatal("[render_manager_vulkan::init] Failed to create Vulkan instance!");
 			return false;
 		}
     	if (!m_windowManagerVulkan->on_instance_created(m_apiCtx))
     	{
-    		log::fatal("[vulkan::render_manager::init] Failed to create Vulkan surfaces!");
+    		log::fatal("[render_manager_vulkan::init] Failed to create Vulkan surfaces!");
     		return false;
     	}
 
     	if (!create_device())
     	{
-    		log::fatal("[vulkan::render_manager::init] Failed to create Vulkan device!");
+    		log::fatal("[render_manager_vulkan::init] Failed to create Vulkan device!");
     		return false;
     	}
 
 		return true;
 	}
 
-	void vulkan::render_manager::clear()
+	void render_manager_vulkan::clear()
 	{
 		if (m_apiCtx.m_instance != nullptr)
 		{
@@ -284,7 +280,7 @@ namespace engine
 		super::clear();
 	}
 
-	bool vulkan::render_manager::create_instance(const create_info& info)
+	bool render_manager_vulkan::create_instance(const create_info& info)
 	{
     	vk::detail::defaultDispatchLoaderDynamic.init(vkGetInstanceProcAddr);
 
@@ -297,7 +293,7 @@ namespace engine
 			validationLayers.push_back("VK_LAYER_KHRONOS_validation");
 			if (!check_validation_layer_support(validationLayers))
 			{
-				log::fatal("[vulkan::render_manager::init] Some of the validation layers not supported on this device!");
+				log::fatal("[render_manager_vulkan::init] Some of the validation layers not supported on this device!");
 				return false;
 			}
 			instanceExtensions.push_back(vk::EXTDebugUtilsExtensionName);
@@ -326,7 +322,7 @@ namespace engine
 		const auto instance = vk::createInstance(instanceInfo);
 		if (instance.result != vk::Result::eSuccess)
 		{
-			log::fatal("[vulkan::render_manager::init] Failed to create Vulkan instance! Error: {}", instance.result);
+			log::fatal("[render_manager_vulkan::init] Failed to create Vulkan instance! Error: {}", instance.result);
 			return false;
 		}
 		m_apiCtx.m_instance = instance.value;
@@ -337,7 +333,7 @@ namespace engine
 			const auto debugMessenger = m_apiCtx.i().createDebugUtilsMessengerEXT(debugMessengerInfo);
 			if (debugMessenger.result != vk::Result::eSuccess)
 			{
-				log::fatal("[vulkan::render_manager::init] Failed to create Vulkan debug messenger! Error: {}", debugMessenger.result);
+				log::fatal("[render_manager_vulkan::init] Failed to create Vulkan debug messenger! Error: {}", debugMessenger.result);
 				return false;
 			}
 			m_debugMessenger = debugMessenger.value;
@@ -345,7 +341,7 @@ namespace engine
     	return true;
 	}
 
-	bool vulkan::render_manager::create_device()
+	bool render_manager_vulkan::create_device()
     {
     	const auto mainSurface = m_windowManagerVulkan->surface(engine::window_manager::instance()->main_window_id());
 
@@ -356,7 +352,7 @@ namespace engine
     	});
     	if (availableDevicesView.empty())
     	{
-    		log::fatal("[engine::vulkan::render_manager::create_device] Couldn't find any supported physical devices!");
+    		log::fatal("[render_manager_vulkan::create_device] Couldn't find any supported physical devices!");
     		return false;
     	}
 
@@ -367,17 +363,17 @@ namespace engine
 		std::ranges::sort(availableDevices, std::greater(), [](const physical_device_data& data) {
 			return data.score;
 		});
-    	log::log("[engine::vulkan::render_manager::create_device] Found {} devices:", availableDevices.size());
+    	log::log("[render_manager_vulkan::create_device] Found {} devices:", availableDevices.size());
     	for (std::size_t index = 0; index < availableDevices.size(); ++index)
     	{
-    		log::log("[engine::vulkan::render_manager::create_device]   {}. {}",
+    		log::log("[render_manager_vulkan::create_device]   {}. {}",
     			index + 1, availableDevices[index].properties.deviceName.data());
     	}
 
     	const auto deviceResult = engine::create_device(availableDevices[0]);
     	if (deviceResult.result != vk::Result::eSuccess)
     	{
-    		log::fatal("[engine::vulkan::render_manager::create_device] Failed to create Vulkan device! Error: {}", deviceResult.result);
+    		log::fatal("[render_manager_vulkan::create_device] Failed to create Vulkan device! Error: {}", deviceResult.result);
     		return false;
     	}
 
@@ -385,7 +381,7 @@ namespace engine
 		return true;
 	}
 
-	void vulkan::window_manager::clear_vulkan()
+	void window_manager_vulkan::clear_vulkan()
 	{
     	if (!m_windowDataVulkan.empty())
     	{
@@ -398,14 +394,14 @@ namespace engine
     	}
 	}
 
-	bool vulkan::window_manager::on_instance_created(const api_context& ctx)
+	bool window_manager_vulkan::on_instance_created(const vulkan_context& ctx)
     {
     	const auto windowManager = engine::window_manager::instance();
     	return std::ranges::all_of(windowManager->window_ids(), [this, &ctx](const window_id& id) {
     		const auto surface = create_surface(ctx, id);
     		if (surface == nullptr)
     		{
-				log::error("[vulkan::window_manager::on_instance_created] Failed to create surface for window {}", id);
+				log::error("[window_manager_vulkan::on_instance_created] Failed to create surface for window {}", id);
 				return false;
 			}
 			m_windowDataVulkan.emplace(id, window_data_vulkan{ surface });
@@ -413,13 +409,13 @@ namespace engine
     	});
     }
 
-	vk::SurfaceKHR vulkan::window_manager::surface(const window_id& id) const
+	vk::SurfaceKHR window_manager_vulkan::surface(const window_id& id) const
 	{
     	const auto iter = m_windowDataVulkan.find(id);
     	return iter != m_windowDataVulkan.end() ? iter->second.surface : nullptr;
 	}
 
-	void vulkan::window_manager::on_destroy_window(const window_id& id)
+	void window_manager_vulkan::on_destroy_window(const window_id& id)
     {
     	const auto iter = m_windowDataVulkan.find(id);
     	if (iter != m_windowDataVulkan.end())

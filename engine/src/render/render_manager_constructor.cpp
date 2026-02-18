@@ -13,7 +13,7 @@ namespace engine
         switch (info.api)
         {
 #if RATS_ENGINE_VULKAN_ENABLE
-        case render_api::vulkan: return new vulkan::render_manager();
+        case render_api::vulkan: return new render_manager_vulkan();
 #endif
         default:;
         }

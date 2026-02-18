@@ -8,7 +8,7 @@
 #if RATS_ENGINE_GLFW_ENABLE
     #if RATS_ENGINE_VULKAN_ENABLE
         #include <engine/render/glfw/window_manager_glfw_vulkan.h>
-        #define RATS_ENGINE_WINDOW_MANAGER_IMPL_VULKAN engine::vulkan::window_manager_glfw
+        #define RATS_ENGINE_WINDOW_MANAGER_IMPL_VULKAN engine::window_manager_glfw_vulkan
     #endif
 #else
     #define RATS_ENGINE_WINDOW_NONE
