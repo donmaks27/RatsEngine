@@ -113,15 +113,15 @@ namespace engine
     		// Check queue families
     		std::ranges::copy(device.getQueueFamilyProperties2(), std::back_inserter(result.queueProperties));
     		auto graphicsIter = std::ranges::find_if(result.queueProperties, [](const vk::QueueFamilyProperties2& queueFamily) {
-				return (queueFamily.queueFamilyProperties.queueCount >= 2) &&
-					!!(queueFamily.queueFamilyProperties.queueFlags & (vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eTransfer));
+				return !!(queueFamily.queueFamilyProperties.queueFlags & (vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eTransfer));
 			});
     		if (graphicsIter != result.queueProperties.end())
     		{
     			result.graphicsQueue.familyIndex = static_cast<std::uint32_t>(std::distance(result.queueProperties.begin(), graphicsIter));
     			result.graphicsQueue.queueIndex = 0;
     			result.transferQueue.familyIndex = result.graphicsQueue.familyIndex;
-    			result.transferQueue.queueIndex = 1;
+    			const auto queueCount = result.queueProperties[result.graphicsQueue.familyIndex].queueFamilyProperties.queueCount;
+    			result.transferQueue.queueIndex = queueCount >= 2 ? 1 : 0;
     		}
     		else
     		{
@@ -215,7 +215,8 @@ namespace engine
     		eastl::vector<vk::DeviceQueueCreateInfo> queueCreateInfo;
     		if (data.graphicsQueue.familyIndex == data.transferQueue.familyIndex)
     		{
-    			queueCreateInfo.push_back({ {}, data.graphicsQueue.familyIndex, 2, queuePriorities });
+    			const auto queueCount = static_cast<std::uint32_t>(data.graphicsQueue.queueIndex != data.transferQueue.queueIndex ? 2 : 1);
+    			queueCreateInfo.push_back({ {}, data.graphicsQueue.familyIndex, queueCount, queuePriorities });
     		}
     		else
     		{
@@ -370,7 +371,7 @@ namespace engine
     			index + 1, availableDevices[index].properties.deviceName.data());
     	}
 
-    	const auto deviceResult = engine::create_device(availableDevices[0]);
+    	const auto deviceResult = engine::create_device(availableDevices.front());
     	if (deviceResult.result != vk::Result::eSuccess)
     	{
     		log::fatal("[render_manager_vulkan::create_device] Failed to create Vulkan device! Error: {}", deviceResult.result);
