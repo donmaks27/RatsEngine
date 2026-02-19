@@ -8,7 +8,8 @@
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 "RATS_ENGINE_GLFW_ENABLE": "ON",
-                "RATS_ENGINE_VULKAN_ENABLE": "ON"
+                "RATS_ENGINE_VULKAN_ENABLE": "ON",
+                "RATS_ENGINE_VULKAN_ENABLE_VALIDATION_LAYERS": "ON"
             },
             "hidden": true
         },

@@ -1,12 +1,11 @@
 #pragma once
 
 #include <engine/core.h>
+#include <engine/render/vulkan/core.h>
 #include <engine/render/render_manager.h>
 #include <engine/render/window_manager.h>
 
 #include <EASTL/vector_map.h>
-#include <fmt/format.h>
-#include <vulkan/vulkan.hpp>
 
 namespace engine
 {
@@ -18,17 +17,19 @@ namespace engine
 
     public:
         vulkan_context() = default;
-        vulkan_context(const vulkan_context&) = default;
+        vulkan_context(const vulkan_context&) = delete;
+        vulkan_context(vulkan_context&&) = delete;
         ~vulkan_context() = default;
 
-        vulkan_context& operator=(const vulkan_context&) = default;
+        vulkan_context& operator=(const vulkan_context&) = delete;
+        vulkan_context& operator=(vulkan_context&&) = delete;
 
-        [[nodiscard]] const vk::Instance& i() const { return m_instance; }
+        [[nodiscard]] const vk::Instance& i() const { return *m_instance; }
         [[nodiscard]] const vk::Device& d() const { return m_device; }
 
     private:
 
-        vk::Instance m_instance;
+        vulkan::instance m_instance;
         vk::Device m_device;
     };
 
@@ -98,21 +99,9 @@ namespace engine
         static render_manager_vulkan* s_instanceVulkan;
 
         vulkan_context m_ctx;
-        vk::DebugUtilsMessengerEXT m_debugMessenger;
         vk::PhysicalDevice m_physicalDevice;
 
         [[nodiscard]] bool create_instance(const create_info& info);
         [[nodiscard]] bool create_device();
     };
 }
-
-template<>
-struct fmt::formatter<vk::Result> : formatter<std::string>
-{
-    template<typename FormatContext>
-    auto format(const vk::Result result, FormatContext& ctx) const
-    {
-        const auto value = fmt::format("{} (0x{:08X})", vk::to_string(result), static_cast<std::uint32_t>(result));
-        return formatter<std::string>::format(value, ctx);
-    }
-};

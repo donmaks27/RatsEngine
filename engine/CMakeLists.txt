@@ -63,9 +63,12 @@ if(${RATS_ENGINE_RENDER_VULKAN})
 		"VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"
 		"VULKAN_HPP_NO_EXCEPTIONS=1")
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
-		"private/engine/render/vulkan/render_manager_vulkan.h")
+		"private/engine/render/vulkan/core.h"
+		"private/engine/render/vulkan/render_manager_vulkan.h"
+		"private/engine/render/vulkan/builder/instance_builder.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/vulkan/render_manager_vulkan.cpp")
+		"src/render/vulkan/render_manager_vulkan.cpp"
+		"src/render/vulkan/builder/instance_builder.cpp")
 
 endif()
 
