@@ -55,7 +55,7 @@ list(APPEND RATS_ENGINE_SRC_FILES_NO_PCH
 	"src/utils/log.cpp"
 	"src/utils/uuid.cpp")
 
-if(${RATS_ENGINE_RENDER_VULKAN})
+if(${RATS_ENGINE_VULKAN_ENABLE})
 
 	find_package(Vulkan REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS Vulkan::Vulkan)
@@ -65,14 +65,16 @@ if(${RATS_ENGINE_RENDER_VULKAN})
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 		"private/engine/render/vulkan/core.h"
 		"private/engine/render/vulkan/render_manager_vulkan.h"
-		"private/engine/render/vulkan/builder/instance_builder.h")
+		"private/engine/render/vulkan/builder/instance_builder.h"
+		"private/engine/render/vulkan/builder/device_builder.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
 		"src/render/vulkan/render_manager_vulkan.cpp"
-		"src/render/vulkan/builder/instance_builder.cpp")
+		"src/render/vulkan/builder/instance_builder.cpp"
+		"src/render/vulkan/builder/device_builder.cpp")
 
 endif()
 
-if(${RATS_ENGINE_WINDOW_GLFW})
+if(${RATS_ENGINE_GLFW_ENABLE})
 
 	find_package(glfw3 CONFIG REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
@@ -81,7 +83,7 @@ if(${RATS_ENGINE_WINDOW_GLFW})
 	list(APPEND RATS_ENGINE_SRC_FILES
 		"src/render/glfw/window_manager_glfw.cpp")
 
-	if(${RATS_ENGINE_RENDER_VULKAN})
+	if(${RATS_ENGINE_VULKAN_ENABLE})
 		list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 			"private/engine/render/glfw/window_manager_glfw_vulkan.h")
 		list(APPEND RATS_ENGINE_SRC_FILES

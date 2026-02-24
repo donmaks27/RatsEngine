@@ -17,6 +17,7 @@ struct fmt::formatter<vk::Result> : formatter<std::string>
 namespace engine::vulkan
 {
     class instance_builder;
+    class device_builder;
 
     class instance final
     {
@@ -54,5 +55,38 @@ namespace engine::vulkan
 
         vk::UniqueInstance m_instance;
         vk::UniqueDebugUtilsMessengerEXT m_debugMessenger;
+    };
+
+    class device final
+    {
+        friend device_builder;
+
+    public:
+        device() = default;
+        device(const device&) = delete;
+        device(device&&) noexcept = default;
+        ~device() { clear(); }
+
+        device& operator=(const device&) = delete;
+        device& operator=(device&&) noexcept = default;
+
+        [[nodiscard]] const vk::Device* operator->() const { return &m_device.get(); }
+        [[nodiscard]] const vk::Device& operator*() const { return m_device.get(); }
+        [[nodiscard]] const vk::Device& value() const { return m_device.get(); }
+
+        [[nodiscard]] bool valid() const { return m_device.get() != nullptr; }
+        [[nodiscard]] bool operator!=(std::nullptr_t) const { return valid(); }
+        [[nodiscard]] bool operator==(std::nullptr_t) const { return !valid(); }
+
+        void clear()
+        {
+            m_device.reset();
+            m_physicalDevice = nullptr;
+        }
+
+    private:
+
+        vk::PhysicalDevice m_physicalDevice;
+        vk::UniqueDevice m_device;
     };
 }

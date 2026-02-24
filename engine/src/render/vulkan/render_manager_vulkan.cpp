@@ -23,7 +23,6 @@ namespace engine
 		{
 			vk::PhysicalDevice device;
 			vk::PhysicalDeviceProperties properties;
-    		eastl::vector<vk::QueueFamilyProperties2> queueProperties;
 			vk::DeviceSize VRAM = 0;
 			std::uint32_t score = 0;
 
@@ -77,34 +76,34 @@ namespace engine
 			}
 
     		// Check queue families
-    		std::ranges::copy(device.getQueueFamilyProperties2(), std::back_inserter(result.queueProperties));
-    		auto graphicsIter = std::ranges::find_if(result.queueProperties, [](const vk::QueueFamilyProperties2& queueFamily) {
+    		const auto queueProperties = device.getQueueFamilyProperties2();
+    		auto graphicsIter = std::ranges::find_if(queueProperties, [](const vk::QueueFamilyProperties2& queueFamily) {
 				return !!(queueFamily.queueFamilyProperties.queueFlags & (vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eTransfer));
 			});
-    		if (graphicsIter != result.queueProperties.end())
+    		if (graphicsIter != queueProperties.end())
     		{
-    			result.graphicsQueue.familyIndex = static_cast<std::uint32_t>(std::distance(result.queueProperties.begin(), graphicsIter));
+    			result.graphicsQueue.familyIndex = static_cast<std::uint32_t>(std::distance(queueProperties.begin(), graphicsIter));
     			result.graphicsQueue.queueIndex = 0;
     			result.transferQueue.familyIndex = result.graphicsQueue.familyIndex;
-    			const auto queueCount = result.queueProperties[result.graphicsQueue.familyIndex].queueFamilyProperties.queueCount;
+    			const auto queueCount = queueProperties[result.graphicsQueue.familyIndex].queueFamilyProperties.queueCount;
     			result.transferQueue.queueIndex = queueCount >= 2 ? 1 : 0;
     		}
     		else
     		{
-    			graphicsIter = std::ranges::find_if(result.queueProperties, [](const vk::QueueFamilyProperties2& queueFamily) {
+    			graphicsIter = std::ranges::find_if(queueProperties, [](const vk::QueueFamilyProperties2& queueFamily) {
 					return !!(queueFamily.queueFamilyProperties.queueFlags & vk::QueueFlagBits::eGraphics);
 				});
-    			const auto transferIter = std::ranges::find_if(graphicsIter + 1, result.queueProperties.end(), [](const vk::QueueFamilyProperties2& queueFamily) {
+    			const auto transferIter = std::ranges::find_if(graphicsIter + 1, queueProperties.end(), [](const vk::QueueFamilyProperties2& queueFamily) {
 					return !!(queueFamily.queueFamilyProperties.queueFlags & vk::QueueFlagBits::eTransfer);
 				});
-    			if ((graphicsIter == result.queueProperties.end()) || (transferIter == result.queueProperties.end()))
+    			if ((graphicsIter == queueProperties.end()) || (transferIter == queueProperties.end()))
     			{
     				return result;
     			}
 
-    			result.graphicsQueue.familyIndex = static_cast<std::uint32_t>(std::distance(result.queueProperties.begin(), graphicsIter));
+    			result.graphicsQueue.familyIndex = static_cast<std::uint32_t>(std::distance(queueProperties.begin(), graphicsIter));
     			result.graphicsQueue.queueIndex = 0;
-    			result.transferQueue.familyIndex = static_cast<std::uint32_t>(std::distance(result.queueProperties.begin(), transferIter));
+    			result.transferQueue.familyIndex = static_cast<std::uint32_t>(std::distance(queueProperties.begin(), transferIter));
     			result.transferQueue.queueIndex = 0;
     		}
 

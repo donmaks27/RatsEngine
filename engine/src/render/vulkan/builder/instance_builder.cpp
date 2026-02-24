@@ -62,13 +62,16 @@ namespace engine::vulkan
 
     instance_builder& instance_builder::add_required_extension(const char* extension)
     {
-        m_requiredExtensions.emplace_back(extension);
+        m_requiredExtensions.emplace(extension);
         return *this;
     }
-    instance_builder& instance_builder::add_required_extensions(eastl::span<const char* const> extensions)
+    instance_builder& instance_builder::add_required_extensions(const eastl::span<const char* const> extensions)
     {
         m_requiredExtensions.reserve(m_requiredExtensions.size() + extensions.size());
-        std::ranges::copy(extensions, std::back_inserter(m_requiredExtensions));
+		for (const auto& extension : extensions)
+		{
+			m_requiredExtensions.emplace(extension);
+		}
         return *this;
     }
 
@@ -92,7 +95,7 @@ namespace engine::vulkan
 				log::fatal("[vulkan::instance_builder::build] Some of the validation layers are not supported on this device!");
 				return {};
 			}
-			m_requiredExtensions.push_back(vk::EXTDebugUtilsExtensionName);
+			m_requiredExtensions.emplace(vk::EXTDebugUtilsExtensionName);
 		}
 
     	const auto supportedInstanceVersion = vk::enumerateInstanceVersion().value;
