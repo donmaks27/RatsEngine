@@ -42,16 +42,17 @@ namespace engine::vulkan
         };
         struct physical_device_data
         {
-            vk::PhysicalDevice device;
-            std::string name;
-            vk::DeviceSize VRAM = 0;
+            vk::PhysicalDevice device = nullptr;
+            std::string name{};
             std::uint32_t vulkanVersion = vk::ApiVersion10;
+			vk::PhysicalDeviceType deviceType = vk::PhysicalDeviceType::eOther;
+            vk::DeviceSize VRAM = 0;
 
             std::uint32_t score = 0;
 
-            eastl::vector<const char*> extensions;
-            queue_data graphicsQueue;
-            queue_data transferQueue;
+            eastl::vector<const char*> extensions{};
+            queue_data graphicsQueue{};
+            queue_data transferQueue{};
             location featureDynamicRendering = location::none;
         };
 

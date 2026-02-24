@@ -25,6 +25,7 @@ namespace engine::vulkan
 
     public:
         instance() = default;
+        instance(std::nullptr_t) {}
         instance(const instance&) = delete;
         instance(instance&& value) noexcept = default;
         ~instance() { clear(); }
@@ -36,6 +37,11 @@ namespace engine::vulkan
             m_instance = std::move(value.m_instance);
             return *this;
         }
+        instance& operator=(std::nullptr_t)
+        {
+            clear();
+            return *this;
+		}
 
         [[nodiscard]] const vk::Instance* operator->() const { return &m_instance.get(); }
         [[nodiscard]] const vk::Instance& operator*() const { return m_instance.get(); }
@@ -63,12 +69,18 @@ namespace engine::vulkan
 
     public:
         device() = default;
+        device(std::nullptr_t) {}
         device(const device&) = delete;
         device(device&&) noexcept = default;
-        ~device() { clear(); }
+        ~device() = default;
 
         device& operator=(const device&) = delete;
         device& operator=(device&&) noexcept = default;
+        device& operator=(std::nullptr_t)
+        {
+            clear();
+            return *this;
+		}
 
         [[nodiscard]] const vk::Device* operator->() const { return &m_device.get(); }
         [[nodiscard]] const vk::Device& operator*() const { return m_device.get(); }
@@ -80,6 +92,8 @@ namespace engine::vulkan
 
         void clear()
         {
+            m_queueTransfer = nullptr;
+            m_queueGraphics = nullptr;
             m_device.reset();
             m_physicalDevice = nullptr;
         }
@@ -88,5 +102,7 @@ namespace engine::vulkan
 
         vk::PhysicalDevice m_physicalDevice;
         vk::UniqueDevice m_device;
+        vk::Queue m_queueGraphics;
+        vk::Queue m_queueTransfer;
     };
 }

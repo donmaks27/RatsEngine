@@ -93,7 +93,7 @@ namespace engine::vulkan
 			if (!check_validation_layer_support(validationLayers))
 			{
 				log::fatal("[vulkan::instance_builder::build] Some of the validation layers are not supported on this device!");
-				return {};
+				return nullptr;
 			}
 			m_requiredExtensions.emplace(vk::EXTDebugUtilsExtensionName);
 		}
@@ -120,7 +120,7 @@ namespace engine::vulkan
 		if (vulkanInstance.result != vk::Result::eSuccess)
 		{
 			log::fatal("[vulkan::instance_builder::build] Failed to create Vulkan instance! Error: {}", vulkanInstance.result);
-			return {};
+			return nullptr;
 		}
 
 		instance result;
@@ -132,7 +132,7 @@ namespace engine::vulkan
 			if (debugMessenger.result != vk::Result::eSuccess)
 			{
 				log::fatal("[vulkan::instance_builder::build] Failed to create Vulkan debug messenger! Error: {}", debugMessenger.result);
-				return {};
+				return nullptr;
 			}
 			result.m_debugMessenger = std::move(debugMessenger.value);
 		}

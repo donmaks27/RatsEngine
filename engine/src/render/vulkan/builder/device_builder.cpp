@@ -36,7 +36,7 @@ namespace engine::vulkan
         auto availableDevices = physicalDevices | std::ranges::views::transform([this, &surface](const vk::PhysicalDevice& device) {
             return get_physical_device_data(device, surface);
         }) | std::ranges::views::filter([](const physical_device_data& data) {
-            return data.score > 0;
+            return data.device != nullptr;
         });
         if (availableDevices.empty())
         {
@@ -45,12 +45,26 @@ namespace engine::vulkan
         m_physicalDevices.reserve(physicalDevices.size());
         std::ranges::copy(availableDevices, std::back_inserter(m_physicalDevices));
 
+        std::ranges::for_each(m_physicalDevices, [this](physical_device_data& data) {
+	        switch (data.deviceType)
+	        {
+			case vk::PhysicalDeviceType::eDiscreteGpu:   data.score += 1000; break;
+			case vk::PhysicalDeviceType::eIntegratedGpu: data.score += 500;  break;
+			default:;
+	        }
+            const bool hasOptionalFeatures = (m_featureDynamicRendering == feature::optional) && (data.featureDynamicRendering != location::none);
+            if (hasOptionalFeatures)
+            {
+                data.score += 20;
+            }
+		});
         std::ranges::max_element(m_physicalDevices, std::greater(), [](const physical_device_data& data) {
             return data.VRAM;
         })->score += 50;
         std::ranges::sort(m_physicalDevices, std::greater(), [](const physical_device_data& data) {
             return data.score;
         });
+
         log::log("[vulkan::device_builder::collect_physical_devices] Found {} devices:", m_physicalDevices.size());
         for (std::size_t index = 0; index < m_physicalDevices.size(); ++index)
         {
@@ -78,48 +92,39 @@ namespace engine::vulkan
         const vk::SurfaceKHR& surface) const
     {
     	const auto properties = device.getProperties2().properties;
-    	physical_device_data result{
-    		.device = device, .name = properties.deviceName, .vulkanVersion = properties.apiVersion
-    	};
     	if (properties.apiVersion < m_minVulkanVersion)
     	{
-    		return result;
+    		return {};
     	}
 
+        const auto& memoryProperties = device.getMemoryProperties2().memoryProperties;
+        const auto heapIter = std::ranges::find_if(memoryProperties.memoryHeaps, [](const vk::MemoryHeap& heap) {
+            return !!(heap.flags & vk::MemoryHeapFlagBits::eDeviceLocal);
+        });
+        if (heapIter == memoryProperties.memoryHeaps.end())
+        {
+            return {};
+        }
     	if (device.getSurfacePresentModesKHR(surface).value.empty() || device.getSurfaceFormats2KHR({ surface }).value.empty())
     	{
-    		return result;
+    		return {};
     	}
+
+    	physical_device_data result{
+    		.device = device, 
+    		.name = properties.deviceName, 
+    		.vulkanVersion = properties.apiVersion, 
+    		.deviceType = properties.deviceType, 
+    		.VRAM = heapIter->size
+    	};
     	if (!get_physical_device_queues(result))
     	{
-    		return result;
+    		return {};
     	}
     	if (!get_physical_device_features(result))
     	{
-    		return result;
+    		return {};
     	}
-
-   		const auto& memoryProperties = device.getMemoryProperties2().memoryProperties;
-   		const auto heapIter = std::ranges::find_if(memoryProperties.memoryHeaps, [](const vk::MemoryHeap& heap) {
-   			return !!(heap.flags & vk::MemoryHeapFlagBits::eDeviceLocal);
-   		});
-   		if (heapIter == memoryProperties.memoryHeaps.end())
-   		{
-   			return result;
-   		}
-   		result.VRAM = heapIter->size;
-
-   		switch (properties.deviceType)
-   		{
-		   case vk::PhysicalDeviceType::eDiscreteGpu:   result.score += 1000; break;
-		   case vk::PhysicalDeviceType::eIntegratedGpu: result.score += 500;  break;
-		   default: ;
-   		}
-    	const bool hasOptionalFeatures = (m_featureDynamicRendering == feature::optional) && (result.featureDynamicRendering != location::none);
-		if (hasOptionalFeatures)
-		{
-			result.score += 20;
-		}
     	return result;
     }
     bool device_builder::get_physical_device_queues(physical_device_data& data)
@@ -234,6 +239,67 @@ namespace engine::vulkan
 
     device device_builder::build(const instance& i)
     {
-        return {};
+        if (m_physicalDevices.empty())
+        {
+            return nullptr;
+        }
+
+        const auto deviceIter = !m_preferredDeviceName.empty() ? std::ranges::find_if(m_physicalDevices, [this](const physical_device_data& data) {
+            return data.name == m_preferredDeviceName;
+		}) : m_physicalDevices.end();
+		const auto& physicalDevice = deviceIter != m_physicalDevices.end() ? *deviceIter : m_physicalDevices.front();
+
+        vk::PhysicalDeviceFeatures deviceFeatures{};
+        void* features = nullptr;
+        // Core features
+        vk::PhysicalDeviceVulkan13Features features13{};
+        // Extension features
+        vk::PhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures{};
+        void** nextFeature = &features;
+        if (physicalDevice.vulkanVersion >= vk::ApiVersion13)
+        {
+            *nextFeature = &features13;
+            nextFeature = &features13.pNext;
+        }
+
+        deviceFeatures.samplerAnisotropy = vk::True;
+        if (physicalDevice.featureDynamicRendering == location::core)
+        {
+            features13.dynamicRendering = vk::True;
+        }
+        else if (physicalDevice.featureDynamicRendering == location::extension)
+        {
+            dynamicRenderingFeatures.dynamicRendering = vk::True;
+            *nextFeature = &dynamicRenderingFeatures;
+            nextFeature = &dynamicRenderingFeatures.pNext;
+        }
+
+        constexpr float queuePriorities[] = { 1.f, 1.f };
+        eastl::vector<vk::DeviceQueueCreateInfo> queueCreateInfo;
+        if (physicalDevice.graphicsQueue.familyIndex == physicalDevice.transferQueue.familyIndex)
+        {
+            const auto queueCount = static_cast<std::uint32_t>(physicalDevice.graphicsQueue.queueIndex != physicalDevice.transferQueue.queueIndex ? 2 : 1);
+            queueCreateInfo.push_back({ {}, physicalDevice.graphicsQueue.familyIndex, queueCount, queuePriorities });
+        }
+        else
+        {
+            queueCreateInfo.push_back({ {}, physicalDevice.graphicsQueue.familyIndex, 1, queuePriorities });
+            queueCreateInfo.push_back({ {}, physicalDevice.transferQueue.familyIndex, 1, queuePriorities });
+        }
+        auto deviceValue = physicalDevice.device.createDeviceUnique({ {},
+            queueCreateInfo, {}, physicalDevice.extensions, &deviceFeatures, features
+		});
+        if (deviceValue.result != vk::Result::eSuccess)
+        {
+            log::fatal("[vulkan::device_builder::build] Failed to create Vulkan device! Error: {}", deviceValue.result);
+            return nullptr;
+		}
+        
+        device result;
+		result.m_physicalDevice = physicalDevice.device;
+		result.m_device = std::move(deviceValue.value);
+        result.m_queueGraphics = result.m_device->getQueue2({ {}, physicalDevice.graphicsQueue.familyIndex, physicalDevice.graphicsQueue.queueIndex });
+		result.m_queueTransfer = result.m_device->getQueue2({ {}, physicalDevice.transferQueue.familyIndex, physicalDevice.transferQueue.queueIndex });
+        return result;
     }
 }

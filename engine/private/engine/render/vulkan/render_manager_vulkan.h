@@ -25,12 +25,12 @@ namespace engine
         vulkan_context& operator=(vulkan_context&&) = delete;
 
         [[nodiscard]] const vk::Instance& i() const { return *m_instance; }
-        [[nodiscard]] const vk::Device& d() const { return m_device; }
+        [[nodiscard]] const vk::Device& d() const { return *m_device; }
 
     private:
 
         vulkan::instance m_instance;
-        vk::Device m_device;
+        vulkan::device m_device;
     };
 
     class window_manager_vulkan
