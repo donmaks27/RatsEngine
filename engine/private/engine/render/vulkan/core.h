@@ -14,6 +14,11 @@ struct fmt::formatter<vk::Result> : formatter<std::string>
     }
 };
 
+namespace engine
+{
+	class render_manager_vulkan;
+}
+
 namespace engine::vulkan
 {
     class instance_builder;
@@ -104,5 +109,27 @@ namespace engine::vulkan
         vk::UniqueDevice m_device;
         vk::Queue m_queueGraphics;
         vk::Queue m_queueTransfer;
+    };
+
+    class context final
+    {
+        friend render_manager_vulkan;
+
+    public:
+        context() = default;
+        context(const context&) = delete;
+        context(context&&) = delete;
+        ~context() = default;
+
+        context& operator=(const context&) = delete;
+        context& operator=(context&&) = delete;
+
+        [[nodiscard]] const vk::Instance& i() const { return *m_instance; }
+        [[nodiscard]] const vk::Device& d() const { return *m_device; }
+
+    private:
+
+        instance m_instance;
+        device m_device;
     };
 }

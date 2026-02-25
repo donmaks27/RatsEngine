@@ -2,7 +2,7 @@
 
 #include <engine/core.h>
 #include <engine/render/glfw/window_manager_glfw.h>
-#include <engine/render/vulkan/render_manager_vulkan.h>
+#include <engine/render/vulkan/window_manager_vulkan.h>
 
 namespace engine
 {
@@ -18,7 +18,7 @@ namespace engine
     protected:
 
         [[nodiscard]] virtual eastl::vector<const char*> required_instance_extensions() const override;
-        [[nodiscard]] virtual vk::SurfaceKHR create_surface(const vulkan_context& ctx, const window_id& id) const override;
+        [[nodiscard]] virtual vk::SurfaceKHR create_surface(const window_id& id) const override;
 
         virtual bool init(const create_info& info) override;
         virtual void clear() override;

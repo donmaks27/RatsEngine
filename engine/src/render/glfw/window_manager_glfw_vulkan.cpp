@@ -1,5 +1,7 @@
 #include <engine/render/glfw/window_manager_glfw_vulkan.h>
 
+#include <engine/render/vulkan/render_manager_vulkan.h>
+
 #include <GLFW/glfw3.h>
 
 namespace engine
@@ -11,7 +13,7 @@ namespace engine
         return { extensions, extensions + extensionCount };
     }
 
-    vk::SurfaceKHR window_manager_glfw_vulkan::create_surface(const vulkan_context& ctx, const window_id& id) const
+    vk::SurfaceKHR window_manager_glfw_vulkan::create_surface(const window_id& id) const
     {
         const auto iter = m_windowDataGLFW.find(id);
         if (iter == m_windowDataGLFW.end())
@@ -19,6 +21,7 @@ namespace engine
             return nullptr;
         }
 
+        const auto& ctx = render_manager_vulkan::instance()->vk_ctx();
         VkSurfaceKHR surface;
         const auto result = static_cast<vk::Result>(glfwCreateWindowSurface(ctx.i(), iter->second, nullptr, &surface));
         if (result != vk::Result::eSuccess)
