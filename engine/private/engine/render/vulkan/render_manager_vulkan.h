@@ -29,7 +29,6 @@ namespace engine
         static render_manager_vulkan* s_instanceVulkan;
 
         vulkan::context m_ctx;
-        vk::PhysicalDevice m_physicalDevice;
 
         [[nodiscard]] bool create_instance(const create_info& info);
         [[nodiscard]] bool create_device();

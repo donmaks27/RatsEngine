@@ -36,7 +36,7 @@ namespace engine
             s_instance->clear();
             delete s_instance;
             s_instance = nullptr;
-            log::info("[window_manager::clear_instance] Window manager instance cleared successfully");
+            log::log("[window_manager::clear_instance] Window manager instance cleared successfully");
         }
     }
 

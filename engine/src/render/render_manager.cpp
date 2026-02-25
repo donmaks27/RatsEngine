@@ -38,7 +38,7 @@ namespace engine
             s_instance->clear();
             delete s_instance;
             s_instance = nullptr;
-            log::info("[render_manager::clear_instance] Render manager instance cleared successfully");
+            log::log("[render_manager::clear_instance] Render manager instance cleared successfully");
         }
     }
 

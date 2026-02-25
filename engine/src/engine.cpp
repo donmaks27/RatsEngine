@@ -58,7 +58,7 @@ namespace engine
 
         render_manager::clear_instance();
 
-        log::info("[engine::clear_engine] Engine cleared successfully");
+        log::log("[engine::clear_engine] Engine cleared successfully");
         m_engineStarted = false;
     }
 }

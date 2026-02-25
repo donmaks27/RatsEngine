@@ -36,7 +36,6 @@ namespace engine
     		log::fatal("[render_manager_vulkan::init] Failed to create Vulkan surfaces!");
     		return false;
     	}
-
     	if (!create_device())
     	{
     		log::fatal("[render_manager_vulkan::init] Failed to create Vulkan device!");

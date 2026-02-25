@@ -124,8 +124,8 @@ namespace engine::vulkan
         context& operator=(const context&) = delete;
         context& operator=(context&&) = delete;
 
-        [[nodiscard]] const vk::Instance& i() const { return *m_instance; }
-        [[nodiscard]] const vk::Device& d() const { return *m_device; }
+        [[nodiscard]] const instance& i() const { return m_instance; }
+        [[nodiscard]] const device& d() const { return m_device; }
 
     private:
 

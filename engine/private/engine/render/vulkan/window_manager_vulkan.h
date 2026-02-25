@@ -33,9 +33,10 @@ namespace engine
         [[nodiscard]] virtual vk::SurfaceKHR create_surface(const window_id& id) const = 0;
 
         void on_init();
-        void on_clear();
+        static void on_clear();
 
-        void on_destroy_window(const window_id& id);
+        [[nodiscard]] bool on_window_created(const window_id& id);
+        void on_window_destroying(const window_id& id);
 
     private:
 
@@ -48,8 +49,10 @@ namespace engine
 
         eastl::vector_map<window_id, window_data_vulkan> m_windowDataVulkan;
 
-        void clear_vulkan();
 
         [[nodiscard]] bool on_instance_created();
+        [[nodiscard]] bool create_surface_for_window(const window_id& id);
+
+        void clear_vulkan();
     };
 }
