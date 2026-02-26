@@ -69,10 +69,13 @@ namespace engine::vulkan
         feature m_featureDynamicRendering = feature::none;
 
 
-        bool get_physical_device_data(physical_device_data& outData, const vk::PhysicalDevice& device, 
+        [[nodiscard]] bool gather_physical_devices(const instance& i, const vk::SurfaceKHR& surface);
+        void get_physical_device_data(physical_device_data& outData, const vk::PhysicalDevice& device,
             const vk::SurfaceKHR& surface) const;
-        [[nodiscard]] bool get_physical_device_queues(physical_device_data& data, 
+        void get_physical_device_queues(physical_device_data& data,
             const vk::SurfaceKHR& surface) const;
         [[nodiscard]] bool get_physical_device_features(physical_device_data& data) const;
+
+        void calculate_physical_devices_score();
     };
 }

@@ -68,6 +68,45 @@ namespace engine::vulkan
     };
 
     enum class queue_type : std::uint32_t { graphics, present, compute, transfer };
+    class queue final
+    {
+        friend device_builder;
+
+    public:
+        queue() = default;
+        queue(std::nullptr_t) {}
+        queue(const queue&) = default;
+        queue(queue&&) noexcept = default;
+        ~queue() = default;
+
+        queue& operator=(const queue&) = default;
+        queue& operator=(queue&&) noexcept = default;
+        queue& operator=(std::nullptr_t)
+        {
+            clear();
+            return *this;
+        }
+
+        [[nodiscard]] const vk::Queue* operator->() const { return &m_queue; }
+        [[nodiscard]] const vk::Queue& operator*() const { return m_queue; }
+
+        [[nodiscard]] bool valid() const { return m_queue != nullptr; }
+        [[nodiscard]] bool operator!=(std::nullptr_t) const { return valid(); }
+        [[nodiscard]] bool operator==(std::nullptr_t) const { return !valid(); }
+
+        void clear()
+        {
+            m_queue = nullptr;
+            m_familyIndex = 0;
+            m_queueIndex = 0;
+        }
+
+    private:
+
+        vk::Queue m_queue = nullptr;
+        std::uint32_t m_familyIndex = 0;
+        std::uint32_t m_queueIndex = 0;
+    };
 
     class device final
     {
@@ -106,7 +145,7 @@ namespace engine::vulkan
 
         vk::PhysicalDevice m_physicalDevice;
         vk::UniqueDevice m_device;
-        eastl::vector_map<queue_type, vk::Queue> m_queues;
+        eastl::vector_map<queue_type, queue> m_queues;
     };
 
     class context final

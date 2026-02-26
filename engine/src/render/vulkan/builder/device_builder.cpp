@@ -40,49 +40,16 @@ namespace engine::vulkan
 
     device_builder& device_builder::collect_physical_devices(const instance& i, const vk::SurfaceKHR& surface)
     {
-        m_physicalDevices.clear();
-
-        const auto physicalDevices = i->enumeratePhysicalDevices().value;
-        auto availableDevices = physicalDevices | std::ranges::views::transform([this, &surface](const vk::PhysicalDevice& device) {
-            physical_device_data result;
-            get_physical_device_data(result, device, surface);
-            return result;
-        }) | std::ranges::views::filter([](const physical_device_data& data) {
-            return data.device != nullptr;
-        });
-        if (availableDevices.empty())
-        {
-            return *this;
-        }
-        m_physicalDevices.reserve(physicalDevices.size());
-        std::ranges::copy(availableDevices, std::back_inserter(m_physicalDevices));
-
-        std::ranges::for_each(m_physicalDevices, [this](physical_device_data& data) {
-	        switch (data.deviceType)
-	        {
-			case vk::PhysicalDeviceType::eDiscreteGpu:   data.score += 1000; break;
-			case vk::PhysicalDeviceType::eIntegratedGpu: data.score += 500;  break;
-			default:;
-	        }
-            const bool hasOptionalFeatures = (m_featureDynamicRendering == feature::optional) && (data.featureDynamicRendering != location::none);
-            if (hasOptionalFeatures)
-            {
-                data.score += 20;
-            }
-		});
-        std::ranges::max_element(m_physicalDevices, std::greater(), [](const physical_device_data& data) {
-            return data.VRAM;
-        })->score += 50;
-        std::ranges::sort(m_physicalDevices, std::greater(), [](const physical_device_data& data) {
-            return data.score;
-        });
-
-        log::log("[vulkan::device_builder::collect_physical_devices] Found {} devices:", m_physicalDevices.size());
-        for (std::size_t index = 0; index < m_physicalDevices.size(); ++index)
-        {
-            log::log("[vulkan::device_builder::collect_physical_devices]   {}. {}",
-                index + 1, m_physicalDevices[index].name);
-        }
+    	if (gather_physical_devices(i, surface))
+    	{
+    		calculate_physical_devices_score();
+    		log::log("[vulkan::device_builder::collect_physical_devices] Found {} devices:", m_physicalDevices.size());
+    		for (std::size_t index = 0; index < m_physicalDevices.size(); ++index)
+    		{
+    			log::log("[vulkan::device_builder::collect_physical_devices]   {}. {} ({})",
+					index + 1, m_physicalDevices[index].name, m_physicalDevices[index].score);
+    		}
+    	}
         return *this;
     }
     device_builder& device_builder::get_physical_devices(eastl::vector<std::string_view>& devices)
@@ -100,13 +67,28 @@ namespace engine::vulkan
     	return *this;
     }
 
-    bool device_builder::get_physical_device_data(physical_device_data& outData, const vk::PhysicalDevice& device, 
+	bool device_builder::gather_physical_devices(const instance& i, const vk::SurfaceKHR& surface)
+	{
+    	const auto physicalDevices = i->enumeratePhysicalDevices().value;
+    	m_physicalDevices.clear();
+    	m_physicalDevices.reserve(physicalDevices.size());
+    	std::ranges::transform(physicalDevices, std::back_inserter(m_physicalDevices), [this, &surface](const vk::PhysicalDevice& device) {
+			physical_device_data result;
+			get_physical_device_data(result, device, surface);
+			return result;
+		});
+    	eastl::erase_if(m_physicalDevices, [](const physical_device_data& data) {
+			return data.device == nullptr;
+		});
+    	return !m_physicalDevices.empty();
+	}
+    void device_builder::get_physical_device_data(physical_device_data& outData, const vk::PhysicalDevice& device,
         const vk::SurfaceKHR& surface) const
     {
     	const auto properties = device.getProperties2().properties;
     	if (properties.apiVersion < m_minVulkanVersion)
     	{
-    		return false;
+    		return;
     	}
 
         const auto& memoryProperties = device.getMemoryProperties2().memoryProperties;
@@ -115,36 +97,40 @@ namespace engine::vulkan
         });
         if (heapIter == memoryProperties.memoryHeaps.end())
         {
-            return false;
+            return;
         }
     	if (device.getSurfacePresentModesKHR(surface).value.empty() || device.getSurfaceFormats2KHR({ surface }).value.empty())
     	{
-    		return false;
+    		return;
     	}
 
-        outData = {
+        physical_device_data result = {
     		.device = device, 
     		.name = properties.deviceName, 
     		.vulkanVersion = properties.apiVersion, 
     		.deviceType = properties.deviceType, 
     		.VRAM = heapIter->size
     	};
-        return get_physical_device_queues(outData, surface) 
-    		&& get_physical_device_features(outData);
+    	if (!get_physical_device_features(result))
+    	{
+    		return;
+    	}
+    	log::log("[physical_devices] Device {}", result.name);
+    	get_physical_device_queues(result, surface);
+
+    	outData = std::move(result);
     }
-
-    bool device_builder::get_physical_device_queues(physical_device_data& data, const vk::SurfaceKHR& surface) const
+    void device_builder::get_physical_device_queues(physical_device_data& data, const vk::SurfaceKHR& surface) const
     {
-    	const auto queueProperties = data.device.getQueueFamilyProperties2();
-
         struct queue_info
         {
 			std::uint32_t familyIndex = 0;
 			bool graphics = false;
 			bool present = false;
 			bool compute = false;
-            bool trasfer = false;
+            bool transfer = false;
         };
+    	const auto queueProperties = data.device.getQueueFamilyProperties2();
         eastl::vector<queue_info> queueIndices(queueProperties.size());
         for (std::uint32_t i = 0; i < queueProperties.size(); i++)
         {
@@ -155,7 +141,7 @@ namespace engine::vulkan
 			info.graphics = static_cast<bool>(queueFlags & vk::QueueFlagBits::eGraphics);
             info.present = data.device.getSurfaceSupportKHR(info.familyIndex, surface).value == vk::True;
 			info.compute = static_cast<bool>(queueFlags & vk::QueueFlagBits::eCompute);
-			info.trasfer = static_cast<bool>(queueFlags & vk::QueueFlagBits::eTransfer);
+			info.transfer = static_cast<bool>(queueFlags & vk::QueueFlagBits::eTransfer);
         });
         std::ranges::sort(queueIndices, [](const queue_info& info1, const queue_info& info2) {
             if (info1.graphics != info2.graphics)
@@ -172,9 +158,9 @@ namespace engine::vulkan
             {
                 return info1.compute;
             }
-            if (info1.trasfer != info2.trasfer)
+            if (info1.transfer != info2.transfer)
             {
-                return info1.trasfer;
+                return info1.transfer;
             }
             return false;
         });
@@ -198,7 +184,7 @@ namespace engine::vulkan
         if (m_preferDedicatedTransferQueue)
         {
             const auto iter = std::ranges::find_if(queueIndices, [&](const queue_info& info) {
-                return !info.graphics && !info.compute && info.trasfer;
+                return !info.graphics && !info.compute && info.transfer;
             });
             if (iter != queueIndices.end())
             {
@@ -212,9 +198,7 @@ namespace engine::vulkan
             { queue_type::compute,  { .familyIndex = computeIndex  } },
 			{ queue_type::transfer, { .familyIndex = transferIndex } },
         };
-    	return true;
     }
-
     bool device_builder::get_physical_device_features(physical_device_data& data) const
     {
     	eastl::vector requiredExtensions = m_requiredExtensions;
@@ -292,6 +276,29 @@ namespace engine::vulkan
     	return true;
     }
 
+    void device_builder::calculate_physical_devices_score()
+    {
+    	std::ranges::for_each(m_physicalDevices, [this](physical_device_data& data) {
+			switch (data.deviceType)
+			{
+			case vk::PhysicalDeviceType::eDiscreteGpu:   data.score += 1000; break;
+			case vk::PhysicalDeviceType::eIntegratedGpu: data.score += 500;  break;
+			default:;
+			}
+			const bool hasOptionalFeatures = (m_featureDynamicRendering == feature::optional) && (data.featureDynamicRendering != location::none);
+			if (hasOptionalFeatures)
+			{
+				data.score += 20;
+			}
+		});
+    	std::ranges::max_element(m_physicalDevices, std::greater(), [](const physical_device_data& data) {
+			return data.VRAM;
+		})->score += 50;
+    	std::ranges::sort(m_physicalDevices, std::greater(), [](const physical_device_data& data) {
+			return data.score;
+		});
+    }
+
     device device_builder::build(const instance& i)
     {
         if (m_physicalDevices.empty())
@@ -360,7 +367,10 @@ namespace engine::vulkan
 		result.m_device = std::move(deviceValue.value);
         for (const auto& [type, queueData] : physicalDevice.queues)
         {
-            result.m_queues[type] = result.m_device->getQueue2({ {}, queueData.familyIndex, queueData.queueIndex });
+            auto& queue = result.m_queues[type];
+        	queue.m_queue = result.m_device->getQueue2({ {}, queueData.familyIndex, queueData.queueIndex });
+        	queue.m_familyIndex = queueData.familyIndex;
+        	queue.m_queueIndex = queueData.queueIndex;
 		}
         return result;
     }
