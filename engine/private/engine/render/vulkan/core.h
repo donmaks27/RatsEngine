@@ -50,7 +50,6 @@ namespace engine::vulkan
 
         [[nodiscard]] const vk::Instance* operator->() const { return &m_instance.get(); }
         [[nodiscard]] const vk::Instance& operator*() const { return m_instance.get(); }
-        [[nodiscard]] const vk::Instance& value() const { return m_instance.get(); }
 
         [[nodiscard]] bool valid() const { return m_instance.get() != nullptr; }
         [[nodiscard]] bool operator!=(std::nullptr_t) const { return  valid(); }
@@ -67,6 +66,8 @@ namespace engine::vulkan
         vk::UniqueInstance m_instance;
         vk::UniqueDebugUtilsMessengerEXT m_debugMessenger;
     };
+
+    enum class queue_type : std::uint32_t { graphics, present, compute, transfer };
 
     class device final
     {
@@ -89,7 +90,6 @@ namespace engine::vulkan
 
         [[nodiscard]] const vk::Device* operator->() const { return &m_device.get(); }
         [[nodiscard]] const vk::Device& operator*() const { return m_device.get(); }
-        [[nodiscard]] const vk::Device& value() const { return m_device.get(); }
 
         [[nodiscard]] bool valid() const { return m_device.get() != nullptr; }
         [[nodiscard]] bool operator!=(std::nullptr_t) const { return valid(); }
@@ -97,8 +97,7 @@ namespace engine::vulkan
 
         void clear()
         {
-            m_queueTransfer = nullptr;
-            m_queueGraphics = nullptr;
+            m_queues.clear();
             m_device.reset();
             m_physicalDevice = nullptr;
         }
@@ -107,8 +106,7 @@ namespace engine::vulkan
 
         vk::PhysicalDevice m_physicalDevice;
         vk::UniqueDevice m_device;
-        vk::Queue m_queueGraphics;
-        vk::Queue m_queueTransfer;
+        eastl::vector_map<queue_type, vk::Queue> m_queues;
     };
 
     class context final

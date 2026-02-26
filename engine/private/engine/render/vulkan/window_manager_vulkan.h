@@ -50,8 +50,10 @@ namespace engine
         eastl::vector_map<window_id, window_data_vulkan> m_windowDataVulkan;
 
 
-        [[nodiscard]] bool on_instance_created();
         [[nodiscard]] bool create_surface_for_window(const window_id& id);
+
+        [[nodiscard]] bool on_instance_created();
+        [[nodiscard]] bool on_device_created();
 
         void clear_vulkan();
     };

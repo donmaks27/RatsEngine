@@ -25,18 +25,6 @@ namespace engine
         }
         return true;
     }
-    bool window_manager_vulkan::on_instance_created()
-    {
-        const auto windowManager = window_manager::instance();
-        return std::ranges::all_of(windowManager->window_ids(), [this](const window_id& id) {
-            if (!create_surface_for_window(id))
-            {
-                log::fatal("[window_manager_vulkan::on_instance_created] Failed to create surface for window {}", id);
-                return false;
-			}
-            return true;
-        });
-    }
     bool window_manager_vulkan::create_surface_for_window(const window_id& id)
     {
 		auto& windowData = m_windowDataVulkan[id];
@@ -50,6 +38,27 @@ namespace engine
 			windowData.surface = surface;
         }
         return true;
+    }
+
+    bool window_manager_vulkan::on_instance_created()
+    {
+        const auto windowManager = window_manager::instance();
+        return std::ranges::all_of(windowManager->window_ids(), [this](const window_id& id) {
+            if (!create_surface_for_window(id))
+            {
+                log::fatal("[window_manager_vulkan::on_instance_created] Failed to create surface for window {}", id);
+                return false;
+			}
+            return true;
+        });
+    }
+    bool window_manager_vulkan::on_device_created()
+    {
+        const auto windowManager = window_manager::instance();
+        return std::ranges::all_of(windowManager->window_ids(), [this](const window_id& id) {
+            // TODO: Swapchain creation
+            return true;
+        });
     }
 
     void window_manager_vulkan::on_window_destroying(const window_id& id)

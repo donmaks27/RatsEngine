@@ -26,11 +26,14 @@ namespace engine::vulkan
         device_builder& add_required_extensions(eastl::span<const char* const> extensions);
 
         device_builder& set_min_vulkan_version(std::uint32_t version);
+		device_builder& prefer_dedicated_transfer_queue(bool prefer = true);
+		device_builder& prefer_dedicated_compute_queue(bool prefer = true);
         device_builder& feature_dynamic_rendering(feature feature);
 
         device_builder& collect_physical_devices(const instance& i, const vk::SurfaceKHR& surface);
         device_builder& get_physical_devices(eastl::vector<std::string_view>& devices);
         device_builder& set_preferred_physical_device(std::string name);
+
         device build(const instance& i);
 
     private:
@@ -51,8 +54,7 @@ namespace engine::vulkan
             std::uint32_t score = 0;
 
             eastl::vector<const char*> extensions{};
-            queue_data graphicsQueue{};
-            queue_data transferQueue{};
+			eastl::vector_map<queue_type, queue_data> queues{};
             location featureDynamicRendering = location::none;
         };
 
@@ -61,11 +63,16 @@ namespace engine::vulkan
         eastl::vector_set<const char*> m_requiredExtensions;
         std::string m_preferredDeviceName;
         std::uint32_t m_minVulkanVersion = vk::ApiVersion10;
+        bool m_preferDedicatedTransferQueue = false;
+        bool m_preferDedicatedComputeQueue = false;
+
         feature m_featureDynamicRendering = feature::none;
 
-        [[nodiscard]] physical_device_data get_physical_device_data(const vk::PhysicalDevice& device,
+
+        bool get_physical_device_data(physical_device_data& outData, const vk::PhysicalDevice& device, 
             const vk::SurfaceKHR& surface) const;
-        [[nodiscard]] static bool get_physical_device_queues(physical_device_data& data);
+        [[nodiscard]] bool get_physical_device_queues(physical_device_data& data, 
+            const vk::SurfaceKHR& surface) const;
         [[nodiscard]] bool get_physical_device_features(physical_device_data& data) const;
     };
 }

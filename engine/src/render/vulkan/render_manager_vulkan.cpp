@@ -26,14 +26,14 @@ namespace engine
 			return false;
 		}
 
+		auto* windowManager = window_manager_vulkan::instance();
 		if (!create_instance(info))
 		{
 			log::fatal("[render_manager_vulkan::init] Failed to create Vulkan instance!");
 			return false;
 		}
-    	if (!window_manager_vulkan::instance()->on_instance_created())
+    	if (!windowManager->on_instance_created())
     	{
-    		log::fatal("[render_manager_vulkan::init] Failed to create Vulkan surfaces!");
     		return false;
     	}
     	if (!create_device())
@@ -41,6 +41,10 @@ namespace engine
     		log::fatal("[render_manager_vulkan::init] Failed to create Vulkan device!");
     		return false;
     	}
+		if (!windowManager->on_device_created())
+		{
+			return false;
+		}
 
 		return true;
 	}

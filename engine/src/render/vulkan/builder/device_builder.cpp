@@ -22,6 +22,16 @@ namespace engine::vulkan
         m_minVulkanVersion = version;
         return *this;
     }
+	device_builder& device_builder::prefer_dedicated_transfer_queue(const bool prefer)
+    {
+        m_preferDedicatedTransferQueue = prefer;
+		return *this;
+    }
+    device_builder& device_builder::prefer_dedicated_compute_queue(const bool prefer)
+    {
+		m_preferDedicatedComputeQueue = prefer;
+        return *this;
+	}
     device_builder& device_builder::feature_dynamic_rendering(const feature feature)
     {
         m_featureDynamicRendering = feature;
@@ -34,7 +44,9 @@ namespace engine::vulkan
 
         const auto physicalDevices = i->enumeratePhysicalDevices().value;
         auto availableDevices = physicalDevices | std::ranges::views::transform([this, &surface](const vk::PhysicalDevice& device) {
-            return get_physical_device_data(device, surface);
+            physical_device_data result;
+            get_physical_device_data(result, device, surface);
+            return result;
         }) | std::ranges::views::filter([](const physical_device_data& data) {
             return data.device != nullptr;
         });
@@ -88,13 +100,13 @@ namespace engine::vulkan
     	return *this;
     }
 
-    device_builder::physical_device_data device_builder::get_physical_device_data(const vk::PhysicalDevice& device,
+    bool device_builder::get_physical_device_data(physical_device_data& outData, const vk::PhysicalDevice& device, 
         const vk::SurfaceKHR& surface) const
     {
     	const auto properties = device.getProperties2().properties;
     	if (properties.apiVersion < m_minVulkanVersion)
     	{
-    		return {};
+    		return false;
     	}
 
         const auto& memoryProperties = device.getMemoryProperties2().memoryProperties;
@@ -103,63 +115,106 @@ namespace engine::vulkan
         });
         if (heapIter == memoryProperties.memoryHeaps.end())
         {
-            return {};
+            return false;
         }
     	if (device.getSurfacePresentModesKHR(surface).value.empty() || device.getSurfaceFormats2KHR({ surface }).value.empty())
     	{
-    		return {};
+    		return false;
     	}
 
-    	physical_device_data result{
+        outData = {
     		.device = device, 
     		.name = properties.deviceName, 
     		.vulkanVersion = properties.apiVersion, 
     		.deviceType = properties.deviceType, 
     		.VRAM = heapIter->size
     	};
-    	if (!get_physical_device_queues(result))
-    	{
-    		return {};
-    	}
-    	if (!get_physical_device_features(result))
-    	{
-    		return {};
-    	}
-    	return result;
+        return get_physical_device_queues(outData, surface) 
+    		&& get_physical_device_features(outData);
     }
-    bool device_builder::get_physical_device_queues(physical_device_data& data)
+
+    bool device_builder::get_physical_device_queues(physical_device_data& data, const vk::SurfaceKHR& surface) const
     {
     	const auto queueProperties = data.device.getQueueFamilyProperties2();
-    	auto graphicsIter = std::ranges::find_if(queueProperties, [](const vk::QueueFamilyProperties2& queueFamily) {
-			return !!(queueFamily.queueFamilyProperties.queueFlags & (vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eTransfer));
-		});
-    	if (graphicsIter != queueProperties.end())
-    	{
-    		data.graphicsQueue.familyIndex = static_cast<std::uint32_t>(std::distance(queueProperties.begin(), graphicsIter));
-    		data.graphicsQueue.queueIndex = 0;
-    		data.transferQueue.familyIndex = data.graphicsQueue.familyIndex;
-    		const auto queueCount = queueProperties[data.graphicsQueue.familyIndex].queueFamilyProperties.queueCount;
-    		data.transferQueue.queueIndex = queueCount >= 2 ? 1 : 0;
-    		return true;
-    	}
 
-    	graphicsIter = std::ranges::find_if(queueProperties, [](const vk::QueueFamilyProperties2& queueFamily) {
-			return !!(queueFamily.queueFamilyProperties.queueFlags & vk::QueueFlagBits::eGraphics);
-		});
-    	const auto transferIter = std::ranges::find_if(graphicsIter + 1, queueProperties.end(), [](const vk::QueueFamilyProperties2& queueFamily) {
-			return !!(queueFamily.queueFamilyProperties.queueFlags & vk::QueueFlagBits::eTransfer);
-		});
-    	if ((graphicsIter == queueProperties.end()) || (transferIter == queueProperties.end()))
-    	{
-    		return false;
-    	}
+        struct queue_info
+        {
+			std::uint32_t familyIndex = 0;
+			bool graphics = false;
+			bool present = false;
+			bool compute = false;
+            bool trasfer = false;
+        };
+        eastl::vector<queue_info> queueIndices(queueProperties.size());
+        for (std::uint32_t i = 0; i < queueProperties.size(); i++)
+        {
+            queueIndices[i].familyIndex = i;
+		}
+        std::ranges::for_each(queueIndices, [&](queue_info& info) {
+            const auto queueFlags = queueProperties[info.familyIndex].queueFamilyProperties.queueFlags;
+			info.graphics = static_cast<bool>(queueFlags & vk::QueueFlagBits::eGraphics);
+            info.present = data.device.getSurfaceSupportKHR(info.familyIndex, surface).value == vk::True;
+			info.compute = static_cast<bool>(queueFlags & vk::QueueFlagBits::eCompute);
+			info.trasfer = static_cast<bool>(queueFlags & vk::QueueFlagBits::eTransfer);
+        });
+        std::ranges::sort(queueIndices, [](const queue_info& info1, const queue_info& info2) {
+            if (info1.graphics != info2.graphics)
+            {
+                return info1.graphics;
+            }
+			const bool graphicsPresent1 = info1.graphics && info1.present;
+			const bool graphicsPresent2 = info2.graphics && info2.present;
+            if (graphicsPresent1 != graphicsPresent2)
+            {
+                return graphicsPresent1;
+            }
+            if (info1.compute != info2.compute)
+            {
+                return info1.compute;
+            }
+            if (info1.trasfer != info2.trasfer)
+            {
+                return info1.trasfer;
+            }
+            return false;
+        });
 
-    	data.graphicsQueue.familyIndex = static_cast<std::uint32_t>(std::distance(queueProperties.begin(), graphicsIter));
-    	data.graphicsQueue.queueIndex = 0;
-    	data.transferQueue.familyIndex = static_cast<std::uint32_t>(std::distance(queueProperties.begin(), transferIter));
-    	data.transferQueue.queueIndex = 0;
+        const std::uint32_t graphicsIndex = queueIndices[0].familyIndex;
+        const std::uint32_t presentIndex = std::ranges::find_if(queueIndices, [](const queue_info& info) {
+            return info.present;
+        })->familyIndex;
+        std::uint32_t computeIndex = graphicsIndex;
+        if (m_preferDedicatedComputeQueue)
+        {
+            const auto iter = std::ranges::find_if(queueIndices, [&](const queue_info& info) {
+                return !info.graphics && info.compute;
+            });
+            if (iter != queueIndices.end())
+            {
+                computeIndex = iter->familyIndex;
+            }
+		}
+        std::uint32_t transferIndex = graphicsIndex;
+        if (m_preferDedicatedTransferQueue)
+        {
+            const auto iter = std::ranges::find_if(queueIndices, [&](const queue_info& info) {
+                return !info.graphics && !info.compute && info.trasfer;
+            });
+            if (iter != queueIndices.end())
+            {
+                transferIndex = iter->familyIndex;
+            }
+        }
+
+        data.queues = {
+			{ queue_type::graphics, { .familyIndex = graphicsIndex } },
+			{ queue_type::present,  { .familyIndex = presentIndex  } },
+            { queue_type::compute,  { .familyIndex = computeIndex  } },
+			{ queue_type::transfer, { .familyIndex = transferIndex } },
+        };
     	return true;
     }
+
     bool device_builder::get_physical_device_features(physical_device_data& data) const
     {
     	eastl::vector requiredExtensions = m_requiredExtensions;
@@ -274,18 +329,23 @@ namespace engine::vulkan
             nextFeature = &dynamicRenderingFeatures.pNext;
         }
 
-        constexpr float queuePriorities[] = { 1.f, 1.f };
+        static constexpr float queuePriorities[] = { 1.0f, 1.0f, 1.0f, 1.0f };
         eastl::vector<vk::DeviceQueueCreateInfo> queueCreateInfo;
-        if (physicalDevice.graphicsQueue.familyIndex == physicalDevice.transferQueue.familyIndex)
+        queueCreateInfo.reserve(4);
+        for (const auto& [type, queueData] : physicalDevice.queues)
         {
-            const auto queueCount = static_cast<std::uint32_t>(physicalDevice.graphicsQueue.queueIndex != physicalDevice.transferQueue.queueIndex ? 2 : 1);
-            queueCreateInfo.push_back({ {}, physicalDevice.graphicsQueue.familyIndex, queueCount, queuePriorities });
-        }
-        else
-        {
-            queueCreateInfo.push_back({ {}, physicalDevice.graphicsQueue.familyIndex, 1, queuePriorities });
-            queueCreateInfo.push_back({ {}, physicalDevice.transferQueue.familyIndex, 1, queuePriorities });
-        }
+            const auto infoIter = std::ranges::find(queueCreateInfo, queueData.familyIndex, [](const vk::DeviceQueueCreateInfo& info) {
+                return info.queueFamilyIndex;
+			});
+            if (infoIter != queueCreateInfo.end())
+            {
+                infoIter->queueCount++;
+            }
+            else
+            {
+                queueCreateInfo.push_back({ {}, queueData.familyIndex, 1, queuePriorities });
+			}
+		}
         auto deviceValue = physicalDevice.device.createDeviceUnique({ {},
             queueCreateInfo, {}, physicalDevice.extensions, &deviceFeatures, features
 		});
@@ -298,8 +358,10 @@ namespace engine::vulkan
         device result;
 		result.m_physicalDevice = physicalDevice.device;
 		result.m_device = std::move(deviceValue.value);
-        result.m_queueGraphics = result.m_device->getQueue2({ {}, physicalDevice.graphicsQueue.familyIndex, physicalDevice.graphicsQueue.queueIndex });
-		result.m_queueTransfer = result.m_device->getQueue2({ {}, physicalDevice.transferQueue.familyIndex, physicalDevice.transferQueue.queueIndex });
+        for (const auto& [type, queueData] : physicalDevice.queues)
+        {
+            result.m_queues[type] = result.m_device->getQueue2({ {}, queueData.familyIndex, queueData.queueIndex });
+		}
         return result;
     }
 }
