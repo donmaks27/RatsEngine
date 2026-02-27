@@ -94,6 +94,9 @@ namespace engine::vulkan
         [[nodiscard]] bool operator!=(std::nullptr_t) const { return valid(); }
         [[nodiscard]] bool operator==(std::nullptr_t) const { return !valid(); }
 
+		[[nodiscard]] std::uint32_t family_index() const { return m_familyIndex; }
+		[[nodiscard]] std::uint32_t queue_index() const { return m_queueIndex; }
+
         void clear()
         {
             m_queue = nullptr;
@@ -134,6 +137,9 @@ namespace engine::vulkan
         [[nodiscard]] bool operator!=(std::nullptr_t) const { return valid(); }
         [[nodiscard]] bool operator==(std::nullptr_t) const { return !valid(); }
 
+        [[nodiscard]] const vk::PhysicalDevice& physical_device() const { return m_physicalDevice; }
+        [[nodiscard]] const vulkan::queue& queue(const queue_type type) const { return m_queues.at_key(type); }
+
         void clear()
         {
             m_queues.clear();
@@ -145,7 +151,7 @@ namespace engine::vulkan
 
         vk::PhysicalDevice m_physicalDevice;
         vk::UniqueDevice m_device;
-        eastl::vector_map<queue_type, queue> m_queues;
+        eastl::vector_map<queue_type, vulkan::queue> m_queues;
     };
 
     class context final

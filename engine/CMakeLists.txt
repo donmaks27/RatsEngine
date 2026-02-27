@@ -67,12 +67,14 @@ if(${RATS_ENGINE_VULKAN_ENABLE})
 		"private/engine/render/vulkan/render_manager_vulkan.h"
 		"private/engine/render/vulkan/window_manager_vulkan.h"
 		"private/engine/render/vulkan/builder/instance_builder.h"
-		"private/engine/render/vulkan/builder/device_builder.h")
+		"private/engine/render/vulkan/builder/device_builder.h"
+		"private/engine/render/vulkan/swapchain.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
 		"src/render/vulkan/render_manager_vulkan.cpp"
 		"src/render/vulkan/window_manager_vulkan.cpp"
 		"src/render/vulkan/builder/instance_builder.cpp"
-		"src/render/vulkan/builder/device_builder.cpp")
+		"src/render/vulkan/builder/device_builder.cpp"
+		"src/render/vulkan/swapchain.cpp")
 
 endif()
 

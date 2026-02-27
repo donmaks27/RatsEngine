@@ -4,6 +4,7 @@
 #include <engine/render/vulkan/core.h>
 
 #include <engine/render/window_manager.h>
+#include <engine/render/vulkan/swapchain.h>
 
 namespace engine
 {
@@ -43,6 +44,7 @@ namespace engine
         struct window_data_vulkan
         {
             vk::SurfaceKHR surface;
+			vulkan::swapchain swapchain;
         };
 
         static window_manager_vulkan* s_instanceVulkan;

@@ -123,9 +123,10 @@ namespace engine::vulkan
 			return nullptr;
 		}
 
+    	vk::detail::defaultDispatchLoaderDynamic.init(vulkanInstance.value.get());
+
 		instance result;
 		result.m_instance = std::move(vulkanInstance.value);
-    	vk::detail::defaultDispatchLoaderDynamic.init(*result, vkGetInstanceProcAddr);
 		if constexpr (config::vulkan::validation_layers)
 		{
 			auto debugMessenger = result->createDebugUtilsMessengerEXTUnique(debugMessengerInfo);

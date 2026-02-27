@@ -361,6 +361,8 @@ namespace engine::vulkan
             log::fatal("[vulkan::device_builder::build] Failed to create Vulkan device! Error: {}", deviceValue.result);
             return nullptr;
 		}
+
+        vk::detail::defaultDispatchLoaderDynamic.init(*i, deviceValue.value.get());
         
         device result;
 		result.m_physicalDevice = physicalDevice.device;
