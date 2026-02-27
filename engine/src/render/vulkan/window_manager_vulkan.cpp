@@ -18,49 +18,8 @@ namespace engine
     bool window_manager_vulkan::on_window_created(const window_id& id)
     {
 		const auto& ctx = render_manager_vulkan::instance()->vk_ctx();
-        if ((ctx.i() != nullptr) && !create_surface_for_window(id))
-        {
-            log::fatal("[window_manager_vulkan::on_create_window] Failed to create surface for window {}", id);
-            return false;
-        }
-        return true;
+        return create_surface(ctx, id) && create_swapchain(ctx, id);
     }
-    bool window_manager_vulkan::create_surface_for_window(const window_id& id)
-    {
-		auto& windowData = m_windowDataVulkan[id];
-        if (windowData.surface == nullptr)
-        {
-            const auto surface = create_surface(id);
-            if (surface == nullptr)
-            {
-                return false;
-			}
-			windowData.surface = surface;
-        }
-        return true;
-    }
-
-    bool window_manager_vulkan::on_instance_created()
-    {
-        const auto windowManager = window_manager::instance();
-        return std::ranges::all_of(windowManager->window_ids(), [this](const window_id& id) {
-            if (!create_surface_for_window(id))
-            {
-                log::fatal("[window_manager_vulkan::on_instance_created] Failed to create surface for window {}", id);
-                return false;
-			}
-            return true;
-        });
-    }
-    bool window_manager_vulkan::on_device_created()
-    {
-        const auto windowManager = window_manager::instance();
-        return std::ranges::all_of(windowManager->window_ids(), [this](const window_id& id) {
-            // TODO: Swapchain creation
-            return true;
-        });
-    }
-
     void window_manager_vulkan::on_window_destroying(const window_id& id)
     {
         const auto iter = m_windowDataVulkan.find(id);
@@ -71,19 +30,72 @@ namespace engine
         }
     }
 
+    bool window_manager_vulkan::on_instance_created(const vulkan::context& ctx)
+    {
+        const auto windowManager = window_manager::instance();
+        return std::ranges::all_of(windowManager->window_ids(), [this, &ctx](const window_id& id) {
+            return create_surface(ctx, id);
+        });
+    }
+    bool window_manager_vulkan::on_device_created(const vulkan::context& ctx)
+    {
+        const auto windowManager = window_manager::instance();
+        return std::ranges::all_of(windowManager->window_ids(), [this, &ctx](const window_id& id) {
+            return create_swapchain(ctx, id);
+        });
+    }
+
+    bool window_manager_vulkan::create_surface(const vulkan::context& ctx, const window_id& id)
+    {
+        if (ctx.i() == nullptr)
+        {
+			// Surface creation will be deferred until instance creation
+            return true;
+		}
+        const auto surface = create_surface_impl(ctx, id);
+        if (surface == nullptr)
+        {
+            log::fatal("[window_manager_vulkan::create_surface] Failed to create surface for window {}!", id);
+            return false;
+        }
+        m_windowDataVulkan[id].surface = surface;
+		return true;
+    }
     vk::SurfaceKHR window_manager_vulkan::surface(const window_id& id) const
     {
         const auto iter = m_windowDataVulkan.find(id);
         return iter != m_windowDataVulkan.end() ? iter->second.surface : nullptr;
     }
 
-    void window_manager_vulkan::clear_vulkan()
+    bool window_manager_vulkan::create_swapchain(const vulkan::context& ctx, const window_id& id)
+    {
+        if (ctx.d() == nullptr)
+        {
+            // Swapchain creation will be deferred until device creation
+            return true;
+        }
+        
+		const auto size = window_manager::instance()->window_size(id);
+        if (!m_windowDataVulkan[id].swapchain.init(ctx, { .surface = surface(id), .surfaceSize = size }))
+        {
+            log::fatal("[window_manager_vulkan::create_swapchain] Failed to create swapchain for window {}!", id);
+            return false;
+        }
+        return true;
+    }
+	const vulkan::swapchain* window_manager_vulkan::swapchain(const window_id& id) const
+    {
+        const auto iter = m_windowDataVulkan.find(id);
+        return iter != m_windowDataVulkan.end() ? &iter->second.swapchain : nullptr;
+    }
+
+    void window_manager_vulkan::clear_vulkan(const vulkan::context& ctx)
     {
         if (!m_windowDataVulkan.empty())
         {
-            const auto& ctx = render_manager_vulkan::instance()->vk_ctx();
-            for (const auto& [id, data] : m_windowDataVulkan)
+            for (auto& [id, data] : m_windowDataVulkan)
             {
+                data.swapchain.clear();
                 ctx.i()->destroySurfaceKHR(data.surface);
             }
             m_windowDataVulkan.clear();

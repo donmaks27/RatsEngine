@@ -123,9 +123,10 @@ namespace engine::vulkan
 			clear();
 			return false;
 		}
+
 		m_swapchainImages.resize(swapchainImages.value.size());
 		std::ranges::copy(swapchainImages.value, m_swapchainImages.begin());
-		return false;
+		return true;
 	}
 
 	void swapchain::clear()

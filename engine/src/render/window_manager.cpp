@@ -61,6 +61,12 @@ namespace engine
         m_mainWindowId = window_id::invalid_id();
     }
 
+    glm::uvec2 window_manager::window_size(const window_id& id) const
+    {
+        const auto iter = m_windowData.find(id);
+		return iter != m_windowData.end() ? iter->second.size : glm::uvec2{ 0, 0 };
+    }
+
     window_id window_manager::create_window(const window_create_info& info)
     {
         window_id id = window_id::generate();
@@ -70,8 +76,8 @@ namespace engine
         }
 
         log::log("[window_manager::create_window] Creating window {}...", id);
-        m_windowData.emplace(id, window_data{});
-        if (!create_window_impl(m_mainWindowId, {}))
+        m_windowData.emplace(id, window_data{ .size = info.size });
+        if (!create_window_impl(m_mainWindowId, { .size = info.size }))
         {
             log::error("[window_manager::create_window] Failed to create window!");
             m_windowData.erase(id);

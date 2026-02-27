@@ -32,7 +32,7 @@ namespace engine
 			log::fatal("[render_manager_vulkan::init] Failed to create Vulkan instance!");
 			return false;
 		}
-    	if (!windowManager->on_instance_created())
+    	if (!windowManager->on_instance_created(m_ctx))
     	{
     		return false;
     	}
@@ -41,7 +41,7 @@ namespace engine
     		log::fatal("[render_manager_vulkan::init] Failed to create Vulkan device!");
     		return false;
     	}
-		if (!windowManager->on_device_created())
+		if (!windowManager->on_device_created(m_ctx))
 		{
 			return false;
 		}
@@ -53,7 +53,7 @@ namespace engine
 	{
 		if (m_ctx.m_instance != nullptr)
 		{
-			window_manager_vulkan::instance()->clear_vulkan();
+			window_manager_vulkan::instance()->clear_vulkan(m_ctx);
 
             m_ctx.m_device.clear();
 			m_ctx.m_instance.clear();

@@ -6,6 +6,7 @@
 #include <engine/utils/uuid.h>
 
 #include <EASTL/vector_map.h>
+#include <glm/vec2.hpp>
 
 #include <ranges>
 
@@ -13,7 +14,10 @@ namespace engine
 {
     using window_id = utils::uuid;
 
-    struct window_create_info {};
+    struct window_create_info
+    {
+		glm::uvec2 size = { 800, 600 };
+    };
 
     class RATS_ENGINE_EXPORT window_manager
     {
@@ -42,6 +46,7 @@ namespace engine
                 return data.first;
             });
         }
+		[[nodiscard]] glm::uvec2 window_size(const window_id& id) const;
 
         window_id create_window(const window_create_info& info);
         [[nodiscard]] virtual bool should_close_window(const window_id& id) const = 0;
@@ -54,7 +59,10 @@ namespace engine
 
     protected:
 
-        struct window_data {};
+        struct window_data
+        {
+			glm::uvec2 size = { 0, 0 };
+        };
 
         eastl::vector_map<window_id, window_data> m_windowData;
         window_id m_mainWindowId = window_id::invalid_id();

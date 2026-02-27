@@ -55,7 +55,7 @@ namespace engine
 
     bool window_manager_glfw::create_window_impl(const window_id& id, const window_create_info& info)
     {
-        const auto window = glfwCreateWindow(800, 600, "RatsEngine", nullptr, nullptr);
+        const auto window = glfwCreateWindow(static_cast<int>(info.size.x), static_cast<int>(info.size.y), "RatsEngine", nullptr, nullptr);
         if (window == nullptr)
         {
             log::error("[window_manager_glfw::create_window_impl] Failed to create GLFW window");
