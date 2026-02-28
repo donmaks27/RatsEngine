@@ -24,6 +24,7 @@ namespace engine::vulkan
     class instance_builder;
     class device_builder;
 
+    class command_pool;
     class queue;
     class context;
 
@@ -32,8 +33,9 @@ namespace engine::vulkan
     {
     public:
 
-        [[nodiscard]] const auto* operator->() const { return &operator*(); }
-        [[nodiscard]] const auto& operator*() const
+        [[nodiscard]] const auto* operator->() const { return &value(); }
+        [[nodiscard]] const auto& operator*() const { return value(); }
+        [[nodiscard]] const auto& value() const
         {
             if constexpr (!std::is_same_v<StoreType, AccessType>)
             {
@@ -45,7 +47,7 @@ namespace engine::vulkan
             }
         }
 
-        [[nodiscard]] bool valid() const { return operator*() != nullptr; }
+        [[nodiscard]] bool valid() const { return value() != nullptr; }
         [[nodiscard]] bool operator!=(std::nullptr_t) const { return  valid(); }
         [[nodiscard]] bool operator==(std::nullptr_t) const { return !valid(); }
 
@@ -99,6 +101,10 @@ namespace engine::vulkan
         command_pool& operator=(command_pool&&) noexcept;
         command_pool& operator=(std::nullptr_t);
 
+        [[nodiscard]] eastl::vector<vk::UniqueCommandBuffer> command_buffers(const context& ctx, std::uint32_t count,
+            bool primary = true) const;
+        [[nodiscard]] vk::UniqueCommandBuffer command_buffer(const context& ctx, bool primary = true) const;
+
         void clear();
         void clear(const context& ctx);
     };
@@ -125,7 +131,7 @@ namespace engine::vulkan
 		[[nodiscard]] std::uint32_t family_index() const { return m_familyIndex; }
 		[[nodiscard]] std::uint32_t queue_index() const { return m_queueIndex; }
 
-        [[nodiscard]] command_pool create_command_pool(const context& ctx, vk::CommandPoolCreateFlags flags = {}) const;
+        [[nodiscard]] vulkan::command_pool command_pool(const context& ctx, vk::CommandPoolCreateFlags flags = {}) const;
 
         void clear()
         {

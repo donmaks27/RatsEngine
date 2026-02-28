@@ -108,8 +108,8 @@ namespace engine
 
 	bool render_manager_vulkan::create_command_pools()
 	{
-		m_graphicsCommandPool = m_ctx.d().queue(vulkan::queue_type::graphics).create_command_pool(m_ctx);
-		m_transferCommandPool = m_ctx.d().queue(vulkan::queue_type::transfer).create_command_pool(m_ctx,
+		m_graphicsCommandPool = m_ctx.d().queue(vulkan::queue_type::graphics).command_pool(m_ctx);
+		m_transferCommandPool = m_ctx.d().queue(vulkan::queue_type::transfer).command_pool(m_ctx,
 			vk::CommandPoolCreateFlagBits::eTransient);
 		return m_graphicsCommandPool.valid() && m_transferCommandPool.valid();
 	}

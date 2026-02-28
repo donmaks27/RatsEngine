@@ -21,6 +21,48 @@ namespace engine::vulkan
         clear();
         return *this;
     }
+
+    eastl::vector<vk::UniqueCommandBuffer> command_pool::command_buffers(const context& ctx, const std::uint32_t count,
+        const bool primary) const
+    {
+        if (!valid() || (count == 0))
+        {
+            return {};
+        }
+        auto buffers = ctx.d()->allocateCommandBuffersUnique({
+            value(),
+            primary ? vk::CommandBufferLevel::ePrimary : vk::CommandBufferLevel::eSecondary,
+            count
+        });
+        if (buffers.result != vk::Result::eSuccess)
+        {
+            log::warning("[vulkan::command_pool::command_buffers] Failed to allocate command buffers: {}", buffers.result);
+            return {};
+        }
+        eastl::vector<vk::UniqueCommandBuffer> result;
+        result.reserve(buffers.value.size());
+        std::ranges::move(buffers.value, std::back_inserter(result));
+        return result;
+    }
+    vk::UniqueCommandBuffer command_pool::command_buffer(const context& ctx, const bool primary) const
+    {
+        if (!valid())
+        {
+            return {};
+        }
+        auto buffer = ctx.d()->allocateCommandBuffersUnique({
+            value(),
+            primary ? vk::CommandBufferLevel::ePrimary : vk::CommandBufferLevel::eSecondary,
+            1
+        });
+        if (buffer.result != vk::Result::eSuccess)
+        {
+            log::warning("[vulkan::command_pool::command_buffer] Failed to allocate command buffer: {}", buffer.result);
+            return {};
+        }
+        return std::move(buffer.value[0]);
+    }
+
     void command_pool::clear()
     {
         if (valid())
@@ -37,7 +79,7 @@ namespace engine::vulkan
         }
     }
 
-    command_pool queue::create_command_pool(const context& ctx, const vk::CommandPoolCreateFlags flags) const
+    vulkan::command_pool queue::command_pool(const context& ctx, const vk::CommandPoolCreateFlags flags) const
     {
         if (!valid())
         {
@@ -46,10 +88,10 @@ namespace engine::vulkan
         const auto commandPool = ctx.d()->createCommandPool({ flags, family_index() });
         if (commandPool.result != vk::Result::eSuccess)
         {
-            log::error("[vulkan::queue::create_command_pool] Failed to create command pool: {}", commandPool.result);
+            log::error("[vulkan::queue::command_pool] Failed to create command pool: {}", commandPool.result);
             return nullptr;
         }
-        command_pool result;
+        vulkan::command_pool result;
         result.m_value = commandPool.value;
         return result;
     }
