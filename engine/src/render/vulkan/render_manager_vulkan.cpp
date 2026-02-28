@@ -58,8 +58,8 @@ namespace engine
 	{
 		if (m_ctx.m_instance != nullptr)
 		{
-			m_transferCommandPool.clear();
-			m_graphicsCommandPool.clear();
+			m_transferCommandPool.clear(m_ctx);
+			m_graphicsCommandPool.clear(m_ctx);
 
 			window_manager_vulkan::instance()->clear_vulkan(m_ctx);
             m_ctx.m_device.clear();
@@ -108,8 +108,9 @@ namespace engine
 
 	bool render_manager_vulkan::create_command_pools()
 	{
-		m_graphicsCommandPool = m_ctx.d().queue(vulkan::queue_type::graphics).create_command_pool();
-		m_transferCommandPool = m_ctx.d().queue(vulkan::queue_type::transfer).create_command_pool(vk::CommandPoolCreateFlagBits::eTransient);
+		m_graphicsCommandPool = m_ctx.d().queue(vulkan::queue_type::graphics).create_command_pool(m_ctx);
+		m_transferCommandPool = m_ctx.d().queue(vulkan::queue_type::transfer).create_command_pool(m_ctx,
+			vk::CommandPoolCreateFlagBits::eTransient);
 		return m_graphicsCommandPool.valid() && m_transferCommandPool.valid();
 	}
 }

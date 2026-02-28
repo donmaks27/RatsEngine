@@ -25,20 +25,25 @@ namespace engine::vulkan
     {
         if (valid())
         {
-            const auto& device = render_manager_vulkan::instance()->vk_ctx().d();
-            device->destroyCommandPool(m_value);
+            clear(render_manager_vulkan::instance()->vk_ctx());
+        }
+    }
+    void command_pool::clear(const context& ctx)
+    {
+        if (valid())
+        {
+            ctx.d()->destroyCommandPool(m_value);
             m_value = nullptr;
         }
     }
 
-    command_pool queue::create_command_pool(const vk::CommandPoolCreateFlags flags) const
+    command_pool queue::create_command_pool(const context& ctx, const vk::CommandPoolCreateFlags flags) const
     {
         if (!valid())
         {
             return nullptr;
         }
-        const auto& device = render_manager_vulkan::instance()->vk_ctx().d();
-        const auto commandPool = device->createCommandPool({ flags, family_index() });
+        const auto commandPool = ctx.d()->createCommandPool({ flags, family_index() });
         if (commandPool.result != vk::Result::eSuccess)
         {
             log::error("[vulkan::queue::create_command_pool] Failed to create command pool: {}", commandPool.result);

@@ -25,6 +25,7 @@ namespace engine::vulkan
     class device_builder;
 
     class queue;
+    class context;
 
     template<typename AccessType, typename StoreType = AccessType>
     class _value_wrapper
@@ -99,6 +100,7 @@ namespace engine::vulkan
         command_pool& operator=(std::nullptr_t);
 
         void clear();
+        void clear(const context& ctx);
     };
 
     class queue final : public _value_wrapper<vk::Queue>
@@ -123,7 +125,7 @@ namespace engine::vulkan
 		[[nodiscard]] std::uint32_t family_index() const { return m_familyIndex; }
 		[[nodiscard]] std::uint32_t queue_index() const { return m_queueIndex; }
 
-        [[nodiscard]] command_pool create_command_pool(vk::CommandPoolCreateFlags flags = {}) const;
+        [[nodiscard]] command_pool create_command_pool(const context& ctx, vk::CommandPoolCreateFlags flags = {}) const;
 
         void clear()
         {
