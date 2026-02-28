@@ -81,7 +81,7 @@ namespace engine::vulkan
 		auto surfaceFormats = physicalDevice.getSurfaceFormats2KHR({ createInfo.surface }).value;
 		const auto surfaceCaps = physicalDevice.getSurfaceCapabilities2KHR({ createInfo.surface }).value.surfaceCapabilities;
 
-		const auto selectedPresentMode = pickPresentMode(surfacePresentModes, createInfo.preferDisableVSync);
+		const auto selectedPresentMode = pickPresentMode(surfacePresentModes, createInfo.disableVSync);
 		const auto selectedFormat = std::ranges::min_element(surfaceFormats, std::less(), [](const vk::SurfaceFormat2KHR& format) {
 			return getSurfaceFormatPriority(format.surfaceFormat);
 		})->surfaceFormat;
@@ -124,17 +124,20 @@ namespace engine::vulkan
 			return false;
 		}
 
-		m_swapchainImages.resize(swapchainImages.value.size());
-		std::ranges::copy(swapchainImages.value, m_swapchainImages.begin());
+		m_images.resize(swapchainImages.value.size());
+		std::ranges::copy(swapchainImages.value, m_images.begin());
 		return true;
 	}
 
 	void swapchain::clear()
 	{
-		m_swapchainImages.clear();
+		clear(render_manager_vulkan::instance()->vk_ctx());
+	}
+	void swapchain::clear(const context& ctx)
+	{
+		m_images.clear();
 		if (valid())
 		{
-			const auto& ctx = render_manager_vulkan::instance()->vk_ctx();
 			ctx.d()->destroySwapchainKHR(m_swapchain);
 			m_swapchain = nullptr;
 		}

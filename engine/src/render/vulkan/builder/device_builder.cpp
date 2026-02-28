@@ -363,17 +363,20 @@ namespace engine::vulkan
 		}
 
         vk::detail::defaultDispatchLoaderDynamic.init(*i, deviceValue.value.get());
+
+    	eastl::vector_map<queue_type, vulkan::queue> queues;
+    	for (const auto& [type, queueData] : physicalDevice.queues)
+    	{
+    		auto& queue = queues[type];
+    		queue.m_value = deviceValue.value->getQueue2({ {}, queueData.familyIndex, queueData.queueIndex });
+    		queue.m_familyIndex = queueData.familyIndex;
+    		queue.m_queueIndex = queueData.queueIndex;
+    	}
         
         device result;
+		result.m_value = std::move(deviceValue.value);
 		result.m_physicalDevice = physicalDevice.device;
-		result.m_device = std::move(deviceValue.value);
-        for (const auto& [type, queueData] : physicalDevice.queues)
-        {
-            auto& queue = result.m_queues[type];
-        	queue.m_queue = result.m_device->getQueue2({ {}, queueData.familyIndex, queueData.queueIndex });
-        	queue.m_familyIndex = queueData.familyIndex;
-        	queue.m_queueIndex = queueData.queueIndex;
-		}
+        result.m_queues = std::move(queues);
         return result;
     }
 }

@@ -35,15 +35,16 @@ namespace engine::vulkan
 		{
 			vk::SurfaceKHR surface = nullptr;
 			glm::uvec2 surfaceSize = { 0, 0 };
-			bool preferDisableVSync = false;
+			bool disableVSync = false;
 		};
 		[[nodiscard]] bool init(const context& ctx, const create_info& createInfo);
 
 		void clear();
+		void clear(const context& ctx);
 
 	private:
 
 		vk::SwapchainKHR m_swapchain = nullptr;
-		eastl::vector<vk::Image> m_swapchainImages;
+		eastl::vector<vk::Image> m_images;
 	};
 }

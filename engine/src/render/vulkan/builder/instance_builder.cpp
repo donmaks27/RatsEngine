@@ -126,7 +126,7 @@ namespace engine::vulkan
     	vk::detail::defaultDispatchLoaderDynamic.init(vulkanInstance.value.get());
 
 		instance result;
-		result.m_instance = std::move(vulkanInstance.value);
+		result.m_value = std::move(vulkanInstance.value);
 		if constexpr (config::vulkan::validation_layers)
 		{
 			auto debugMessenger = result->createDebugUtilsMessengerEXTUnique(debugMessengerInfo);

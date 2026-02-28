@@ -24,7 +24,41 @@ namespace engine::vulkan
     class instance_builder;
     class device_builder;
 
-    class instance final
+    template<typename AccessType, typename StoreType = AccessType>
+    class _value_wrapper
+    {
+    public:
+        _value_wrapper() = default;
+        _value_wrapper(const _value_wrapper&) = delete;
+        _value_wrapper(_value_wrapper&& value) noexcept = default;
+        ~_value_wrapper() = default;
+
+        _value_wrapper& operator=(const _value_wrapper&) = delete;
+        _value_wrapper& operator=(_value_wrapper&& value) noexcept = default;
+
+        [[nodiscard]] const auto* operator->() const { return &operator*(); }
+        [[nodiscard]] const auto& operator*() const
+        {
+            if constexpr (!std::is_same_v<StoreType, AccessType>)
+            {
+                return m_value.get();
+            }
+            else
+            {
+                return m_value;
+            }
+        }
+
+        [[nodiscard]] bool valid() const { return operator*() != nullptr; }
+        [[nodiscard]] bool operator!=(std::nullptr_t) const { return  valid(); }
+        [[nodiscard]] bool operator==(std::nullptr_t) const { return !valid(); }
+
+    protected:
+
+        StoreType m_value;
+    };
+
+    class instance final : public _value_wrapper<vk::Instance, vk::UniqueInstance>
     {
         friend instance_builder;
 
@@ -36,50 +70,36 @@ namespace engine::vulkan
         ~instance() { clear(); }
 
         instance& operator=(const instance&) = delete;
-        instance& operator=(instance&& value) noexcept
-        {
-            m_debugMessenger = std::move(value.m_debugMessenger);
-            m_instance = std::move(value.m_instance);
-            return *this;
-        }
+        instance& operator=(instance&& value) noexcept = default;
         instance& operator=(std::nullptr_t)
         {
             clear();
             return *this;
 		}
 
-        [[nodiscard]] const vk::Instance* operator->() const { return &m_instance.get(); }
-        [[nodiscard]] const vk::Instance& operator*() const { return m_instance.get(); }
-
-        [[nodiscard]] bool valid() const { return m_instance.get() != nullptr; }
-        [[nodiscard]] bool operator!=(std::nullptr_t) const { return  valid(); }
-        [[nodiscard]] bool operator==(std::nullptr_t) const { return !valid(); }
-
         void clear()
         {
             m_debugMessenger.reset();
-            m_instance.reset();
+            m_value.reset();
         }
 
     private:
 
-        vk::UniqueInstance m_instance;
         vk::UniqueDebugUtilsMessengerEXT m_debugMessenger;
     };
 
-    enum class queue_type : std::uint32_t { graphics, present, compute, transfer };
-    class queue final
+    class queue final : public _value_wrapper<vk::Queue>
     {
         friend device_builder;
 
     public:
         queue() = default;
         queue(std::nullptr_t) {}
-        queue(const queue&) = default;
+        queue(const queue&) = delete;
         queue(queue&&) noexcept = default;
         ~queue() = default;
 
-        queue& operator=(const queue&) = default;
+        queue& operator=(const queue&) = delete;
         queue& operator=(queue&&) noexcept = default;
         queue& operator=(std::nullptr_t)
         {
@@ -87,31 +107,24 @@ namespace engine::vulkan
             return *this;
         }
 
-        [[nodiscard]] const vk::Queue* operator->() const { return &m_queue; }
-        [[nodiscard]] const vk::Queue& operator*() const { return m_queue; }
-
-        [[nodiscard]] bool valid() const { return m_queue != nullptr; }
-        [[nodiscard]] bool operator!=(std::nullptr_t) const { return valid(); }
-        [[nodiscard]] bool operator==(std::nullptr_t) const { return !valid(); }
-
 		[[nodiscard]] std::uint32_t family_index() const { return m_familyIndex; }
 		[[nodiscard]] std::uint32_t queue_index() const { return m_queueIndex; }
 
         void clear()
         {
-            m_queue = nullptr;
+            m_value = nullptr;
             m_familyIndex = 0;
             m_queueIndex = 0;
         }
 
     private:
 
-        vk::Queue m_queue = nullptr;
         std::uint32_t m_familyIndex = 0;
         std::uint32_t m_queueIndex = 0;
     };
 
-    class device final
+    enum class queue_type : std::uint32_t { graphics, present, compute, transfer };
+    class device final : public _value_wrapper<vk::Device, vk::UniqueDevice>
     {
         friend device_builder;
 
@@ -130,27 +143,19 @@ namespace engine::vulkan
             return *this;
 		}
 
-        [[nodiscard]] const vk::Device* operator->() const { return &m_device.get(); }
-        [[nodiscard]] const vk::Device& operator*() const { return m_device.get(); }
-
-        [[nodiscard]] bool valid() const { return m_device.get() != nullptr; }
-        [[nodiscard]] bool operator!=(std::nullptr_t) const { return valid(); }
-        [[nodiscard]] bool operator==(std::nullptr_t) const { return !valid(); }
-
         [[nodiscard]] const vk::PhysicalDevice& physical_device() const { return m_physicalDevice; }
         [[nodiscard]] const vulkan::queue& queue(const queue_type type) const { return m_queues.at_key(type); }
 
         void clear()
         {
             m_queues.clear();
-            m_device.reset();
             m_physicalDevice = nullptr;
+            m_value.reset();
         }
 
     private:
 
         vk::PhysicalDevice m_physicalDevice;
-        vk::UniqueDevice m_device;
         eastl::vector_map<queue_type, vulkan::queue> m_queues;
     };
 

@@ -95,7 +95,7 @@ namespace engine
         {
             for (auto& [id, data] : m_windowDataVulkan)
             {
-                data.swapchain.clear();
+                data.swapchain.clear(ctx);
                 ctx.i()->destroySurfaceKHR(data.surface);
             }
             m_windowDataVulkan.clear();
