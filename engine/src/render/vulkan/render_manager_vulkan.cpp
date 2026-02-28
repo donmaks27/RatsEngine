@@ -45,6 +45,11 @@ namespace engine
 		{
 			return false;
 		}
+		if (!create_command_pools())
+		{
+			log::fatal("[render_manager_vulkan::init] Failed to create Vulkan command pools!");
+			return false;
+		}
 
 		return true;
 	}
@@ -53,8 +58,10 @@ namespace engine
 	{
 		if (m_ctx.m_instance != nullptr)
 		{
-			window_manager_vulkan::instance()->clear_vulkan(m_ctx);
+			m_transferCommandPool.clear();
+			m_graphicsCommandPool.clear();
 
+			window_manager_vulkan::instance()->clear_vulkan(m_ctx);
             m_ctx.m_device.clear();
 			m_ctx.m_instance.clear();
 		}
@@ -97,5 +104,12 @@ namespace engine
         }
         m_ctx.m_device = std::move(device);
         return true;
+	}
+
+	bool render_manager_vulkan::create_command_pools()
+	{
+		m_graphicsCommandPool = m_ctx.d().queue(vulkan::queue_type::graphics).create_command_pool();
+		m_transferCommandPool = m_ctx.d().queue(vulkan::queue_type::transfer).create_command_pool(vk::CommandPoolCreateFlagBits::eTransient);
+		return m_graphicsCommandPool.valid() && m_transferCommandPool.valid();
 	}
 }

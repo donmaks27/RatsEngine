@@ -24,17 +24,12 @@ namespace engine::vulkan
     class instance_builder;
     class device_builder;
 
+    class queue;
+
     template<typename AccessType, typename StoreType = AccessType>
     class _value_wrapper
     {
     public:
-        _value_wrapper() = default;
-        _value_wrapper(const _value_wrapper&) = delete;
-        _value_wrapper(_value_wrapper&& value) noexcept = default;
-        ~_value_wrapper() = default;
-
-        _value_wrapper& operator=(const _value_wrapper&) = delete;
-        _value_wrapper& operator=(_value_wrapper&& value) noexcept = default;
 
         [[nodiscard]] const auto* operator->() const { return &operator*(); }
         [[nodiscard]] const auto& operator*() const
@@ -88,6 +83,24 @@ namespace engine::vulkan
         vk::UniqueDebugUtilsMessengerEXT m_debugMessenger;
     };
 
+    class command_pool final : public _value_wrapper<vk::CommandPool>
+    {
+        friend queue;
+
+    public:
+        command_pool() = default;
+        command_pool(std::nullptr_t) {}
+        command_pool(const command_pool&) = delete;
+        command_pool(command_pool&&) noexcept;
+        ~command_pool() { clear(); }
+
+        command_pool& operator=(const command_pool&) = delete;
+        command_pool& operator=(command_pool&&) noexcept;
+        command_pool& operator=(std::nullptr_t);
+
+        void clear();
+    };
+
     class queue final : public _value_wrapper<vk::Queue>
     {
         friend device_builder;
@@ -95,11 +108,11 @@ namespace engine::vulkan
     public:
         queue() = default;
         queue(std::nullptr_t) {}
-        queue(const queue&) = delete;
+        queue(const queue&) = default;
         queue(queue&&) noexcept = default;
         ~queue() = default;
 
-        queue& operator=(const queue&) = delete;
+        queue& operator=(const queue&) = default;
         queue& operator=(queue&&) noexcept = default;
         queue& operator=(std::nullptr_t)
         {
@@ -109,6 +122,8 @@ namespace engine::vulkan
 
 		[[nodiscard]] std::uint32_t family_index() const { return m_familyIndex; }
 		[[nodiscard]] std::uint32_t queue_index() const { return m_queueIndex; }
+
+        [[nodiscard]] command_pool create_command_pool(vk::CommandPoolCreateFlags flags = {}) const;
 
         void clear()
         {

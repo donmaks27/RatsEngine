@@ -29,8 +29,11 @@ namespace engine
         static render_manager_vulkan* s_instanceVulkan;
 
         vulkan::context m_ctx;
+        vulkan::command_pool m_graphicsCommandPool;
+        vulkan::command_pool m_transferCommandPool;
 
         [[nodiscard]] bool create_instance(const create_info& info);
         [[nodiscard]] bool create_device();
+        [[nodiscard]] bool create_command_pools();
     };
 }
