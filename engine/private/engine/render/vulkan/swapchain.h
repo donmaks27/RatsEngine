@@ -7,7 +7,7 @@
 
 namespace engine::vulkan
 {
-	class swapchain final
+	class swapchain final : _value_wrapper<vk::SwapchainKHR>
 	{
 	public:
 		swapchain() = default;
@@ -24,13 +24,6 @@ namespace engine::vulkan
 			return *this;
 		}
 
-		[[nodiscard]] const vk::SwapchainKHR* operator->() const { return &m_swapchain; }
-		[[nodiscard]] const vk::SwapchainKHR& operator*() const { return m_swapchain; }
-
-		[[nodiscard]] bool valid() const { return m_swapchain != nullptr; }
-		[[nodiscard]] bool operator!=(std::nullptr_t) const { return valid(); }
-		[[nodiscard]] bool operator==(std::nullptr_t) const { return !valid(); }
-
 		struct create_info
 		{
 			vk::SurfaceKHR surface = nullptr;
@@ -42,9 +35,16 @@ namespace engine::vulkan
 		void clear();
 		void clear(const context& ctx);
 
+		[[nodiscard]] bool outdated() const { return valid() && m_outdated; }
+		[[nodiscard]] bool acquire_next_image(const context& ctx);
+		[[nodiscard]] bool present(const context& ctx, eastl::span<const vk::Semaphore> waitSemaphores);
+
 	private:
 
-		vk::SwapchainKHR m_swapchain = nullptr;
 		eastl::vector<vk::Image> m_images;
+		vk::Semaphore m_imageAcquired;
+
+		std::uint8_t m_currentImageIndex = std::numeric_limits<std::uint8_t>::max();
+		bool m_outdated = false;
 	};
 }

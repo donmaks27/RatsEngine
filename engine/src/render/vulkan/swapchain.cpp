@@ -90,6 +90,8 @@ namespace engine::vulkan
 			std::clamp(surfaceCaps.minImageCount + 1, surfaceCaps.minImageCount, surfaceCaps.maxImageCount) : 
 			(surfaceCaps.minImageCount + 1);
 
+		const auto& graphicsQueue = device.queue(queue_type::graphics);
+		const std::uint32_t queueFamilies[] = { graphicsQueue.family_index(), presentQueue.family_index() };
 		vk::SwapchainCreateInfoKHR swapchainCreateInfo{ {},
 			createInfo.surface, 
 			swapchainImageCount,
@@ -100,13 +102,19 @@ namespace engine::vulkan
 			surfaceCaps.currentTransform, vk::CompositeAlphaFlagBitsKHR::eOpaque, 
 			selectedPresentMode,
 			vk::True,
-			m_swapchain
+			m_value
 		};
-		const auto swapchainValue = device->createSwapchainKHR(swapchainCreateInfo);
-		if (m_swapchain != nullptr)
+		if (graphicsQueue.family_index() != presentQueue.family_index())
 		{
-			device->destroySwapchainKHR(m_swapchain);
-			m_swapchain = nullptr;
+			swapchainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
+			swapchainCreateInfo.queueFamilyIndexCount = 2;
+			swapchainCreateInfo.pQueueFamilyIndices = queueFamilies;
+		}
+		const auto swapchainValue = device->createSwapchainKHR(swapchainCreateInfo);
+		if (m_value != nullptr)
+		{
+			device->destroySwapchainKHR(m_value);
+			m_value = nullptr;
 		}
 		if (swapchainValue.result != vk::Result::eSuccess)
 		{
@@ -115,7 +123,18 @@ namespace engine::vulkan
 			return false;
 		}
 
-		m_swapchain = swapchainValue.value;
+		m_value = swapchainValue.value;
+		if (m_imageAcquired == nullptr)
+		{
+			const auto semaphoreResult = device->createSemaphore({});
+			if (semaphoreResult.result != vk::Result::eSuccess)
+			{
+				log::error("[vulkan::swapchain::init] Failed to create image acquired semaphore: {}", semaphoreResult.result);
+				clear();
+				return false;
+			}
+			m_imageAcquired = semaphoreResult.value;
+		}
 		const auto swapchainImages = device->getSwapchainImagesKHR(swapchainValue.value);
 		if (swapchainImages.result != vk::Result::eSuccess)
 		{
@@ -135,11 +154,94 @@ namespace engine::vulkan
 	}
 	void swapchain::clear(const context& ctx)
 	{
-		m_images.clear();
 		if (valid())
 		{
-			ctx.d()->destroySwapchainKHR(m_swapchain);
-			m_swapchain = nullptr;
+			const auto& device = ctx.d();
+
+			m_outdated = false;
+			m_images.clear();
+			device->destroySemaphore(m_imageAcquired);
+			m_imageAcquired = nullptr;
+			device->destroySwapchainKHR(m_value);
+			m_value = nullptr;
 		}
+	}
+
+	bool swapchain::acquire_next_image(const context& ctx)
+	{
+		if (!valid())
+		{
+			log::warning("[vulkan::swapchain::acquire_next_image] Swapchain is not valid");
+			return false;
+		}
+		if (outdated())
+		{
+			log::warning("[vulkan::swapchain::acquire_next_image] Swapchain is outdated");
+			return false;
+		}
+
+		const auto acquireResult = ctx.d()->acquireNextImage2KHR({ m_value, std::numeric_limits<std::uint64_t>::max(), m_imageAcquired });
+		if (acquireResult.result != vk::Result::eSuccess)
+		{
+			switch (acquireResult.result)
+			{
+			case vk::Result::eSuboptimalKHR:
+				log::log("[vulkan::swapchain::acquire_next_image] Swapchain is suboptimal");
+				break;
+			case vk::Result::eErrorOutOfDateKHR:
+				log::log("[vulkan::swapchain::acquire_next_image] Swapchain is out of date");
+				break;
+
+			default:
+				log::error("[vulkan::swapchain::acquire_next_image] Failed to acquire next image: {}", acquireResult.result);
+				return false;
+			}
+
+			m_outdated = true;
+			return true;
+		}
+
+		m_currentImageIndex = static_cast<std::uint8_t>(acquireResult.value);
+		return true;
+	}
+	bool swapchain::present(const context& ctx, const eastl::span<const vk::Semaphore> waitSemaphores)
+	{
+		if (!valid())
+		{
+			log::warning("[vulkan::swapchain::present] Swapchain is not valid");
+			return false;
+		}
+		if (outdated())
+		{
+			log::warning("[vulkan::swapchain::present] Swapchain is outdated");
+			return false;
+		}
+		if (m_currentImageIndex >= m_images.size())
+		{
+			log::warning("[vulkan::swapchain::present] No image acquired");
+			return false;
+		}
+		
+		const auto imageIndex = static_cast<std::uint32_t>(m_currentImageIndex);
+		const auto result = ctx.d().queue(queue_type::present)->presentKHR({
+			waitSemaphores, { m_value }, { imageIndex }
+		});
+		if (result != vk::Result::eSuccess)
+		{
+			switch (result)
+			{
+			case vk::Result::eSuboptimalKHR:
+				log::log("[vulkan::swapchain::present] Swapchain is suboptimal");
+				break;
+			case vk::Result::eErrorOutOfDateKHR:
+				log::log("[vulkan::swapchain::present] Swapchain is out of date");
+				break;
+			default:
+				log::error("[vulkan::swapchain::present] Failed to present image: {}", result);
+				return false;
+			}
+			m_outdated = true;
+		}
+		return true;
 	}
 }
