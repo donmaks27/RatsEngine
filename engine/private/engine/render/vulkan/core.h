@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EASTL/span.h>
+#include <EASTL/vector_set.h>
 #include <fmt/format.h>
 #include <vulkan/vulkan.hpp>
 
@@ -147,6 +147,7 @@ namespace engine::vulkan
         std::uint32_t m_queueIndex = 0;
     };
 
+    enum class device_feature : std::uint8_t { sampler_anisotropy, dynamic_render, synchronization2 };
     enum class queue_type : std::uint32_t { graphics, present, compute, transfer };
     class device final : public _value_wrapper<vk::Device, vk::UniqueDevice>
     {
@@ -168,6 +169,7 @@ namespace engine::vulkan
 		}
 
         [[nodiscard]] const vk::PhysicalDevice& physical_device() const { return m_physicalDevice; }
+		[[nodiscard]] bool feature(const device_feature feature) const { return m_features.find(feature) != m_features.end(); }
         [[nodiscard]] const vulkan::queue& queue(const queue_type type) const { return m_queues.at_key(type); }
 
         void clear()
@@ -180,6 +182,7 @@ namespace engine::vulkan
     private:
 
         vk::PhysicalDevice m_physicalDevice;
+        eastl::vector_set<device_feature> m_features;
         eastl::vector_map<queue_type, vulkan::queue> m_queues;
     };
 

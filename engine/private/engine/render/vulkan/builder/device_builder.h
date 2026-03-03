@@ -8,11 +8,12 @@
 
 namespace engine::vulkan
 {
+    enum class device_feature_type : std::uint8_t { none, optional, required };
+
     class device_builder final
     {
     public:
-        enum class feature : std::uint8_t { none, optional, required };
-        enum class location : std::uint8_t { none, extension, core };
+        enum class feature_location : std::uint8_t { none, extension, core };
 
         device_builder() = default;
         device_builder(const device_builder&) = delete;
@@ -28,7 +29,7 @@ namespace engine::vulkan
         device_builder& set_min_vulkan_version(std::uint32_t version);
 		device_builder& prefer_dedicated_transfer_queue(bool prefer = true);
 		device_builder& prefer_dedicated_compute_queue(bool prefer = true);
-        device_builder& feature_dynamic_rendering(feature feature);
+		device_builder& feature(device_feature name, device_feature_type type = device_feature_type::required);
 
         device_builder& collect_physical_devices(const instance& i, const vk::SurfaceKHR& surface);
         device_builder& get_physical_devices(eastl::vector<std::string_view>& devices);
@@ -54,19 +55,18 @@ namespace engine::vulkan
             std::uint32_t score = 0;
 
             eastl::vector<const char*> extensions{};
+			eastl::vector_map<device_feature, feature_location> features{};
 			eastl::vector_map<queue_type, queue_data> queues{};
-            location featureDynamicRendering = location::none;
         };
 
         eastl::vector<physical_device_data> m_physicalDevices;
 
         eastl::vector_set<const char*> m_requiredExtensions;
+        eastl::vector_map<device_feature, device_feature_type> m_features;
         std::string m_preferredDeviceName;
         std::uint32_t m_minVulkanVersion = vk::ApiVersion10;
         bool m_preferDedicatedTransferQueue = false;
         bool m_preferDedicatedComputeQueue = false;
-
-        feature m_featureDynamicRendering = feature::none;
 
 
         [[nodiscard]] bool gather_physical_devices(const instance& i, const vk::SurfaceKHR& surface);

@@ -12,7 +12,8 @@ namespace engine
 	{
     	constexpr eastl::array RequiredInstanceExtensions = { vk::KHRGetSurfaceCapabilities2ExtensionName };
     	constexpr eastl::array RequiredDeviceExtensions = { vk::KHRSwapchainExtensionName };
-    	constexpr auto MinVulkanApiVersion = vk::ApiVersion11;
+		constexpr auto MaxInstanceVulkanApiVersion = vk::ApiVersion13;
+		constexpr auto MinDeviceVulkanApiVersion = vk::ApiVersion11;
 	}
 
 	render_manager_vulkan* render_manager_vulkan::s_instanceVulkan = nullptr;
@@ -79,7 +80,7 @@ namespace engine
 			.set_engine_version(0, 1, 0)
 			.add_required_extensions(window_manager_vulkan::instance()->required_instance_extensions())
 			.add_required_extensions(RequiredInstanceExtensions)
-			.set_max_vulkan_version(vk::ApiVersion13)
+			.set_max_vulkan_version(MaxInstanceVulkanApiVersion)
 			.build();
 		if (instance == nullptr)
 		{
@@ -94,8 +95,10 @@ namespace engine
     	const auto mainSurface = window_manager_vulkan::instance()->surface(window_manager::instance()->main_window_id());
         auto device = vulkan::device_builder()
             .add_required_extensions(RequiredDeviceExtensions)
-            .set_min_vulkan_version(MinVulkanApiVersion)
-            .feature_dynamic_rendering(vulkan::device_builder::feature::required)
+            .set_min_vulkan_version(MinDeviceVulkanApiVersion)
+			.feature(vulkan::device_feature::sampler_anisotropy, vulkan::device_feature_type::required)
+            .feature(vulkan::device_feature::dynamic_render, vulkan::device_feature_type::required)
+			.feature(vulkan::device_feature::synchronization2, vulkan::device_feature_type::required)
             .collect_physical_devices(m_ctx.m_instance, mainSurface)
             .build(m_ctx.m_instance);
         if (device == nullptr)

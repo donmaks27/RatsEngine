@@ -3,6 +3,7 @@
 #include <engine/core.h>
 #include <engine/render/vulkan/core.h>
 
+#include <EASTL/span.h>
 #include <glm/vec2.hpp>
 
 namespace engine::vulkan
