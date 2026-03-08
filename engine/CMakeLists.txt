@@ -42,9 +42,11 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/render/window_manager.h"
 	"include/engine/utils/log.h"
 	"include/engine/utils/uuid.h"
+	"include/engine/utils/events.h"
 	"include/engine/utils/macro/defer.h")
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS)
 list(APPEND RATS_ENGINE_SRC_FILES
+	"src/utils/events.cpp"
 	"src/engine.cpp"
 	"src/render/render_manager.cpp"
 	"src/render/window_manager.cpp"
@@ -97,7 +99,8 @@ if(${RATS_ENGINE_GLFW_ENABLE})
 
 endif()
 
-add_library(rats-engine SHARED)
+add_library(rats-engine SHARED
+	include/engine/eastl_config.h)
 target_link_libraries(rats-engine
 	PUBLIC ${RATS_ENGINE_PUBLIC_LIBS}
 	PRIVATE ${RATS_ENGINE_PRIVATE_LIBS})

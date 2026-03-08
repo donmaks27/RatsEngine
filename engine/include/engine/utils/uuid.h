@@ -35,6 +35,8 @@ namespace engine::utils
         uint64_t m_hi = 0;
         uint64_t m_lo = 0;
     };
+
+    inline constexpr uuid invalid_uuid = uuid::invalid_id();
 }
 
 template<>
