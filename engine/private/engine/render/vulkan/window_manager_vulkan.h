@@ -34,6 +34,8 @@ namespace engine
         [[nodiscard]] virtual eastl::vector<const char*> required_instance_extensions() const = 0;
         [[nodiscard]] virtual vk::SurfaceKHR create_surface_impl(const vulkan::context& ctx, const window_id& id) const = 0;
 
+        void on_event(const utils::event_base& event, utils::event_id eventType);
+
         void on_init();
         static void on_clear();
 

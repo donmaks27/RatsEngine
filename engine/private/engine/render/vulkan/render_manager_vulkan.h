@@ -4,9 +4,13 @@
 #include <engine/render/vulkan/core.h>
 
 #include <engine/render/render_manager.h>
+#include <engine/utils/events.h>
 
 namespace engine
 {
+    struct vulkan_instance_created_event final : utils::event<vulkan_instance_created_event> {};
+    struct vulkan_device_created_event final : utils::event<vulkan_device_created_event> {};
+
     class render_manager_vulkan final : public render_manager
     {
         using super = render_manager;

@@ -1,10 +1,21 @@
 #include <engine/render/vulkan/window_manager_vulkan.h>
 
+#include <engine/engine.h>
 #include <engine/render/vulkan/render_manager_vulkan.h>
 
 namespace engine
 {
     window_manager_vulkan* window_manager_vulkan::s_instanceVulkan = nullptr;
+
+    void window_manager_vulkan::on_event(const utils::event_base& event, const utils::event_id eventType)
+    {
+        utils::dispatch_event<vulkan_instance_created_event>(event, eventType, [](const auto&) {
+            log::log("[window_manager_vulkan::on_event] Instance created!");
+        });
+        utils::dispatch_event<vulkan_device_created_event>(event, eventType, [](const auto&) {
+            log::log("[window_manager_vulkan::on_event] Device created!");
+        });
+    }
 
     void window_manager_vulkan::on_init()
     {

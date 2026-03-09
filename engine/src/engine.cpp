@@ -38,6 +38,8 @@ namespace engine
         while (!windowManager->should_close_main_window())
         {
             windowManager->on_frame_end();
+
+            m_engineEventBus.refresh_events();
         }
         log::log("[engine::start] Game loop stopped");
         return true;

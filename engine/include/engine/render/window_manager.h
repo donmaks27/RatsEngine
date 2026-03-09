@@ -4,6 +4,7 @@
 
 #include <engine/render/render_api.h>
 #include <engine/utils/uuid.h>
+#include <engine/utils/events.h>
 
 #include <EASTL/vector_map.h>
 #include <glm/vec2.hpp>
@@ -19,11 +20,11 @@ namespace engine
 		glm::uvec2 size = { 800, 600 };
     };
 
-    class RATS_ENGINE_EXPORT window_manager
+    class RATS_ENGINE_EXPORT window_manager : public utils::event_listener
     {
     protected:
-        window_manager() = default;
-        virtual ~window_manager() = default;
+        window_manager();
+        virtual ~window_manager() override;
     public:
         window_manager(const window_manager&) = delete;
         window_manager(window_manager&&) = delete;

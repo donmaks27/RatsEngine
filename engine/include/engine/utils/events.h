@@ -25,7 +25,7 @@ namespace engine::utils
         [[nodiscard]] static event_id generate_event_type();
     };
     template<typename EventType>
-    struct event : private event_base
+    struct event : event_base
     {
         [[nodiscard]] static event_id type()
         {
@@ -35,6 +35,15 @@ namespace engine::utils
     };
     template<typename T>
     concept event_type = std::derived_from<T, event<T>> && std::is_final_v<T>;
+
+    template<typename EventType, typename Func> requires event_type<EventType> && std::invocable<Func, const EventType&>
+    void dispatch_event(const event_base& event, const event_id eventType, Func&& func)
+    {
+        if (eventType == EventType::type())
+        {
+            func(static_cast<const EventType&>(event));
+        }
+    }
 
     class RATS_ENGINE_EXPORT event_listener
     {

@@ -43,6 +43,11 @@ namespace engine
         super::clear();
     }
 
+    void window_manager_glfw_vulkan::on_event(const utils::event_base& event, const utils::event_id eventType)
+    {
+        super_vulkan::on_event(event, eventType);
+    }
+
     bool window_manager_glfw_vulkan::create_window_impl(const window_id& id, const window_create_info& info)
     {
         return super::create_window_impl(id, info) && super_vulkan::on_window_created(id);

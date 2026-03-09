@@ -1,8 +1,19 @@
 #include <engine/render/window_manager.h>
+#include <engine/engine.h>
 
 namespace engine
 {
     window_manager* window_manager::s_instance = nullptr;
+
+    window_manager::window_manager()
+    {
+        engine::instance().event_bus().add_listener(this);
+    }
+    window_manager::~window_manager()
+    {
+        engine::instance().event_bus().remove_listener(this);
+    }
+
     window_manager* window_manager::create_instance(const create_info& info)
     {
         if (s_instance != nullptr)
