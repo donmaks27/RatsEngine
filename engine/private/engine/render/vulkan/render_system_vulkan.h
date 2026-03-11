@@ -3,7 +3,7 @@
 #include <engine/core.h>
 #include <engine/render/vulkan/core.h>
 
-#include <engine/render/render_manager.h>
+#include <engine/render/render_system.h>
 #include <engine/utils/events.h>
 
 namespace engine
@@ -11,15 +11,15 @@ namespace engine
     struct vulkan_instance_created_event final : utils::event<vulkan_instance_created_event> {};
     struct vulkan_device_created_event final : utils::event<vulkan_device_created_event> {};
 
-    class render_manager_vulkan final : public render_manager
+    class render_system_vulkan final : public render_system
     {
-        using super = render_manager;
+        using super = render_system;
 
     public:
-        render_manager_vulkan() = default;
-        virtual ~render_manager_vulkan() override = default;
+        render_system_vulkan() = default;
+        virtual ~render_system_vulkan() override = default;
 
-        [[nodiscard]] static render_manager_vulkan* instance() { return s_instanceVulkan; }
+        [[nodiscard]] static render_system_vulkan* instance() { return s_instanceVulkan; }
 
         [[nodiscard]] const vulkan::context& vk_ctx() const { return m_ctx; }
 
@@ -30,7 +30,7 @@ namespace engine
 
     private:
 
-        static render_manager_vulkan* s_instanceVulkan;
+        static render_system_vulkan* s_instanceVulkan;
 
         vulkan::context m_ctx;
         vulkan::command_pool m_graphicsCommandPool;

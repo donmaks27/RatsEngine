@@ -20,24 +20,24 @@ namespace engine
 		glm::uvec2 size = { 800, 600 };
     };
 
-    class RATS_ENGINE_EXPORT window_manager : public utils::event_listener
+    class RATS_ENGINE_EXPORT window_system : public utils::event_listener
     {
     protected:
-        window_manager();
-        virtual ~window_manager() override;
+        window_system();
+        virtual ~window_system() override;
     public:
-        window_manager(const window_manager&) = delete;
-        window_manager(window_manager&&) = delete;
+        window_system(const window_system&) = delete;
+        window_system(window_system&&) = delete;
 
-        window_manager& operator=(const window_manager&) = delete;
-        window_manager& operator=(window_manager&&) = delete;
+        window_system& operator=(const window_system&) = delete;
+        window_system& operator=(window_system&&) = delete;
 
         struct create_info
         {
             render_api api = render_api::vulkan;
         };
-        static window_manager* create_instance(const create_info& info);
-        [[nodiscard]] static window_manager* instance() { return s_instance; }
+        static window_system* create_instance(const create_info& info);
+        [[nodiscard]] static window_system* instance() { return s_instance; }
         static void clear_instance();
 
         [[nodiscard]] auto window_ids() const
@@ -76,7 +76,7 @@ namespace engine
 
     private:
 
-        static window_manager* s_instance;
-        static window_manager* create_instance_impl(const create_info& info);
+        static window_system* s_instance;
+        static window_system* create_instance_impl(const create_info& info);
     };
 }

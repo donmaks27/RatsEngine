@@ -38,8 +38,8 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/core.h"
 	"include/engine/engine.h"
 	"include/engine/render/render_api.h"
-	"include/engine/render/render_manager.h"
-	"include/engine/render/window_manager.h"
+	"include/engine/render/render_system.h"
+	"include/engine/render/window_system.h"
 	"include/engine/utils/log.h"
 	"include/engine/utils/uuid.h"
 	"include/engine/utils/events.h"
@@ -48,10 +48,10 @@ list(APPEND RATS_ENGINE_PRIVATE_HEADERS)
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/utils/events.cpp"
 	"src/engine.cpp"
-	"src/render/render_manager.cpp"
-	"src/render/window_manager.cpp"
-	"src/render/render_manager_constructor.cpp"
-	"src/render/window_manager_constructor.cpp")
+	"src/render/render_system.cpp"
+	"src/render/window_system.cpp"
+	"src/render/render_system_constructor.cpp"
+	"src/render/window_system_constructor.cpp")
 list(APPEND RATS_ENGINE_SRC_FILES_NO_PCH
 	"src/utils/eastl_operator_new.cpp"
 	"src/utils/log.cpp"
@@ -63,18 +63,19 @@ if(${RATS_ENGINE_VULKAN_ENABLE})
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS Vulkan::Vulkan)
 	list(APPEND RATS_ENGINE_PRIVATE_DEFINITIONS
 		"VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"
-		"VULKAN_HPP_NO_EXCEPTIONS=1")
+		"VULKAN_HPP_NO_EXCEPTIONS=1"
+		"VULKAN_HPP_NO_NODISCARD_WARNINGS=1")
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 		"private/engine/render/vulkan/core.h"
-		"private/engine/render/vulkan/render_manager_vulkan.h"
-		"private/engine/render/vulkan/window_manager_vulkan.h"
+		"private/engine/render/vulkan/render_system_vulkan.h"
+		"private/engine/render/vulkan/window_system_vulkan.h"
 		"private/engine/render/vulkan/builder/instance_builder.h"
 		"private/engine/render/vulkan/builder/device_builder.h"
 		"private/engine/render/vulkan/swapchain.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
 		"src/render/vulkan/core.cpp"
-		"src/render/vulkan/render_manager_vulkan.cpp"
-		"src/render/vulkan/window_manager_vulkan.cpp"
+		"src/render/vulkan/render_system_vulkan.cpp"
+		"src/render/vulkan/window_system_vulkan.cpp"
 		"src/render/vulkan/builder/instance_builder.cpp"
 		"src/render/vulkan/builder/device_builder.cpp"
 		"src/render/vulkan/swapchain.cpp")
@@ -86,15 +87,15 @@ if(${RATS_ENGINE_GLFW_ENABLE})
 	find_package(glfw3 CONFIG REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
-		"private/engine/render/glfw/window_manager_glfw.h")
+		"private/engine/render/glfw/window_system_glfw.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/glfw/window_manager_glfw.cpp")
+		"src/render/glfw/window_system_glfw.cpp")
 
 	if(${RATS_ENGINE_VULKAN_ENABLE})
 		list(APPEND RATS_ENGINE_PRIVATE_HEADERS
-			"private/engine/render/glfw/window_manager_glfw_vulkan.h")
+			"private/engine/render/glfw/window_system_glfw_vulkan.h")
 		list(APPEND RATS_ENGINE_SRC_FILES
-			"src/render/glfw/window_manager_glfw_vulkan.cpp")
+			"src/render/glfw/window_system_glfw_vulkan.cpp")
 	endif()
 
 endif()

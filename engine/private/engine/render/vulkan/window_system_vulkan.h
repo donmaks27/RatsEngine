@@ -3,28 +3,28 @@
 #include <engine/core.h>
 #include <engine/render/vulkan/core.h>
 
-#include <engine/render/window_manager.h>
+#include <engine/render/window_system.h>
 #include <engine/render/vulkan/swapchain.h>
 
 namespace engine
 {
-    class render_manager_vulkan;
+    class render_system_vulkan;
 
-    class window_manager_vulkan
+    class window_system_vulkan
     {
-        friend render_manager_vulkan;
+        friend render_system_vulkan;
 
     protected:
-        window_manager_vulkan() = default;
-        virtual ~window_manager_vulkan() = default;
+        window_system_vulkan() = default;
+        virtual ~window_system_vulkan() = default;
     public:
-        window_manager_vulkan(const window_manager_vulkan&) = delete;
-        window_manager_vulkan(window_manager_vulkan&&) = delete;
+        window_system_vulkan(const window_system_vulkan&) = delete;
+        window_system_vulkan(window_system_vulkan&&) = delete;
 
-        window_manager_vulkan& operator=(const window_manager_vulkan&) = delete;
-        window_manager_vulkan& operator=(window_manager_vulkan&&) = delete;
+        window_system_vulkan& operator=(const window_system_vulkan&) = delete;
+        window_system_vulkan& operator=(window_system_vulkan&&) = delete;
 
-        [[nodiscard]] static window_manager_vulkan* instance() { return s_instanceVulkan; }
+        [[nodiscard]] static window_system_vulkan* instance() { return s_instanceVulkan; }
 
         [[nodiscard]] vk::SurfaceKHR surface(const window_id& id) const;
 		[[nodiscard]] const vulkan::swapchain* swapchain(const window_id& id) const;
@@ -46,11 +46,11 @@ namespace engine
 
         struct window_data_vulkan
         {
-            vk::SurfaceKHR surface;
-			vulkan::swapchain swapchain;
+            vk::SurfaceKHR surface = nullptr;
+			vulkan::swapchain swapchain{};
         };
 
-        static window_manager_vulkan* s_instanceVulkan;
+        static window_system_vulkan* s_instanceVulkan;
 
         eastl::vector_map<window_id, window_data_vulkan> m_windowDataVulkan;
 

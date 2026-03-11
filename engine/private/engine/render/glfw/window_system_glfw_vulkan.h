@@ -1,19 +1,19 @@
 #pragma once
 
 #include <engine/core.h>
-#include <engine/render/glfw/window_manager_glfw.h>
-#include <engine/render/vulkan/window_manager_vulkan.h>
+#include <engine/render/glfw/window_system_glfw.h>
+#include <engine/render/vulkan/window_system_vulkan.h>
 
 namespace engine
 {
-    class window_manager_glfw_vulkan : public window_manager_glfw, public window_manager_vulkan
+    class window_system_glfw_vulkan : public window_system_glfw, public window_system_vulkan
     {
-        using super = window_manager_glfw;
-        using super_vulkan = window_manager_vulkan;
+        using super = window_system_glfw;
+        using super_vulkan = window_system_vulkan;
 
     public:
-        window_manager_glfw_vulkan() = default;
-        virtual ~window_manager_glfw_vulkan() override = default;
+        window_system_glfw_vulkan() = default;
+        virtual ~window_system_glfw_vulkan() override = default;
 
     protected:
 

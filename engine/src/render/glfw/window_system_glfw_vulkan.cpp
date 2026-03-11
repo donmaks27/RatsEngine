@@ -1,19 +1,19 @@
-#include <engine/render/glfw/window_manager_glfw_vulkan.h>
+#include <engine/render/glfw/window_system_glfw_vulkan.h>
 
-#include <engine/render/vulkan/render_manager_vulkan.h>
+#include <engine/render/vulkan/render_system_vulkan.h>
 
 #include <GLFW/glfw3.h>
 
 namespace engine
 {
-    eastl::vector<const char*> window_manager_glfw_vulkan::required_instance_extensions() const
+    eastl::vector<const char*> window_system_glfw_vulkan::required_instance_extensions() const
     {
         uint32_t extensionCount = 0;
         const auto extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
         return { extensions, extensions + extensionCount };
     }
 
-    vk::SurfaceKHR window_manager_glfw_vulkan::create_surface_impl(const vulkan::context& ctx, const window_id& id) const
+    vk::SurfaceKHR window_system_glfw_vulkan::create_surface_impl(const vulkan::context& ctx, const window_id& id) const
     {
         const auto iter = m_windowDataGLFW.find(id);
         if (iter == m_windowDataGLFW.end())
@@ -25,34 +25,34 @@ namespace engine
         const auto result = static_cast<vk::Result>(glfwCreateWindowSurface(*ctx.i(), iter->second, nullptr, &surface));
         if (result != vk::Result::eSuccess)
         {
-            log::error("[window_manager_glfw_vulkan::create_surface_impl] Failed to create window surface: {}", result);
+            log::error("[window_system_glfw_vulkan::create_surface_impl] Failed to create window surface: {}", result);
             return nullptr;
         }
 
         return surface;
     }
 
-    bool window_manager_glfw_vulkan::init(const create_info& info)
+    bool window_system_glfw_vulkan::init(const create_info& info)
     {
         super_vulkan::on_init();
         return super::init(info);
     }
-    void window_manager_glfw_vulkan::clear()
+    void window_system_glfw_vulkan::clear()
     {
         super_vulkan::on_clear();
         super::clear();
     }
 
-    bool window_manager_glfw_vulkan::on_event(const utils::event_info& event)
+    bool window_system_glfw_vulkan::on_event(const utils::event_info& event)
     {
         return super_vulkan::handle_event(event);
     }
 
-    bool window_manager_glfw_vulkan::create_window_impl(const window_id& id, const window_create_info& info)
+    bool window_system_glfw_vulkan::create_window_impl(const window_id& id, const window_create_info& info)
     {
         return super::create_window_impl(id, info) && super_vulkan::on_window_created(id);
     }
-    void window_manager_glfw_vulkan::destroy_window_impl(const window_id& id)
+    void window_system_glfw_vulkan::destroy_window_impl(const window_id& id)
     {
         super_vulkan::on_window_destroying(id);
         super::destroy_window_impl(id);

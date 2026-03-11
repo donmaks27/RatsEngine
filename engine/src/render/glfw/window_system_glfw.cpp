@@ -1,4 +1,4 @@
-#include <engine/render/glfw/window_manager_glfw.h>
+#include <engine/render/glfw/window_system_glfw.h>
 
 #include <GLFW/glfw3.h>
 
@@ -12,38 +12,38 @@ namespace
 
 namespace engine
 {
-    bool window_manager_glfw::should_close_window(const window_id& id) const
+    bool window_system_glfw::should_close_window(const window_id& id) const
     {
         const auto iter = m_windowDataGLFW.find(id);
         return (iter != m_windowDataGLFW.end()) && glfwWindowShouldClose(iter->second);
     }
 
-    void window_manager_glfw::on_frame_end()
+    void window_system_glfw::on_frame_end()
     {
         glfwPollEvents();
     }
 
-    bool window_manager_glfw::init(const create_info& info)
+    bool window_system_glfw::init(const create_info& info)
     {
         glfwSetErrorCallback(glfw_error_callback);
         if (!glfwInit())
         {
-            log::fatal("[window_manager_glfw::init] Failed to initialize GLFW!");
+            log::fatal("[window_system_glfw::init] Failed to initialize GLFW!");
             return false;
         }
-        log::info("[window_manager_glfw::init] GLFW initialized");
+        log::info("[window_system_glfw::init] GLFW initialized");
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         return super::init(info);
     }
 
-    void window_manager_glfw::clear()
+    void window_system_glfw::clear()
     {
         clear_GLFW();
         super::clear();
     }
 
-    void window_manager_glfw::clear_GLFW()
+    void window_system_glfw::clear_GLFW()
     {
         for (const auto& [id, window] : m_windowDataGLFW)
         {
@@ -53,20 +53,20 @@ namespace engine
         glfwTerminate();
     }
 
-    bool window_manager_glfw::create_window_impl(const window_id& id, const window_create_info& info)
+    bool window_system_glfw::create_window_impl(const window_id& id, const window_create_info& info)
     {
         const auto window = glfwCreateWindow(static_cast<int>(info.size.x), static_cast<int>(info.size.y), "RatsEngine", nullptr, nullptr);
         if (window == nullptr)
         {
-            log::error("[window_manager_glfw::create_window_impl] Failed to create GLFW window");
+            log::error("[window_system_glfw::create_window_impl] Failed to create GLFW window");
             return false;
         }
-        log::log("[window_manager_glfw::create_window_impl] GLFW window created successfully");
+        log::log("[window_system_glfw::create_window_impl] GLFW window created successfully");
         m_windowDataGLFW.emplace(id, window);
         return true;
     }
 
-    void window_manager_glfw::destroy_window_impl(const window_id& id)
+    void window_system_glfw::destroy_window_impl(const window_id& id)
     {
         const auto iter = m_windowDataGLFW.find(id);
         glfwDestroyWindow(iter->second);

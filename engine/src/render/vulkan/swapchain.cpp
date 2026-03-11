@@ -1,6 +1,6 @@
 #include <engine/render/vulkan/swapchain.h>
 
-#include <engine/render/vulkan/render_manager_vulkan.h>
+#include <engine/render/vulkan/render_system_vulkan.h>
 
 #include <EASTL/span.h>
 
@@ -150,7 +150,7 @@ namespace engine::vulkan
 
 	void swapchain::clear()
 	{
-		clear(render_manager_vulkan::instance()->vk_ctx());
+		clear(render_system_vulkan::instance()->vk_ctx());
 	}
 	void swapchain::clear(const context& ctx)
 	{

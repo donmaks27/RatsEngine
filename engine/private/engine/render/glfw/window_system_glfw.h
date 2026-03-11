@@ -1,19 +1,19 @@
 #pragma once
 
 #include <engine/core.h>
-#include <engine/render/window_manager.h>
+#include <engine/render/window_system.h>
 
 struct GLFWwindow;
 
 namespace engine
 {
-    class window_manager_glfw : public window_manager
+    class window_system_glfw : public window_system
     {
-        using super = window_manager;
+        using super = window_system;
 
     protected:
-        window_manager_glfw() = default;
-        virtual ~window_manager_glfw() override = default;
+        window_system_glfw() = default;
+        virtual ~window_system_glfw() override = default;
     public:
 
         [[nodiscard]] virtual bool should_close_window(const window_id& id) const override;
