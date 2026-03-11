@@ -4,11 +4,10 @@
 
 #include <engine/core.h>
 
-#include <memory>
-
 #include <EASTL/deque.h>
 #include <EASTL/vector_map.h>
 #include <EASTL/vector_set.h>
+#include <EASTL/unique_ptr.h>
 
 namespace engine::utils
 {
@@ -36,14 +35,27 @@ namespace engine::utils
     template<typename T>
     concept event_type = std::derived_from<T, event<T>> && std::is_final_v<T>;
 
-    template<typename EventType, typename Func> requires event_type<EventType> && std::invocable<Func, const EventType&>
-    void dispatch_event(const event_base& event, const event_id eventType, Func&& func)
+    struct RATS_ENGINE_EXPORT event_info
     {
-        if (eventType == EventType::type())
+        const event_base& event;
+        const event_id eventType;
+
+        template<typename EventType, typename Func> requires event_type<EventType> && (std::invocable<Func, const EventType&> || std::invocable<Func>)
+        void dispatch(Func&& func) const
         {
-            func(static_cast<const EventType&>(event));
+            if (eventType == EventType::type())
+            {
+                if constexpr (std::invocable<Func, const EventType&>)
+                {
+                    func(static_cast<const EventType&>(event));
+                }
+                else
+                {
+                    func();
+                }
+            }
         }
-    }
+    };
 
     class RATS_ENGINE_EXPORT event_listener
     {
@@ -53,7 +65,7 @@ namespace engine::utils
         event_listener() = default;
         virtual ~event_listener() = default;
 
-        virtual void on_event(const event_base& event, event_id eventType) = 0;
+        virtual void on_event(const event_info& event) = 0;
     };
 
     class RATS_ENGINE_EXPORT event_bus final
@@ -99,7 +111,7 @@ namespace engine::utils
         {
             for (const auto& listener : m_listeners)
             {
-                listener->on_event(event, EventType::type());
+                listener->on_event(event_info{event, EventType::type()});
             }
         }
 
@@ -145,7 +157,7 @@ namespace engine::utils
         };
 
         eastl::vector_set<event_listener*> m_listeners;
-        eastl::vector_map<event_id, std::unique_ptr<channel_base>> m_eventChannels;
+        eastl::vector_map<event_id, eastl::unique_ptr<channel_base>> m_eventChannels;
 
         template<typename EventType> requires event_type<EventType>
         channel<EventType>& event_channel()
@@ -157,7 +169,7 @@ namespace engine::utils
                 return *reinterpret_cast<channel<EventType>*>(iter->second.get());
             }
             auto* ch = new channel<EventType>();
-            m_eventChannels.emplace(id, std::unique_ptr<channel_base>(ch));
+            m_eventChannels.emplace(id, eastl::unique_ptr<channel_base>(ch));
             return *ch;
         }
         template<typename EventType> requires event_type<EventType>

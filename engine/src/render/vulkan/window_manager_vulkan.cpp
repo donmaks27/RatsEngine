@@ -7,13 +7,13 @@ namespace engine
 {
     window_manager_vulkan* window_manager_vulkan::s_instanceVulkan = nullptr;
 
-    void window_manager_vulkan::on_event(const utils::event_base& event, const utils::event_id eventType)
+    void window_manager_vulkan::handle_event(const utils::event_info& event)
     {
-        utils::dispatch_event<vulkan_instance_created_event>(event, eventType, [](const auto&) {
-            log::log("[window_manager_vulkan::on_event] Instance created!");
+        event.dispatch<vulkan_instance_created_event>([] {
+            log::log("[window_manager_vulkan::handle_event] Instance created!");
         });
-        utils::dispatch_event<vulkan_device_created_event>(event, eventType, [](const auto&) {
-            log::log("[window_manager_vulkan::on_event] Device created!");
+        event.dispatch<vulkan_instance_created_event>([] {
+            log::log("[window_manager_vulkan::handle_event] Device created!");
         });
     }
 
