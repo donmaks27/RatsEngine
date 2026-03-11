@@ -7,13 +7,12 @@ namespace engine
 {
     window_manager_vulkan* window_manager_vulkan::s_instanceVulkan = nullptr;
 
-    void window_manager_vulkan::handle_event(const utils::event_info& event)
+    bool window_manager_vulkan::handle_event(const utils::event_info& event)
     {
-        event.dispatch<vulkan_instance_created_event>([] {
-            log::log("[window_manager_vulkan::handle_event] Instance created!");
-        });
-        event.dispatch<vulkan_instance_created_event>([] {
-            log::log("[window_manager_vulkan::handle_event] Device created!");
+        return event.dispatch<vulkan_instance_created_event>([this] {
+            return on_instance_created();
+        }) && event.dispatch<vulkan_device_created_event>([this] {
+            return on_device_created();
         });
     }
 
@@ -41,17 +40,17 @@ namespace engine
         }
     }
 
-    bool window_manager_vulkan::on_instance_created(const vulkan::context& ctx)
+    bool window_manager_vulkan::on_instance_created()
     {
-        const auto windowManager = window_manager::instance();
-        return std::ranges::all_of(windowManager->window_ids(), [this, &ctx](const window_id& id) {
+        const auto& ctx = render_manager_vulkan::instance()->vk_ctx();
+        return std::ranges::all_of(window_manager::instance()->window_ids(), [this, &ctx](const window_id& id) {
             return create_surface(ctx, id);
         });
     }
-    bool window_manager_vulkan::on_device_created(const vulkan::context& ctx)
+    bool window_manager_vulkan::on_device_created()
     {
-        const auto windowManager = window_manager::instance();
-        return std::ranges::all_of(windowManager->window_ids(), [this, &ctx](const window_id& id) {
+        const auto& ctx = render_manager_vulkan::instance()->vk_ctx();
+        return std::ranges::all_of(window_manager::instance()->window_ids(), [this, &ctx](const window_id& id) {
             return create_swapchain(ctx, id);
         });
     }

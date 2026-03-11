@@ -34,7 +34,7 @@ namespace engine
         [[nodiscard]] virtual eastl::vector<const char*> required_instance_extensions() const = 0;
         [[nodiscard]] virtual vk::SurfaceKHR create_surface_impl(const vulkan::context& ctx, const window_id& id) const = 0;
 
-        void handle_event(const utils::event_info& event);
+        bool handle_event(const utils::event_info& event);
 
         void on_init();
         static void on_clear();
@@ -55,8 +55,8 @@ namespace engine
         eastl::vector_map<window_id, window_data_vulkan> m_windowDataVulkan;
 
 
-        [[nodiscard]] bool on_instance_created(const vulkan::context& ctx);
-        [[nodiscard]] bool on_device_created(const vulkan::context& ctx);
+        [[nodiscard]] bool on_instance_created();
+        [[nodiscard]] bool on_device_created();
 
         [[nodiscard]] bool create_surface(const vulkan::context& ctx, const window_id& id);
 		[[nodiscard]] bool create_swapchain(const vulkan::context& ctx, const window_id& id);

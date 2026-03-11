@@ -36,18 +36,16 @@ namespace engine
 			log::fatal("[render_manager_vulkan::init] Failed to create Vulkan instance!");
 			return false;
 		}
-		event_bus.post_immediate(vulkan_instance_created_event());
-    	if (!windowManager->on_instance_created(m_ctx))
-    	{
-    		return false;
-    	}
+		if (!event_bus.post_immediate<vulkan_instance_created_event>({}))
+		{
+			return false;
+		}
     	if (!create_device())
     	{
     		log::fatal("[render_manager_vulkan::init] Failed to create Vulkan device!");
     		return false;
     	}
-		event_bus.post_immediate(vulkan_device_created_event());
-		if (!windowManager->on_device_created(m_ctx))
+		if (!event_bus.post_immediate<vulkan_device_created_event>({}))
 		{
 			return false;
 		}

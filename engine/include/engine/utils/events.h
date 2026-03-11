@@ -4,6 +4,9 @@
 
 #include <engine/core.h>
 
+#include <cstdint>
+#include <algorithm>
+
 #include <EASTL/deque.h>
 #include <EASTL/vector_map.h>
 #include <EASTL/vector_set.h>
@@ -19,7 +22,6 @@ namespace engine::utils
     struct RATS_ENGINE_EXPORT event_base
     {
     protected:
-        event_base() = default;
 
         [[nodiscard]] static event_id generate_event_type();
     };
@@ -41,11 +43,19 @@ namespace engine::utils
         const event_id eventType;
 
         template<typename EventType, typename Func> requires event_type<EventType> && (std::invocable<Func, const EventType&> || std::invocable<Func>)
-        void dispatch(Func&& func) const
+        bool dispatch(Func&& func) const
         {
             if (eventType == EventType::type())
             {
-                if constexpr (std::invocable<Func, const EventType&>)
+                if constexpr (std::predicate<Func, const EventType&>)
+                {
+                    return func(static_cast<const EventType&>(event));
+                }
+                else if constexpr (std::predicate<Func>)
+                {
+                    return func();
+                }
+                else if constexpr (std::invocable<Func, const EventType&>)
                 {
                     func(static_cast<const EventType&>(event));
                 }
@@ -54,6 +64,7 @@ namespace engine::utils
                     func();
                 }
             }
+            return true;
         }
     };
 
@@ -65,7 +76,7 @@ namespace engine::utils
         event_listener() = default;
         virtual ~event_listener() = default;
 
-        virtual void on_event(const event_info& event) = 0;
+        virtual bool on_event(const event_info& event) = 0;
     };
 
     class RATS_ENGINE_EXPORT event_bus final
@@ -100,21 +111,19 @@ namespace engine::utils
 
         void add_listener(event_listener* listener);
         void remove_listener(event_listener* listener);
+        template<typename EventType> requires event_type<EventType>
+        bool post_immediate(const EventType& event)
+        {
+            return std::ranges::all_of(m_listeners, [&event](event_listener* listener) {
+                return listener->on_event(event_info{event, EventType::type()});
+            });
+        }
 
         template<typename EventType> requires event_type<EventType>
         void post(EventType&& event)
         {
             event_channel<EventType>().deferredEvents.push_back(std::forward<EventType>(event));
         }
-        template<typename EventType> requires event_type<EventType>
-        void post_immediate(const EventType& event)
-        {
-            for (const auto& listener : m_listeners)
-            {
-                listener->on_event(event_info{event, EventType::type()});
-            }
-        }
-
         void refresh_events();
         template<typename EventType> requires event_type<EventType>
         events_list<EventType> events() const

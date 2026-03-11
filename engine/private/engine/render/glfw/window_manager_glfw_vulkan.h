@@ -23,7 +23,7 @@ namespace engine
         virtual bool init(const create_info& info) override;
         virtual void clear() override;
 
-        virtual void on_event(const utils::event_info& event) override;
+        virtual bool on_event(const utils::event_info& event) override;
 
         virtual bool create_window_impl(const window_id& id, const window_create_info& info) override;
         virtual void destroy_window_impl(const window_id& id) override;
