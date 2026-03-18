@@ -36,4 +36,25 @@ namespace engine::log
     {
         fmt::print(fmt::fg(typeToColor(t)), "{} {}\n", typeToString(t), msg);
     }
+
+    logger::logger(std::string_view category)
+		: m_prefix(!category.empty() ? fmt::format("[{}] ", category) : std::string{})
+    {
+    }
+    logger::logger(std::string_view category, const logger& parent)
+    {
+	    if (category.empty())
+	    {
+		    m_prefix = parent.m_prefix;
+	    }
+	    else
+	    {
+		    std::string_view parentPrefix = parent.m_prefix;
+		    if (!parentPrefix.empty())
+		    {
+			    parentPrefix.remove_suffix(1);
+		    }
+		    m_prefix = fmt::format("{}[{}] ", parentPrefix, category);
+	    }
+    }
 }
