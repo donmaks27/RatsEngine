@@ -5,6 +5,8 @@
 
 namespace engine
 {
+    const log::logger window_system_vulkan::Log = window_system_vulkan::logger();
+
     window_system_vulkan* window_system_vulkan::s_instanceVulkan = nullptr;
 
     bool window_system_vulkan::handle_event(const utils::event_info& event)
@@ -65,7 +67,7 @@ namespace engine
         const auto surface = create_surface_impl(ctx, id);
         if (surface == nullptr)
         {
-            log::fatal("[window_system_vulkan::create_surface] Failed to create surface for window {}!", id);
+            Log.fatal("Failed to create surface for window {}!", id);
             return false;
         }
         m_windowDataVulkan[id].surface = surface;
@@ -88,7 +90,7 @@ namespace engine
 		const auto size = window_system::instance()->window_size(id);
         if (!m_windowDataVulkan[id].swapchain.init(ctx, { .surface = surface(id), .surfaceSize = size }))
         {
-            log::fatal("[window_system_vulkan::create_swapchain] Failed to create swapchain for window {}!", id);
+            Log.fatal("Failed to create swapchain for window {}!", id);
             return false;
         }
         return true;

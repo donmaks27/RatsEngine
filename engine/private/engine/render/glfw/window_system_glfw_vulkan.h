@@ -15,6 +15,8 @@ namespace engine
         window_system_glfw_vulkan() = default;
         virtual ~window_system_glfw_vulkan() override = default;
 
+        [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
+
     protected:
 
         [[nodiscard]] virtual eastl::vector<const char*> required_instance_extensions() const override;
@@ -27,5 +29,9 @@ namespace engine
 
         virtual bool create_window_impl(const window_id& id, const window_create_info& info) override;
         virtual void destroy_window_impl(const window_id& id) override;
+
+    private:
+
+        static const log::logger Log;
     };
 }

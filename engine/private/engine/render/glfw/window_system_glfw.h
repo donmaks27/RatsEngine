@@ -16,6 +16,8 @@ namespace engine
         virtual ~window_system_glfw() override = default;
     public:
 
+        [[nodiscard]] static constexpr log::logger logger() { return log::logger("GLFW", super::logger());  }
+
         [[nodiscard]] virtual bool should_close_window(const window_id& id) const override;
 
         virtual void on_frame_end() override;
@@ -31,6 +33,8 @@ namespace engine
         virtual void destroy_window_impl(const window_id& id) override;
 
     private:
+
+        static const log::logger Log;
 
         void clear_GLFW();
     };

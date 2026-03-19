@@ -38,7 +38,6 @@ namespace engine
     private:
 
         static const log::logger Log;
-
         static render_system* s_instance;
         static render_system* create_instance_impl(const create_info& info);
     };

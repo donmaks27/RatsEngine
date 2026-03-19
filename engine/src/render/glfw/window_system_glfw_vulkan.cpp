@@ -6,6 +6,8 @@
 
 namespace engine
 {
+    const log::logger window_system_glfw_vulkan::Log = window_system_glfw_vulkan::logger();
+
     eastl::vector<const char*> window_system_glfw_vulkan::required_instance_extensions() const
     {
         uint32_t extensionCount = 0;
@@ -25,7 +27,7 @@ namespace engine
         const auto result = static_cast<vk::Result>(glfwCreateWindowSurface(*ctx.i(), iter->second, nullptr, &surface));
         if (result != vk::Result::eSuccess)
         {
-            log::error("[window_system_glfw_vulkan::create_surface_impl] Failed to create window surface: {}", result);
+            Log.error("Failed to create window surface: {}", result);
             return nullptr;
         }
 

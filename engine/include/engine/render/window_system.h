@@ -62,8 +62,6 @@ namespace engine
 
     protected:
 
-        static const log::logger Log;
-
         struct window_data
         {
 			glm::uvec2 size = { 0, 0 };
@@ -80,6 +78,7 @@ namespace engine
 
     private:
 
+        static const log::logger Log;
         static window_system* s_instance;
         static window_system* create_instance_impl(const create_info& info);
     };

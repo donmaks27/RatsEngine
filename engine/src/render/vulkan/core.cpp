@@ -4,6 +4,11 @@
 
 namespace engine::vulkan
 {
+	namespace 
+	{
+        const auto& Log = logger_vulkan();
+	}
+
     command_pool::command_pool(command_pool&& value) noexcept
     {
         m_value = value.m_value;
@@ -52,7 +57,7 @@ namespace engine::vulkan
         });
         if (buffers.result != vk::Result::eSuccess)
         {
-            log::warning("[vulkan::command_pool::command_buffers] Failed to allocate command buffers: {}", buffers.result);
+            Log.warning("command_pool. Failed to allocate command buffers: {}", buffers.result);
             return {};
         }
         eastl::vector<vk::CommandBuffer> result;
@@ -73,7 +78,7 @@ namespace engine::vulkan
         });
         if (buffer.result != vk::Result::eSuccess)
         {
-            log::warning("[vulkan::command_pool::command_buffer] Failed to allocate command buffer: {}", buffer.result);
+            Log.warning("command_pool. Failed to allocate command buffer: {}", buffer.result);
             return {};
         }
         return buffer.value[0];
@@ -88,7 +93,7 @@ namespace engine::vulkan
         const auto commandPool = ctx.d()->createCommandPool({ flags, family_index() });
         if (commandPool.result != vk::Result::eSuccess)
         {
-            log::error("[vulkan::queue::command_pool] Failed to create command pool: {}", commandPool.result);
+            Log.error("queue. Failed to create command pool: {}", commandPool.result);
             return nullptr;
         }
         vulkan::command_pool result;

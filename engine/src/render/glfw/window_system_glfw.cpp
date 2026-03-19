@@ -12,6 +12,8 @@ namespace
 
 namespace engine
 {
+    const log::logger window_system_glfw::Log = window_system_glfw::logger();
+
     bool window_system_glfw::should_close_window(const window_id& id) const
     {
         const auto iter = m_windowDataGLFW.find(id);
@@ -28,10 +30,10 @@ namespace engine
         glfwSetErrorCallback(glfw_error_callback);
         if (!glfwInit())
         {
-            log::fatal("[window_system_glfw::init] Failed to initialize GLFW!");
+            Log.fatal("Failed to initialize GLFW!");
             return false;
         }
-        log::info("[window_system_glfw::init] GLFW initialized");
+        Log.info("GLFW initialized");
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         return super::init(info);
@@ -58,10 +60,10 @@ namespace engine
         const auto window = glfwCreateWindow(static_cast<int>(info.size.x), static_cast<int>(info.size.y), "RatsEngine", nullptr, nullptr);
         if (window == nullptr)
         {
-            log::error("[window_system_glfw::create_window_impl] Failed to create GLFW window");
+            Log.error("Failed to create GLFW window");
             return false;
         }
-        log::log("[window_system_glfw::create_window_impl] GLFW window created successfully");
+        Log.log("GLFW window created successfully");
         m_windowDataGLFW.emplace(id, window);
         return true;
     }

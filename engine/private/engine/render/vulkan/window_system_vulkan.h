@@ -24,6 +24,8 @@ namespace engine
         window_system_vulkan& operator=(const window_system_vulkan&) = delete;
         window_system_vulkan& operator=(window_system_vulkan&&) = delete;
 
+        [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(window_system::logger()); }
+
         [[nodiscard]] static window_system_vulkan* instance() { return s_instanceVulkan; }
 
         [[nodiscard]] vk::SurfaceKHR surface(const window_id& id) const;
@@ -50,6 +52,7 @@ namespace engine
 			vulkan::swapchain swapchain{};
         };
 
+        static const log::logger Log;
         static window_system_vulkan* s_instanceVulkan;
 
         eastl::vector_map<window_id, window_data_vulkan> m_windowDataVulkan;

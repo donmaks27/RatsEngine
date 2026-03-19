@@ -18,6 +18,8 @@ namespace engine
 		constexpr auto MinDeviceVulkanApiVersion = vk::ApiVersion11;
 	}
 
+	const log::logger render_system_vulkan::Log = render_system_vulkan::logger();
+
 	render_system_vulkan* render_system_vulkan::s_instanceVulkan = nullptr;
 
 	bool render_system_vulkan::init(const create_info& info)
@@ -32,7 +34,7 @@ namespace engine
 		auto& event_bus = engine::instance().event_bus();
 		if (!create_instance(info))
 		{
-			log::fatal("[render_system_vulkan::init] Failed to create Vulkan instance!");
+			Log.fatal("Failed to create Vulkan instance!");
 			return false;
 		}
 		if (!event_bus.post_immediate<vulkan_instance_created_event>({}))
@@ -41,7 +43,7 @@ namespace engine
 		}
     	if (!create_device())
     	{
-    		log::fatal("[render_system_vulkan::init] Failed to create Vulkan device!");
+			Log.fatal("Failed to create Vulkan device!");
     		return false;
     	}
 		if (!event_bus.post_immediate<vulkan_device_created_event>({}))
@@ -50,7 +52,7 @@ namespace engine
 		}
 		if (!create_command_pools())
 		{
-			log::fatal("[render_system_vulkan::init] Failed to create Vulkan command pools!");
+			Log.fatal("Failed to create Vulkan command pools!");
 			return false;
 		}
 

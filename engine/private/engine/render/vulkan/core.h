@@ -30,6 +30,7 @@ namespace engine::vulkan
     class context;
 
     [[nodiscard]] constexpr log::logger logger_vulkan() { return log::logger("Vulkan", logger_engine()); }
+    [[nodiscard]] constexpr log::logger logger_vulkan(const log::logger& parent) { return log::logger("vulkan", parent); }
 
     template<typename AccessType, typename StoreType = AccessType>
     class _value_wrapper

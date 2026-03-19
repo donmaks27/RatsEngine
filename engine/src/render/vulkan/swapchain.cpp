@@ -8,6 +8,8 @@ namespace engine::vulkan
 {
 	namespace 
 	{
+		const auto Log = log::logger("swapchain", logger_vulkan());
+
 		[[nodiscard]] vk::PresentModeKHR pickPresentMode(const eastl::span<const vk::PresentModeKHR> modes, const bool preferDisableVSync)
 		{
 			if (preferDisableVSync)
@@ -62,7 +64,7 @@ namespace engine::vulkan
 	{
 		if (createInfo.surface == nullptr)
 		{
-			log::warning("[vulkan::swapchain::init] Surface is null");
+			Log.warning("Surface is null");
 			clear();
 			return false;
 		}
@@ -72,7 +74,7 @@ namespace engine::vulkan
 		const auto& presentQueue = device.queue(queue_type::present);
 		if (physicalDevice.getSurfaceSupportKHR(presentQueue.family_index(), createInfo.surface).value != vk::True)
 		{
-			log::warning("[vulkan::swapchain::init] Unsupported surface for current present queue");
+			Log.warning("Unsupported surface for current present queue");
 			clear();
 			return true;
 		}
@@ -118,7 +120,7 @@ namespace engine::vulkan
 		}
 		if (swapchainValue.result != vk::Result::eSuccess)
 		{
-			log::error("[vulkan::swapchain::init] Failed to create swapchain: {}", swapchainValue.result);
+			Log.error("Failed to create swapchain: {}", swapchainValue.result);
 			clear();
 			return false;
 		}
@@ -129,7 +131,7 @@ namespace engine::vulkan
 			const auto semaphoreResult = device->createSemaphore({});
 			if (semaphoreResult.result != vk::Result::eSuccess)
 			{
-				log::error("[vulkan::swapchain::init] Failed to create image acquired semaphore: {}", semaphoreResult.result);
+				Log.error("Failed to create image acquired semaphore: {}", semaphoreResult.result);
 				clear();
 				return false;
 			}
@@ -138,7 +140,7 @@ namespace engine::vulkan
 		const auto swapchainImages = device->getSwapchainImagesKHR(swapchainValue.value);
 		if (swapchainImages.result != vk::Result::eSuccess)
 		{
-			log::error("[vulkan::swapchain::init] Failed to get swapchain images: {}", swapchainImages.result);
+			Log.error("Failed to get swapchain images: {}", swapchainImages.result);
 			clear();
 			return false;
 		}
@@ -171,12 +173,12 @@ namespace engine::vulkan
 	{
 		if (!valid())
 		{
-			log::warning("[vulkan::swapchain::acquire_next_image] Swapchain is not valid");
+			Log.warning("Swapchain is not valid");
 			return false;
 		}
 		if (outdated())
 		{
-			log::warning("[vulkan::swapchain::acquire_next_image] Swapchain is outdated");
+			Log.warning("Swapchain is outdated");
 			return false;
 		}
 
@@ -186,14 +188,14 @@ namespace engine::vulkan
 			switch (acquireResult.result)
 			{
 			case vk::Result::eSuboptimalKHR:
-				log::log("[vulkan::swapchain::acquire_next_image] Swapchain is suboptimal");
+				Log.log("Swapchain is suboptimal");
 				break;
 			case vk::Result::eErrorOutOfDateKHR:
-				log::log("[vulkan::swapchain::acquire_next_image] Swapchain is out of date");
+				Log.log("Swapchain is out of date");
 				break;
 
 			default:
-				log::error("[vulkan::swapchain::acquire_next_image] Failed to acquire next image: {}", acquireResult.result);
+				Log.error("Failed to acquire next image: {}", acquireResult.result);
 				return false;
 			}
 
@@ -208,17 +210,17 @@ namespace engine::vulkan
 	{
 		if (!valid())
 		{
-			log::warning("[vulkan::swapchain::present] Swapchain is not valid");
+			Log.warning("Swapchain is not valid");
 			return false;
 		}
 		if (outdated())
 		{
-			log::warning("[vulkan::swapchain::present] Swapchain is outdated");
+			Log.warning("Swapchain is outdated");
 			return false;
 		}
 		if (m_currentImageIndex >= m_images.size())
 		{
-			log::warning("[vulkan::swapchain::present] No image acquired");
+			Log.warning("No image acquired");
 			return false;
 		}
 		
@@ -231,13 +233,13 @@ namespace engine::vulkan
 			switch (result)
 			{
 			case vk::Result::eSuboptimalKHR:
-				log::log("[vulkan::swapchain::present] Swapchain is suboptimal");
+				Log.log("Swapchain is suboptimal");
 				break;
 			case vk::Result::eErrorOutOfDateKHR:
-				log::log("[vulkan::swapchain::present] Swapchain is out of date");
+				Log.log("Swapchain is out of date");
 				break;
 			default:
-				log::error("[vulkan::swapchain::present] Failed to present image: {}", result);
+				Log.error("Failed to present image: {}", result);
 				return false;
 			}
 			m_outdated = true;
