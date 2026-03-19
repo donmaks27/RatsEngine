@@ -4,16 +4,19 @@ namespace engine::vulkan
 {
 	namespace
 	{
+		const auto LogVulkan = logger_vulkan();
+		const auto Log = log::logger("instance_builder", logger_vulkan());
+
 		vk::Bool32 vulkan_debug_callback(const vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
 			const vk::DebugUtilsMessageTypeFlagsEXT type, const vk::DebugUtilsMessengerCallbackDataEXT* data, void* userData)
 		{
 			switch (severity)
 			{
 				case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:
-					log::warning("[Vulkan] {}", data->pMessage);
+					LogVulkan.warning(data->pMessage);
 					break;
 				case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
-					log::error("[Vulkan] {}", data->pMessage);
+					LogVulkan.error(data->pMessage);
 					break;
 				default: ;
 			}
@@ -84,7 +87,7 @@ namespace engine::vulkan
     instance instance_builder::build()
     {
         vk::detail::defaultDispatchLoaderDynamic.init(vkGetInstanceProcAddr);
-
+		
 		eastl::vector<const char*> validationLayers;
 		vk::DebugUtilsMessengerCreateInfoEXT debugMessengerInfo{};
 		if constexpr (config::vulkan::validation_layers)
@@ -92,7 +95,7 @@ namespace engine::vulkan
 			validationLayers.emplace_back("VK_LAYER_KHRONOS_validation");
 			if (!check_validation_layer_support(validationLayers))
 			{
-				log::fatal("[vulkan::instance_builder::build] Some of the validation layers are not supported on this device!");
+				Log.fatal("build: Some of the validation layers are not supported on this device!");
 				return nullptr;
 			}
 			m_requiredExtensions.emplace(vk::EXTDebugUtilsExtensionName);
@@ -119,7 +122,7 @@ namespace engine::vulkan
 		auto vulkanInstance = vk::createInstanceUnique(instanceInfo);
 		if (vulkanInstance.result != vk::Result::eSuccess)
 		{
-			log::fatal("[vulkan::instance_builder::build] Failed to create Vulkan instance! Error: {}", vulkanInstance.result);
+			Log.fatal("build: Failed to create Vulkan instance! Error: {}", vulkanInstance.result);
 			return nullptr;
 		}
 
@@ -132,7 +135,7 @@ namespace engine::vulkan
 			auto debugMessenger = result->createDebugUtilsMessengerEXTUnique(debugMessengerInfo);
 			if (debugMessenger.result != vk::Result::eSuccess)
 			{
-				log::fatal("[vulkan::instance_builder::build] Failed to create Vulkan debug messenger! Error: {}", debugMessenger.result);
+				Log.fatal("build: Failed to create Vulkan debug messenger! Error: {}", debugMessenger.result);
 				return nullptr;
 			}
 			result.m_debugMessenger = std::move(debugMessenger.value);

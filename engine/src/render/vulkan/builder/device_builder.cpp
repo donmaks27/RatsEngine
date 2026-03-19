@@ -4,6 +4,8 @@ namespace engine::vulkan
 {
 	namespace
 	{
+        const auto Log = log::logger("device_builder", logger_vulkan());
+
         using feature_location = device_builder::feature_location;
 
 		struct device_features_data
@@ -273,10 +275,10 @@ namespace engine::vulkan
     	if (gather_physical_devices(i, surface))
     	{
     		calculate_physical_devices_score();
-    		log::log("[vulkan::device_builder::collect_physical_devices] Found {} devices:", m_physicalDevices.size());
+            Log.log("Found {} devices:", m_physicalDevices.size());
     		for (std::size_t index = 0; index < m_physicalDevices.size(); ++index)
     		{
-    			log::log("[vulkan::device_builder::collect_physical_devices]   {}. {} ({})",
+                Log.log("  {}. {} ({})",
 					index + 1, m_physicalDevices[index].name, m_physicalDevices[index].score);
     		}
     	}
@@ -499,7 +501,7 @@ namespace engine::vulkan
     {
         if (m_physicalDevices.empty())
         {
-            log::fatal("[vulkan::device_builder::build] No allowed physical devices found!");
+            Log.fatal("No allowed physical devices found!");
             return nullptr;
         }
 
@@ -533,7 +535,7 @@ namespace engine::vulkan
 		});
         if (deviceValue.result != vk::Result::eSuccess)
         {
-            log::fatal("[vulkan::device_builder::build] Failed to create Vulkan device! Error: {}", deviceValue.result);
+            Log.fatal("Failed to create Vulkan device! Error: {}", deviceValue.result);
             return nullptr;
 		}
 

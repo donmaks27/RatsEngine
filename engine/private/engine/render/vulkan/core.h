@@ -29,6 +29,8 @@ namespace engine::vulkan
     class queue;
     class context;
 
+    [[nodiscard]] constexpr log::logger logger_vulkan() { return log::logger("Vulkan", logger_engine()); }
+
     template<typename AccessType, typename StoreType = AccessType>
     class _value_wrapper
     {
