@@ -39,11 +39,37 @@ namespace engine::log
     {
     public:
         constexpr logger() = default;
-        explicit logger(std::string_view category);
-        logger(std::string_view category, const logger& parent);
-        logger(const logger&) = default;
+        constexpr explicit logger(const std::string_view category)
+        {
+	        if (!category.empty())
+	        {
+                m_prefix = '[';
+                m_prefix += category;
+                m_prefix += "] ";
+	        }
+        }
+        constexpr logger(std::string_view category, const logger& parent)
+        {
+            if (category.empty())
+            {
+                m_prefix = parent.m_prefix;
+            }
+            else
+            {
+                std::string_view parentPrefix = parent.m_prefix;
+                if (!parentPrefix.empty())
+                {
+                    parentPrefix.remove_suffix(1);
+                }
+                m_prefix = parentPrefix;
+                m_prefix += '[';
+                m_prefix += category;
+                m_prefix += "] ";
+            }
+        }
+        constexpr logger(const logger&) = default;
 
-        logger& operator=(const logger&) = default;
+        constexpr logger& operator=(const logger&) = default;
 
         void print(const type t, std::string_view msg) const { log::print(t, "{}{}", m_prefix, msg); }
         template<typename... Args>

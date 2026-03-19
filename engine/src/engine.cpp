@@ -6,15 +6,7 @@
 
 namespace engine
 {
-    const log::logger& engine::logger()
-    {
-	    static const log::logger logger("engine");
-	    return logger;
-    }
-    namespace
-	{
-        const auto& Log = engine::logger();
-	}
+    const log::logger engine::Log = engine::logger();
 
     engine::~engine()
     {

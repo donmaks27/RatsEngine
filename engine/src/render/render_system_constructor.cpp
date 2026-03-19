@@ -8,11 +8,6 @@
 
 namespace engine
 {
-	namespace
-	{
-        const auto& Log = render_system::logger();
-	}
-
     render_system* render_system::create_instance_impl(const create_info& info)
     {
         switch (info.api)

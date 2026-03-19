@@ -17,7 +17,7 @@ namespace engine
         engine& operator=(const engine&) = delete;
         engine& operator=(engine&&) = delete;
 
-        static const log::logger& logger();
+        [[nodiscard]] static constexpr log::logger logger() { return logger_engine(); }
 
         static engine& instance()
         {
@@ -31,6 +31,8 @@ namespace engine
         [[nodiscard]] utils::event_bus& event_bus() { return m_engineEventBus; }
 
     private:
+
+        static const log::logger Log;
 
         utils::event_bus m_engineEventBus{};
 

@@ -18,7 +18,7 @@ namespace engine
         render_system& operator=(const render_system&) = delete;
         render_system& operator=(render_system&&) = delete;
 
-        static const log::logger& logger();
+        [[nodiscard]] static constexpr log::logger logger() { return log::logger("render_system", logger_engine()); }
 
         struct create_info
         {
@@ -36,6 +36,8 @@ namespace engine
         virtual void clear();
 
     private:
+
+        static const log::logger Log;
 
         static render_system* s_instance;
         static render_system* create_instance_impl(const create_info& info);

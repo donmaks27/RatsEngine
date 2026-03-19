@@ -16,11 +16,6 @@
 
 namespace engine
 {
-	namespace
-	{
-        const auto& Log = window_system::logger();
-	}
-
     window_system* window_system::create_instance_impl(const create_info& info)
     {
 #ifdef RATS_ENGINE_WINDOW_NONE

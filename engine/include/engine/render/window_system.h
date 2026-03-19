@@ -32,7 +32,7 @@ namespace engine
         window_system& operator=(const window_system&) = delete;
         window_system& operator=(window_system&&) = delete;
 
-        static const log::logger& logger();
+        [[nodiscard]] static constexpr log::logger logger() { return log::logger("window_system", logger_engine()); }
 
         struct create_info
         {
@@ -61,6 +61,8 @@ namespace engine
         virtual void on_frame_end() {}
 
     protected:
+
+        static const log::logger Log;
 
         struct window_data
         {

@@ -3,15 +3,7 @@
 
 namespace engine
 {
-    const log::logger& window_system::logger()
-    {
-        static const log::logger logger("window_system", engine::logger());
-        return logger;
-    }
-    namespace
-    {
-        const auto& Log = window_system::logger();
-    }
+    const log::logger window_system::Log = window_system::logger();
 
     window_system* window_system::s_instance = nullptr;
 

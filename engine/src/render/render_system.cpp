@@ -5,15 +5,7 @@
 
 namespace engine
 {
-    const log::logger& render_system::logger()
-    {
-        static const log::logger logger("render_system", engine::logger());
-        return logger;
-    }
-    namespace
-    {
-        const auto& Log = render_system::logger();
-    }
+    const log::logger render_system::Log = render_system::logger();
 
     render_system* render_system::s_instance = nullptr;
     render_system* render_system::create_instance(const create_info& info)
