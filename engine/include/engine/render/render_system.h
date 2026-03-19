@@ -18,6 +18,8 @@ namespace engine
         render_system& operator=(const render_system&) = delete;
         render_system& operator=(render_system&&) = delete;
 
+        static const log::logger& logger();
+
         struct create_info
         {
             std::string appName = "RatsEngine";

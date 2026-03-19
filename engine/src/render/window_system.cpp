@@ -3,6 +3,16 @@
 
 namespace engine
 {
+    const log::logger& window_system::logger()
+    {
+        static const log::logger logger("window_system", engine::logger());
+        return logger;
+    }
+    namespace
+    {
+        const auto& Log = window_system::logger();
+    }
+
     window_system* window_system::s_instance = nullptr;
 
     window_system::window_system()
@@ -21,33 +31,33 @@ namespace engine
             return s_instance;
         }
 
-        log::log("[window_system::create_instance] Creating instance of window manager ({})...", info.api);
+        Log.log("create_instance: Creating instance of window manager ({})...", info.api);
         s_instance = create_instance_impl(info);
         if (s_instance == nullptr)
         {
-            log::fatal("[window_system::create_instance] Failed to create instance of window manager!");
+            Log.fatal("create_instance: Failed to create instance of window manager!");
             return nullptr;
         }
         if (!s_instance->init(info))
         {
-            log::fatal("[window_system::create_instance] Failed to initialize window manager instance!");
+            Log.fatal("create_instance: Failed to initialize window manager instance!");
             s_instance->clear();
             delete s_instance;
             s_instance = nullptr;
             return nullptr;
         }
-        log::info("[window_system::create_instance] Window manager instance created successfully");
+        Log.info("create_instance: Window manager instance created successfully");
         return s_instance;
     }
     void window_system::clear_instance()
     {
         if (s_instance != nullptr)
         {
-            log::log("[window_system::clear_instance] Clearing instance of window manager...");
+            Log.log("clear_instance: Clearing instance of window manager...");
             s_instance->clear();
             delete s_instance;
             s_instance = nullptr;
-            log::log("[window_system::clear_instance] Window manager instance cleared successfully");
+            Log.log("clear_instance: Window manager instance cleared successfully");
         }
     }
 
@@ -55,14 +65,14 @@ namespace engine
     {
         m_mainWindowId = window_id::generate();
         m_windowData.emplace(m_mainWindowId, window_data{});
-        log::log("[window_system::init] Creating main window {}...", m_mainWindowId);
+        Log.log("init: Creating main window {}...", m_mainWindowId);
         if (!create_window_impl(m_mainWindowId, {}))
         {
-            log::fatal("[window_system::init] Failed to create main window!");
+            Log.fatal("init: Failed to create main window!");
             m_windowData = {};
             return false;
         }
-        log::info("[window_system::init] Main window created successfully");
+        Log.info("init: Main window created successfully");
         return true;
     }
 
@@ -86,15 +96,15 @@ namespace engine
             id = window_id::generate();
         }
 
-        log::log("[window_system::create_window] Creating window {}...", id);
+        Log.log("create_window: Creating window {}...", id);
         m_windowData.emplace(id, window_data{ .size = info.size });
         if (!create_window_impl(m_mainWindowId, { .size = info.size }))
         {
-            log::error("[window_system::create_window] Failed to create window!");
+            Log.error("create_window: Failed to create window!");
             m_windowData.erase(id);
             return window_id::invalid_id();
         }
-        log::log("[window_system::create_window] Window created successfully");
+        Log.log("create_window: Window created successfully");
         return id;
     }
     bool window_system::destroy_window(const window_id& id)
@@ -105,13 +115,13 @@ namespace engine
         }
         if (id == m_mainWindowId)
         {
-            log::warning("[window_system::destroy_window] Can't destroy main window");
+            Log.warning("destroy_window: Can't destroy main window");
             return false;
         }
-        log::log("[window_system::destroy_window] Destroying window {}...", id);
+        Log.log("destroy_window: Destroying window {}...", id);
         destroy_window_impl(id);
         m_windowData.erase(id);
-        log::log("[window_system::destroy_window] Window destroyed");
+        Log.log("destroy_window: Window destroyed");
         return true;
     }
 }

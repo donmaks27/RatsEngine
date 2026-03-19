@@ -32,6 +32,8 @@ namespace engine
         window_system& operator=(const window_system&) = delete;
         window_system& operator=(window_system&&) = delete;
 
+        static const log::logger& logger();
+
         struct create_info
         {
             render_api api = render_api::vulkan;

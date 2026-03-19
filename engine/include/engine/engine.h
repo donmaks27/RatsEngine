@@ -17,6 +17,8 @@ namespace engine
         engine& operator=(const engine&) = delete;
         engine& operator=(engine&&) = delete;
 
+        static const log::logger& logger();
+
         static engine& instance()
         {
             static engine engineInstance;

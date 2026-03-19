@@ -6,6 +6,16 @@
 
 namespace engine
 {
+    const log::logger& engine::logger()
+    {
+	    static const log::logger logger("engine");
+	    return logger;
+    }
+    namespace
+	{
+        const auto& Log = engine::logger();
+	}
+
     engine::~engine()
     {
         if (is_started())
@@ -18,22 +28,22 @@ namespace engine
     {
         if (is_started())
         {
-            log::error("[engine::start] Engine already started!");
+            Log.error("start: Engine already started!");
             return false;
         }
         m_engineStarted = true;
 
         RATS_ENGINE_DEFER([this] { clear_engine(); });
 
-        log::log("[engine::start] Initializing engine...");
+        Log.log("start: Initializing engine...");
         if (!init_engine())
         {
-            log::fatal("[engine::start] Engine initialization failed!");
+            Log.fatal("start: Engine initialization failed!");
             return false;
         }
-        log::info("[engine::start] Engine initialized successfully");
+        Log.info("start: Engine initialized successfully");
 
-        log::log("[engine::start] Game loop started");
+        Log.log("start: Game loop started");
         auto* windowManager = window_system::instance();
         while (!windowManager->should_close_main_window())
         {
@@ -41,7 +51,7 @@ namespace engine
 
             m_engineEventBus.refresh_events();
         }
-        log::log("[engine::start] Game loop stopped");
+        Log.log("start: Game loop stopped");
         return true;
     }
 
@@ -56,11 +66,11 @@ namespace engine
 
     void engine::clear_engine()
     {
-        log::log("[engine::clear_engine] Clearing engine...");
+        Log.log("clear_engine: Clearing engine...");
 
         render_system::clear_instance();
 
-        log::log("[engine::clear_engine] Engine cleared successfully");
+        Log.log("clear_engine: Engine cleared successfully");
         m_engineStarted = false;
     }
 }
