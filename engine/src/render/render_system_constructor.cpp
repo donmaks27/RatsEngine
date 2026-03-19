@@ -17,7 +17,7 @@ namespace engine
 #endif
         default:;
         }
-        Log.fatal("create_instance_impl: Render API '{}' is not implemented", info.api);
+        Log.fatal("Render API '{}' is not implemented", info.api);
         return nullptr;
     }
 }

@@ -19,7 +19,7 @@ namespace engine
     window_system* window_system::create_instance_impl(const create_info& info)
     {
 #ifdef RATS_ENGINE_WINDOW_NONE
-        Log.fatal("create_instance_impl: Can't find any implementation of window manager!");
+        Log.fatal("Can't find any implementation of window system!");
         return nullptr;
 #else
         switch (info.api)
@@ -29,7 +29,7 @@ namespace engine
 #endif
         default:;
         }
-        Log.fatal("create_instance_impl: Render API '{}' is not implemented", info.api);
+        Log.fatal("Render API '{}' is not implemented", info.api);
         return nullptr;
 #endif
     }

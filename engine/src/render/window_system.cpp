@@ -23,33 +23,33 @@ namespace engine
             return s_instance;
         }
 
-        Log.log("create_instance: Creating instance of window manager ({})...", info.api);
+        Log.log("Creating instance of window system ({})...", info.api);
         s_instance = create_instance_impl(info);
         if (s_instance == nullptr)
         {
-            Log.fatal("create_instance: Failed to create instance of window manager!");
+            Log.fatal("Failed to create instance of window system!");
             return nullptr;
         }
         if (!s_instance->init(info))
         {
-            Log.fatal("create_instance: Failed to initialize window manager instance!");
+            Log.fatal("Failed to initialize window system instance!");
             s_instance->clear();
             delete s_instance;
             s_instance = nullptr;
             return nullptr;
         }
-        Log.info("create_instance: Window manager instance created successfully");
+        Log.info("Window system instance created successfully");
         return s_instance;
     }
     void window_system::clear_instance()
     {
         if (s_instance != nullptr)
         {
-            Log.log("clear_instance: Clearing instance of window manager...");
+            Log.log("Clearing instance of window system...");
             s_instance->clear();
             delete s_instance;
             s_instance = nullptr;
-            Log.log("clear_instance: Window manager instance cleared successfully");
+            Log.log("Window system instance cleared successfully");
         }
     }
 
@@ -57,14 +57,14 @@ namespace engine
     {
         m_mainWindowId = window_id::generate();
         m_windowData.emplace(m_mainWindowId, window_data{});
-        Log.log("init: Creating main window {}...", m_mainWindowId);
+        Log.log("Creating main window {}...", m_mainWindowId);
         if (!create_window_impl(m_mainWindowId, {}))
         {
-            Log.fatal("init: Failed to create main window!");
+            Log.fatal("Failed to create main window!");
             m_windowData = {};
             return false;
         }
-        Log.info("init: Main window created successfully");
+        Log.info("Main window created successfully");
         return true;
     }
 
@@ -88,15 +88,15 @@ namespace engine
             id = window_id::generate();
         }
 
-        Log.log("create_window: Creating window {}...", id);
+        Log.log("Creating window {}...", id);
         m_windowData.emplace(id, window_data{ .size = info.size });
         if (!create_window_impl(m_mainWindowId, { .size = info.size }))
         {
-            Log.error("create_window: Failed to create window!");
+            Log.error("Failed to create window!");
             m_windowData.erase(id);
             return window_id::invalid_id();
         }
-        Log.log("create_window: Window created successfully");
+        Log.log("Window created successfully");
         return id;
     }
     bool window_system::destroy_window(const window_id& id)
@@ -107,13 +107,13 @@ namespace engine
         }
         if (id == m_mainWindowId)
         {
-            Log.warning("destroy_window: Can't destroy main window");
+            Log.warning("Can't destroy main window");
             return false;
         }
-        Log.log("destroy_window: Destroying window {}...", id);
+        Log.log("Destroying window {}...", id);
         destroy_window_impl(id);
         m_windowData.erase(id);
-        Log.log("destroy_window: Window destroyed");
+        Log.log("Window destroyed");
         return true;
     }
 }

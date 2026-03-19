@@ -15,33 +15,33 @@ namespace engine
             return s_instance;
         }
 
-        Log.log("create_instance: Creating instance of render manager ({})...", info.api);
+        Log.log("Creating instance of render system ({})...", info.api);
         s_instance = create_instance_impl(info);
         if (s_instance == nullptr)
         {
-            Log.fatal("create_instance: Failed to create instance of render manager!");
+            Log.fatal("Failed to create instance of render system!");
             return nullptr;
         }
         if (!s_instance->init(info))
         {
-            Log.fatal("create_instance: Failed to initialize render manager instance!");
+            Log.fatal("Failed to initialize render system instance!");
             s_instance->clear();
             delete s_instance;
             s_instance = nullptr;
             return nullptr;
         }
-        Log.info("create_instance: Render manager instance created successfully");
+        Log.info("Render system instance created successfully");
         return s_instance;
     }
     void render_system::clear_instance()
     {
         if (s_instance != nullptr)
         {
-            Log.log("clear_instance: Clearing instance of render manager...");
+            Log.log("Clearing instance of render system...");
             s_instance->clear();
             delete s_instance;
             s_instance = nullptr;
-            Log.log("clear_instance: Render manager instance cleared successfully");
+            Log.log("Render system instance cleared successfully");
         }
     }
 
@@ -49,7 +49,7 @@ namespace engine
     {
         if (window_system::create_instance({ .api = info.api }) == nullptr)
         {
-            Log.fatal("init: Failed to get window manager instance!");
+            Log.fatal("Failed to get window system instance!");
             return false;
         }
         return true;

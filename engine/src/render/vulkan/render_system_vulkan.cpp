@@ -4,7 +4,7 @@
 #include <engine/render/vulkan/builder/instance_builder.h>
 #include <engine/render/vulkan/builder/device_builder.h>
 
-#include "engine/engine.h"
+#include <engine/engine.h>
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
@@ -30,7 +30,6 @@ namespace engine
 		}
 
 		auto& event_bus = engine::instance().event_bus();
-		auto* windowManager = window_system_vulkan::instance();
 		if (!create_instance(info))
 		{
 			log::fatal("[render_system_vulkan::init] Failed to create Vulkan instance!");

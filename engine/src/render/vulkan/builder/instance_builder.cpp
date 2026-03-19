@@ -95,7 +95,7 @@ namespace engine::vulkan
 			validationLayers.emplace_back("VK_LAYER_KHRONOS_validation");
 			if (!check_validation_layer_support(validationLayers))
 			{
-				Log.fatal("build: Some of the validation layers are not supported on this device!");
+				Log.fatal("Some of the validation layers are not supported on this device!");
 				return nullptr;
 			}
 			m_requiredExtensions.emplace(vk::EXTDebugUtilsExtensionName);
@@ -122,7 +122,7 @@ namespace engine::vulkan
 		auto vulkanInstance = vk::createInstanceUnique(instanceInfo);
 		if (vulkanInstance.result != vk::Result::eSuccess)
 		{
-			Log.fatal("build: Failed to create Vulkan instance! Error: {}", vulkanInstance.result);
+			Log.fatal("Failed to create Vulkan instance! Error: {}", vulkanInstance.result);
 			return nullptr;
 		}
 
@@ -135,7 +135,7 @@ namespace engine::vulkan
 			auto debugMessenger = result->createDebugUtilsMessengerEXTUnique(debugMessengerInfo);
 			if (debugMessenger.result != vk::Result::eSuccess)
 			{
-				Log.fatal("build: Failed to create Vulkan debug messenger! Error: {}", debugMessenger.result);
+				Log.fatal("Failed to create Vulkan debug messenger! Error: {}", debugMessenger.result);
 				return nullptr;
 			}
 			result.m_debugMessenger = std::move(debugMessenger.value);
