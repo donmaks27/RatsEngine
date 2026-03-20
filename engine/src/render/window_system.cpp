@@ -56,9 +56,9 @@ namespace engine
     bool window_system::init(const create_info& info)
     {
         m_mainWindowId = window_id::generate();
-        m_windowData.emplace(m_mainWindowId, window_data{});
+        m_windowData.emplace(m_mainWindowId, window_data{ .size = info.mainWindow.size });
         Log.log("Creating main window {}...", m_mainWindowId);
-        if (!create_window_impl(m_mainWindowId, {}))
+        if (!create_window_impl(m_mainWindowId, info.mainWindow))
         {
             Log.fatal("Failed to create main window!");
             m_windowData = {};

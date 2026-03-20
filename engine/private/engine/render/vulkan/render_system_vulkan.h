@@ -6,6 +6,8 @@
 #include <engine/render/render_system.h>
 #include <engine/utils/events.h>
 
+#include "EASTL/array.h"
+
 namespace engine
 {
     struct vulkan_instance_created_event final : utils::event<vulkan_instance_created_event> {};
@@ -25,6 +27,8 @@ namespace engine
 
         [[nodiscard]] const vulkan::context& vk_ctx() const { return m_ctx; }
 
+        virtual bool render() override;
+
     protected:
 
         virtual bool init(const create_info& info) override;
@@ -35,9 +39,21 @@ namespace engine
         static const log::logger Log;
         static render_system_vulkan* s_instanceVulkan;
 
+        struct frame_data
+        {
+            vk::Semaphore imageAvailableSemaphore = nullptr;
+            vk::Semaphore renderFinishedSemaphore = nullptr;
+            vk::Fence frameFence = nullptr;
+
+            vk::CommandBuffer commandBuffer = nullptr;
+        };
+
         vulkan::context m_ctx;
         vulkan::command_pool m_graphicsCommandPool;
         vulkan::command_pool m_transferCommandPool;
+
+        eastl::array<frame_data, 2> m_framesInFlight;
+        std::uint8_t m_currentFrameInFlight = 0;
 
         [[nodiscard]] bool create_instance(const create_info& info);
         [[nodiscard]] bool create_device();

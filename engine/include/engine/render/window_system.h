@@ -37,6 +37,7 @@ namespace engine
         struct create_info
         {
             render_api api = render_api::vulkan;
+            window_create_info mainWindow{};
         };
         static window_system* create_instance(const create_info& info);
         [[nodiscard]] static window_system* instance() { return s_instance; }

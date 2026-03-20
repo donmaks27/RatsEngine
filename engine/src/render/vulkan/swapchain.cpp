@@ -113,30 +113,14 @@ namespace engine::vulkan
 			swapchainCreateInfo.pQueueFamilyIndices = queueFamilies;
 		}
 		const auto swapchainValue = device->createSwapchainKHR(swapchainCreateInfo);
-		if (m_value != nullptr)
-		{
-			device->destroySwapchainKHR(m_value);
-			m_value = nullptr;
-		}
+		clear();
 		if (swapchainValue.result != vk::Result::eSuccess)
 		{
 			Log.error("Failed to create swapchain: {}", swapchainValue.result);
-			clear();
 			return false;
 		}
 
 		m_value = swapchainValue.value;
-		if (m_imageAcquired == nullptr)
-		{
-			const auto semaphoreResult = device->createSemaphore({});
-			if (semaphoreResult.result != vk::Result::eSuccess)
-			{
-				Log.error("Failed to create image acquired semaphore: {}", semaphoreResult.result);
-				clear();
-				return false;
-			}
-			m_imageAcquired = semaphoreResult.value;
-		}
 		const auto swapchainImages = device->getSwapchainImagesKHR(swapchainValue.value);
 		if (swapchainImages.result != vk::Result::eSuccess)
 		{
@@ -147,6 +131,27 @@ namespace engine::vulkan
 
 		m_images.resize(swapchainImages.value.size());
 		std::ranges::copy(swapchainImages.value, m_images.begin());
+
+		m_imageViews.reserve(m_images.size());
+		const bool imageViewsValid = std::ranges::all_of(m_images, [this, &device, format = selectedFormat.format](const vk::Image& image) {
+			const auto imageViewResult = device->createImageView({ {},
+				image, vk::ImageViewType::e2D, format, {}, {
+					vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1
+				} });
+			if (imageViewResult.result != vk::Result::eSuccess)
+			{
+				Log.error("Failed to create view for swapchain image: {}", imageViewResult.result);
+				return false;
+			}
+			m_imageViews.push_back(imageViewResult.value);
+			return true;
+		});
+		if (!imageViewsValid)
+		{
+			clear();
+			return false;
+		}
+
 		return true;
 	}
 
@@ -161,15 +166,15 @@ namespace engine::vulkan
 			const auto& device = ctx.d();
 
 			m_outdated = false;
+			std::ranges::for_each(m_imageViews, [&device](const vk::ImageView& imageView) { device->destroyImageView(imageView); });
+			m_imageViews.clear();
 			m_images.clear();
-			device->destroySemaphore(m_imageAcquired);
-			m_imageAcquired = nullptr;
 			device->destroySwapchainKHR(m_value);
 			m_value = nullptr;
 		}
 	}
 
-	bool swapchain::acquire_next_image(const context& ctx)
+	bool swapchain::acquire_next_image(const context& ctx, const vk::Semaphore& imageAvailable)
 	{
 		if (!valid())
 		{
@@ -182,7 +187,7 @@ namespace engine::vulkan
 			return false;
 		}
 
-		const auto acquireResult = ctx.d()->acquireNextImage2KHR({ m_value, std::numeric_limits<std::uint64_t>::max(), m_imageAcquired });
+		const auto acquireResult = ctx.d()->acquireNextImage2KHR({ m_value, std::numeric_limits<std::uint64_t>::max(), imageAvailable });
 		if (acquireResult.result != vk::Result::eSuccess)
 		{
 			switch (acquireResult.result)

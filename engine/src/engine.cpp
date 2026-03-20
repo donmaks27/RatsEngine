@@ -37,8 +37,15 @@ namespace engine
 
         Log.log("Game loop started");
         auto* windowSystem = window_system::instance();
+        auto* renderSystem = render_system::instance();
         while (!windowSystem->should_close_main_window())
         {
+            if (!renderSystem->render())
+            {
+                Log.fatal("Render error!");
+                break;
+            }
+
             windowSystem->on_frame_end();
 
             m_engineEventBus.refresh_events();

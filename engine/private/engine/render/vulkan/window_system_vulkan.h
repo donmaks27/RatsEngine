@@ -29,7 +29,7 @@ namespace engine
         [[nodiscard]] static window_system_vulkan* instance() { return s_instanceVulkan; }
 
         [[nodiscard]] vk::SurfaceKHR surface(const window_id& id) const;
-		[[nodiscard]] const vulkan::swapchain* swapchain(const window_id& id) const;
+		[[nodiscard]] vulkan::swapchain* swapchain(const window_id& id);
 
     protected:
 
@@ -46,14 +46,14 @@ namespace engine
 
     private:
 
+        static const log::logger Log;
+        static window_system_vulkan* s_instanceVulkan;
+
         struct window_data_vulkan
         {
             vk::SurfaceKHR surface = nullptr;
 			vulkan::swapchain swapchain{};
         };
-
-        static const log::logger Log;
-        static window_system_vulkan* s_instanceVulkan;
 
         eastl::vector_map<window_id, window_data_vulkan> m_windowDataVulkan;
 

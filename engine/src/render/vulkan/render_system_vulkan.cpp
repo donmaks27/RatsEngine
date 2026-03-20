@@ -56,6 +56,35 @@ namespace engine
 			return false;
 		}
 
+		for (auto& frame : m_framesInFlight)
+		{
+			auto semaphoreResult = m_ctx.d()->createSemaphore({});
+			if (semaphoreResult.result != vk::Result::eSuccess)
+			{
+				Log.fatal("Failed to create imageAvailableSemaphore: {}", semaphoreResult.result);
+				return false;
+			}
+			frame.imageAvailableSemaphore = semaphoreResult.value;
+
+			semaphoreResult = m_ctx.d()->createSemaphore({});
+			if (semaphoreResult.result != vk::Result::eSuccess)
+			{
+				Log.fatal("Failed to create renderFinishedSemaphore: {}", semaphoreResult.result);
+				return false;
+			}
+			frame.renderFinishedSemaphore = semaphoreResult.value;
+
+			const auto fenceResult = m_ctx.d()->createFence({ vk::FenceCreateFlagBits::eSignaled });
+			if (fenceResult.result != vk::Result::eSuccess)
+			{
+				Log.fatal("Failed to create frameFence: {}", fenceResult.result);
+				return false;
+			}
+			frame.frameFence = fenceResult.value;
+
+			frame.commandBuffer = m_graphicsCommandPool.command_buffer(m_ctx);
+		}
+
 		return true;
 	}
 
@@ -64,6 +93,16 @@ namespace engine
 		if (m_ctx.m_instance != nullptr)
 		{
 			m_ctx.d()->waitIdle();
+
+			for (auto& frame : m_framesInFlight)
+			{
+				m_ctx.d()->destroySemaphore(frame.imageAvailableSemaphore);
+				m_ctx.d()->destroySemaphore(frame.renderFinishedSemaphore);
+				m_ctx.d()->destroyFence(frame.frameFence);
+				frame.imageAvailableSemaphore = nullptr;
+				frame.renderFinishedSemaphore = nullptr;
+				frame.frameFence = nullptr;
+			}
 
 			m_transferCommandPool.clear(m_ctx);
 			m_graphicsCommandPool.clear(m_ctx);
@@ -121,5 +160,85 @@ namespace engine
 		m_transferCommandPool = m_ctx.d().queue(vulkan::queue_type::transfer).command_pool(m_ctx,
 			vk::CommandPoolCreateFlagBits::eTransient);
 		return m_graphicsCommandPool.valid() && m_transferCommandPool.valid();
+	}
+
+	bool render_system_vulkan::render()
+	{
+		const auto windowSystem = window_system::instance();
+		const auto& device = m_ctx.d();
+		const auto swapchainSize = windowSystem->window_size(windowSystem->main_window_id());
+		auto swapchain = window_system_vulkan::instance()->swapchain(windowSystem->main_window_id());
+
+		m_currentFrameInFlight = (m_currentFrameInFlight + 1) % m_framesInFlight.size();
+		const auto& frameData = m_framesInFlight[m_currentFrameInFlight];
+		const auto& cmd = frameData.commandBuffer;
+
+		device->waitForFences({ frameData.frameFence }, vk::True, std::numeric_limits<std::uint64_t>::max());
+
+		if (!swapchain->acquire_next_image(m_ctx, frameData.imageAvailableSemaphore))
+		{
+			return false;
+		}
+		if (swapchain->outdated())
+		{
+			return true;
+		}
+		device->resetFences({ frameData.frameFence });
+
+		device->resetCommandPool(*m_graphicsCommandPool);
+		cmd.begin(vk::CommandBufferBeginInfo{});
+
+		// Render
+		vk::ImageMemoryBarrier2 barrier;
+		barrier.image = swapchain->image();
+		barrier.subresourceRange = vk::ImageSubresourceRange{ 
+			vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1
+		};
+		barrier.srcStageMask = vk::PipelineStageFlagBits2::eNone;
+		barrier.srcAccessMask = vk::AccessFlagBits2::eNone;
+		barrier.dstStageMask = vk::PipelineStageFlagBits2::eColorAttachmentOutput;
+		barrier.dstAccessMask = vk::AccessFlagBits2::eColorAttachmentWrite;
+		barrier.oldLayout = vk::ImageLayout::eUndefined;
+		barrier.newLayout = vk::ImageLayout::eColorAttachmentOptimal;
+		const vk::DependencyInfo dependencyInfo{ {}, {}, {}, { barrier } };
+		cmd.pipelineBarrier2(dependencyInfo);
+
+		const auto colorAttachmentInfo = vk::RenderingAttachmentInfo()
+			.setImageView(swapchain->image_view())
+			.setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
+			.setLoadOp(vk::AttachmentLoadOp::eClear)
+			.setStoreOp(vk::AttachmentStoreOp::eStore)
+			.setClearValue({vk::ClearColorValue{ 1.0f, 0.2f, 0.3f, 1.0f }});
+		const auto renderingInfo = vk::RenderingInfo()
+			.setColorAttachments({ colorAttachmentInfo })
+			.setRenderArea({ {}, { swapchainSize.x, swapchainSize.y } })
+			.setLayerCount(1);
+		cmd.beginRendering(renderingInfo);
+		cmd.endRendering();
+
+		barrier.srcStageMask = vk::PipelineStageFlagBits2::eColorAttachmentOutput;
+		barrier.srcAccessMask = vk::AccessFlagBits2::eColorAttachmentWrite;
+		barrier.dstStageMask = vk::PipelineStageFlagBits2::eNone;
+		barrier.dstAccessMask = vk::AccessFlagBits2::eNone;
+		barrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
+		barrier.newLayout = vk::ImageLayout::ePresentSrcKHR;
+		cmd.pipelineBarrier2(dependencyInfo);
+
+		cmd.end();
+
+		const vk::SemaphoreSubmitInfo waitSemaphoreInfo{ frameData.imageAvailableSemaphore , 0, vk::PipelineStageFlagBits2::eColorAttachmentOutput };
+		const vk::SemaphoreSubmitInfo signalSemaphoreInfo{ frameData.renderFinishedSemaphore , 0, vk::PipelineStageFlagBits2::eAllGraphics };
+		const vk::CommandBufferSubmitInfo cmdInfo{ cmd };
+		const auto submitInfo = vk::SubmitInfo2()
+			.setWaitSemaphoreInfos({ waitSemaphoreInfo })
+			.setSignalSemaphoreInfos({ signalSemaphoreInfo })
+			.setCommandBufferInfos({ cmdInfo });
+		device.queue(vulkan::queue_type::graphics)->submit2({ submitInfo }, frameData.frameFence);
+		if (!swapchain->present(m_ctx, { { frameData.renderFinishedSemaphore } }))
+		{
+			return false;
+		}
+
+		return true;
 	}
 }

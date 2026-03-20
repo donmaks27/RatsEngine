@@ -30,6 +30,8 @@ namespace engine
         [[nodiscard]] static render_system* instance() { return s_instance; }
         static void clear_instance();
 
+        [[nodiscard]] virtual bool render() = 0;
+
     protected:
 
         [[nodiscard]] virtual bool init(const create_info& info);

@@ -95,7 +95,7 @@ namespace engine
         }
         return true;
     }
-	const vulkan::swapchain* window_system_vulkan::swapchain(const window_id& id) const
+	vulkan::swapchain* window_system_vulkan::swapchain(const window_id& id)
     {
         const auto iter = m_windowDataVulkan.find(id);
         return iter != m_windowDataVulkan.end() ? &iter->second.swapchain : nullptr;
