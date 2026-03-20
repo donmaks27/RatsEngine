@@ -15,33 +15,33 @@ namespace engine
             return s_instance;
         }
 
-        Log.log("Creating instance of render system ({})...", info.api);
-        s_instance = create_instance_impl(info);
+        Log.log("Initializing render system ({})...", info.api);
+        s_instance = allocate_instance(info);
         if (s_instance == nullptr)
         {
-            Log.fatal("Failed to create instance of render system!");
+            Log.fatal("Failed to allocate instance of render system!");
             return nullptr;
         }
         if (!s_instance->init(info))
         {
-            Log.fatal("Failed to initialize render system instance!");
+            Log.fatal("Failed to initialize render system!");
             s_instance->clear();
             delete s_instance;
             s_instance = nullptr;
             return nullptr;
         }
-        Log.info("Render system instance created successfully");
+        Log.info("Render system initialized successfully");
         return s_instance;
     }
     void render_system::clear_instance()
     {
         if (s_instance != nullptr)
         {
-            Log.log("Clearing instance of render system...");
+            Log.log("Clearing render system...");
             s_instance->clear();
             delete s_instance;
             s_instance = nullptr;
-            Log.log("Render system instance cleared successfully");
+            Log.log("Render system cleared successfully");
         }
     }
 
@@ -49,7 +49,7 @@ namespace engine
     {
         if (window_system::create_instance({ .api = info.api }) == nullptr)
         {
-            Log.fatal("Failed to get window system instance!");
+            Log.fatal("Failed to create window system!");
             return false;
         }
         return true;

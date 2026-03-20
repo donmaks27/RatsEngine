@@ -39,6 +39,6 @@ namespace engine
 
         static const log::logger Log;
         static render_system* s_instance;
-        static render_system* create_instance_impl(const create_info& info);
+        static render_system* allocate_instance(const create_info& info);
     };
 }

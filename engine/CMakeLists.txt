@@ -39,6 +39,7 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/engine.h"
 	"include/engine/render/render_api.h"
 	"include/engine/render/render_system.h"
+	"include/engine/render/surface_system.h"
 	"include/engine/render/window_system.h"
 	"include/engine/utils/log.h"
 	"include/engine/utils/uuid.h"
@@ -48,7 +49,8 @@ list(APPEND RATS_ENGINE_PRIVATE_HEADERS)
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/utils/events.cpp"
 	"src/engine.cpp"
-	"src/render/render_system.cpp"
+	"src/render/render_system.cpp" 
+	"src/render/surface_system.cpp"
 	"src/render/window_system.cpp"
 	"src/render/render_system_constructor.cpp"
 	"src/render/window_system_constructor.cpp")

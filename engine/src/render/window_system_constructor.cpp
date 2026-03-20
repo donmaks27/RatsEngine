@@ -16,7 +16,7 @@
 
 namespace engine
 {
-    window_system* window_system::create_instance_impl(const create_info& info)
+    window_system* window_system::allocate_instance(const create_info& info)
     {
 #ifdef RATS_ENGINE_WINDOW_NONE
         Log.fatal("Can't find any implementation of window system!");

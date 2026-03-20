@@ -80,6 +80,6 @@ namespace engine
 
         static const log::logger Log;
         static window_system* s_instance;
-        static window_system* create_instance_impl(const create_info& info);
+        static window_system* allocate_instance(const create_info& info);
     };
 }
