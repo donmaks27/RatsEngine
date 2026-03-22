@@ -66,14 +66,6 @@ namespace engine
 			}
 			frame.imageAvailableSemaphore = semaphoreResult.value;
 
-			semaphoreResult = m_ctx.d()->createSemaphore({});
-			if (semaphoreResult.result != vk::Result::eSuccess)
-			{
-				Log.fatal("Failed to create renderFinishedSemaphore: {}", semaphoreResult.result);
-				return false;
-			}
-			frame.renderFinishedSemaphore = semaphoreResult.value;
-
 			const auto fenceResult = m_ctx.d()->createFence({ vk::FenceCreateFlagBits::eSignaled });
 			if (fenceResult.result != vk::Result::eSuccess)
 			{
@@ -97,10 +89,8 @@ namespace engine
 			for (auto& frame : m_framesInFlight)
 			{
 				m_ctx.d()->destroySemaphore(frame.imageAvailableSemaphore);
-				m_ctx.d()->destroySemaphore(frame.renderFinishedSemaphore);
 				m_ctx.d()->destroyFence(frame.frameFence);
 				frame.imageAvailableSemaphore = nullptr;
-				frame.renderFinishedSemaphore = nullptr;
 				frame.frameFence = nullptr;
 			}
 
@@ -156,7 +146,8 @@ namespace engine
 
 	bool render_system_vulkan::create_command_pools()
 	{
-		m_graphicsCommandPool = m_ctx.d().queue(vulkan::queue_type::graphics).command_pool(m_ctx);
+		m_graphicsCommandPool = m_ctx.d().queue(vulkan::queue_type::graphics).command_pool(m_ctx,
+			vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 		m_transferCommandPool = m_ctx.d().queue(vulkan::queue_type::transfer).command_pool(m_ctx,
 			vk::CommandPoolCreateFlagBits::eTransient);
 		return m_graphicsCommandPool.valid() && m_transferCommandPool.valid();
@@ -165,9 +156,11 @@ namespace engine
 	bool render_system_vulkan::render()
 	{
 		const auto windowSystem = window_system::instance();
+		const auto windowSystemVulkan = window_system_vulkan::instance();
+		const auto mainWindowId = windowSystem->main_window_id();
 		const auto& device = m_ctx.d();
-		const auto swapchainSize = windowSystem->window_size(windowSystem->main_window_id());
-		auto swapchain = window_system_vulkan::instance()->swapchain(windowSystem->main_window_id());
+		const auto swapchainSize = windowSystem->window_size(mainWindowId);
+		auto swapchain = windowSystemVulkan->swapchain(mainWindowId);
 
 		m_currentFrameInFlight = (m_currentFrameInFlight + 1) % m_framesInFlight.size();
 		const auto& frameData = m_framesInFlight[m_currentFrameInFlight];
@@ -181,11 +174,11 @@ namespace engine
 		}
 		if (swapchain->outdated())
 		{
-			return true;
+			return swapchain->init(m_ctx, { windowSystemVulkan->surface(mainWindowId), swapchainSize });
 		}
 		device->resetFences({ frameData.frameFence });
 
-		device->resetCommandPool(*m_graphicsCommandPool);
+		cmd.reset();
 		cmd.begin(vk::CommandBufferBeginInfo{});
 
 		// Render
@@ -226,15 +219,16 @@ namespace engine
 
 		cmd.end();
 
+		const auto renderFinishedSemaphore = swapchain->render_finished_semaphore();
 		const vk::SemaphoreSubmitInfo waitSemaphoreInfo{ frameData.imageAvailableSemaphore , 0, vk::PipelineStageFlagBits2::eColorAttachmentOutput };
-		const vk::SemaphoreSubmitInfo signalSemaphoreInfo{ frameData.renderFinishedSemaphore , 0, vk::PipelineStageFlagBits2::eAllGraphics };
+		const vk::SemaphoreSubmitInfo signalSemaphoreInfo{ renderFinishedSemaphore , 0, vk::PipelineStageFlagBits2::eAllGraphics };
 		const vk::CommandBufferSubmitInfo cmdInfo{ cmd };
 		const auto submitInfo = vk::SubmitInfo2()
 			.setWaitSemaphoreInfos({ waitSemaphoreInfo })
 			.setSignalSemaphoreInfos({ signalSemaphoreInfo })
 			.setCommandBufferInfos({ cmdInfo });
 		device.queue(vulkan::queue_type::graphics)->submit2({ submitInfo }, frameData.frameFence);
-		if (!swapchain->present(m_ctx, { { frameData.renderFinishedSemaphore } }))
+		if (!swapchain->present(m_ctx, renderFinishedSemaphore))
 		{
 			return false;
 		}

@@ -129,11 +129,11 @@ namespace engine::vulkan
 			return false;
 		}
 
-		m_images.resize(swapchainImages.value.size());
-		std::ranges::copy(swapchainImages.value, m_images.begin());
+		m_images.reserve(swapchainImages.value.size());
+		const bool imagesValid = std::ranges::all_of(swapchainImages.value, [this, &device, format = selectedFormat.format](const vk::Image& image) {
+			auto& data = m_images.emplace_back();
+			data.image = image;
 
-		m_imageViews.reserve(m_images.size());
-		const bool imageViewsValid = std::ranges::all_of(m_images, [this, &device, format = selectedFormat.format](const vk::Image& image) {
 			const auto imageViewResult = device->createImageView({ {},
 				image, vk::ImageViewType::e2D, format, {}, {
 					vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1
@@ -143,15 +143,22 @@ namespace engine::vulkan
 				Log.error("Failed to create view for swapchain image: {}", imageViewResult.result);
 				return false;
 			}
-			m_imageViews.push_back(imageViewResult.value);
+			data.imageView = imageViewResult.value;
+
+			const auto semaphoreResult = device->createSemaphore({});
+			if (semaphoreResult.result != vk::Result::eSuccess)
+			{
+				Log.error("Failed to create semaphore for swapchain image: {}", semaphoreResult.result);
+				return false;
+			}
+			data.renderFinishedSemaphore = semaphoreResult.value;
 			return true;
 		});
-		if (!imageViewsValid)
+		if (!imagesValid)
 		{
 			clear();
 			return false;
 		}
-
 		return true;
 	}
 
@@ -164,10 +171,13 @@ namespace engine::vulkan
 		if (valid())
 		{
 			const auto& device = ctx.d();
+			device->waitIdle();
 
 			m_outdated = false;
-			std::ranges::for_each(m_imageViews, [&device](const vk::ImageView& imageView) { device->destroyImageView(imageView); });
-			m_imageViews.clear();
+			std::ranges::for_each(m_images, [&device](const image_data& data) {
+				device->destroyImageView(data.imageView);
+				device->destroySemaphore(data.renderFinishedSemaphore);
+			});
 			m_images.clear();
 			device->destroySwapchainKHR(m_value);
 			m_value = nullptr;
@@ -184,10 +194,13 @@ namespace engine::vulkan
 		if (outdated())
 		{
 			Log.warning("Swapchain is outdated");
-			return false;
+			return true;
 		}
 
-		const auto acquireResult = ctx.d()->acquireNextImage2KHR({ m_value, std::numeric_limits<std::uint64_t>::max(), imageAvailable });
+		const auto acquireResult = ctx.d()->acquireNextImage2KHR(
+		{
+			m_value, std::numeric_limits<std::uint64_t>::max(), imageAvailable, nullptr, 1
+		});
 		if (acquireResult.result != vk::Result::eSuccess)
 		{
 			switch (acquireResult.result)
@@ -197,6 +210,7 @@ namespace engine::vulkan
 				break;
 			case vk::Result::eErrorOutOfDateKHR:
 				Log.log("Swapchain is out of date");
+				m_outdated = true;
 				break;
 
 			default:
@@ -204,14 +218,13 @@ namespace engine::vulkan
 				return false;
 			}
 
-			m_outdated = true;
 			return true;
 		}
 
 		m_currentImageIndex = static_cast<std::uint8_t>(acquireResult.value);
 		return true;
 	}
-	bool swapchain::present(const context& ctx, const eastl::span<const vk::Semaphore> waitSemaphores)
+	bool swapchain::present(const context& ctx, const vk::Semaphore& waitSemaphore)
 	{
 		if (!valid())
 		{
@@ -221,7 +234,7 @@ namespace engine::vulkan
 		if (outdated())
 		{
 			Log.warning("Swapchain is outdated");
-			return false;
+			return true;
 		}
 		if (m_currentImageIndex >= m_images.size())
 		{
@@ -231,7 +244,7 @@ namespace engine::vulkan
 		
 		const auto imageIndex = static_cast<std::uint32_t>(m_currentImageIndex);
 		const auto result = ctx.d().queue(queue_type::present)->presentKHR({
-			waitSemaphores, { m_value }, { imageIndex }
+			{ waitSemaphore }, { m_value }, { imageIndex }
 		});
 		if (result != vk::Result::eSuccess)
 		{
@@ -242,12 +255,12 @@ namespace engine::vulkan
 				break;
 			case vk::Result::eErrorOutOfDateKHR:
 				Log.log("Swapchain is out of date");
+				m_outdated = true;
 				break;
 			default:
 				Log.error("Failed to present image: {}", result);
 				return false;
 			}
-			m_outdated = true;
 		}
 		return true;
 	}

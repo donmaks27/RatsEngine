@@ -42,7 +42,6 @@ namespace engine
         struct frame_data
         {
             vk::Semaphore imageAvailableSemaphore = nullptr;
-            vk::Semaphore renderFinishedSemaphore = nullptr;
             vk::Fence frameFence = nullptr;
 
             vk::CommandBuffer commandBuffer = nullptr;

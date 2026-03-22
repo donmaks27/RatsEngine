@@ -38,15 +38,31 @@ namespace engine::vulkan
 
 		[[nodiscard]] bool outdated() const { return valid() && m_outdated; }
 		[[nodiscard]] bool acquire_next_image(const context& ctx, const vk::Semaphore& imageAvailable);
-		[[nodiscard]] bool present(const context& ctx, eastl::span<const vk::Semaphore> waitSemaphores);
+		[[nodiscard]] bool present(const context& ctx, const vk::Semaphore& waitSemaphore);
 
-		[[nodiscard]] vk::Image image() const { return m_images.size() > m_currentImageIndex ? m_images[m_currentImageIndex] : nullptr; }
-		[[nodiscard]] vk::ImageView image_view() const { return m_imageViews.size() > m_currentImageIndex ? m_imageViews[m_currentImageIndex] : nullptr; }
+		[[nodiscard]] vk::Image image() const
+		{
+			return m_images.size() > m_currentImageIndex ? m_images[m_currentImageIndex].image : nullptr;
+		}
+		[[nodiscard]] vk::ImageView image_view() const
+		{
+			return m_images.size() > m_currentImageIndex ? m_images[m_currentImageIndex].imageView : nullptr;
+		}
+		[[nodiscard]] vk::Semaphore render_finished_semaphore() const
+		{
+			return m_images.size() > m_currentImageIndex ? m_images[m_currentImageIndex].renderFinishedSemaphore : nullptr;
+		}
 
 	private:
 
-		eastl::vector<vk::Image> m_images;
-		eastl::vector<vk::ImageView> m_imageViews;
+		struct image_data
+		{
+			vk::Image image = nullptr;
+			vk::ImageView imageView = nullptr;
+			vk::Semaphore renderFinishedSemaphore = nullptr;
+		};
+
+		eastl::vector<image_data> m_images;
 
 		std::uint8_t m_currentImageIndex = std::numeric_limits<std::uint8_t>::max();
 		bool m_outdated = false;
