@@ -31,8 +31,8 @@ namespace engine
 
     protected:
 
-        virtual bool init(const create_info& info) override;
-        virtual void clear() override;
+        virtual bool system_init(const instance_create_info& info) override;
+        virtual void system_clear() override;
 
     private:
 
@@ -54,7 +54,7 @@ namespace engine
         eastl::array<frame_data, 2> m_framesInFlight;
         std::uint8_t m_currentFrameInFlight = 0;
 
-        [[nodiscard]] bool create_instance(const create_info& info);
+        [[nodiscard]] bool create_instance(const instance_create_info& info);
         [[nodiscard]] bool create_device();
         [[nodiscard]] bool create_command_pools();
     };

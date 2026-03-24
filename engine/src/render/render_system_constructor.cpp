@@ -8,7 +8,7 @@
 
 namespace engine
 {
-    render_system* render_system::allocate_instance(const create_info& info)
+    render_system* render_system::instance_allocate(const instance_create_info& info)
     {
         switch (info.api)
         {

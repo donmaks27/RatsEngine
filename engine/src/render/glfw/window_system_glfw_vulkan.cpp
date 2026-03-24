@@ -34,15 +34,15 @@ namespace engine
         return surface;
     }
 
-    bool window_system_glfw_vulkan::init(const create_info& info)
+    bool window_system_glfw_vulkan::system_init(const instance_create_info& info)
     {
         super_vulkan::on_init();
-        return super::init(info);
+        return super::system_init(info);
     }
-    void window_system_glfw_vulkan::clear()
+    void window_system_glfw_vulkan::system_clear()
     {
         super_vulkan::on_clear();
-        super::clear();
+        super::system_clear();
     }
 
     bool window_system_glfw_vulkan::on_event(const utils::event_info& event)

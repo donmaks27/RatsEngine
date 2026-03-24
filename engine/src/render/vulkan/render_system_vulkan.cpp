@@ -22,11 +22,11 @@ namespace engine
 
 	render_system_vulkan* render_system_vulkan::s_instanceVulkan = nullptr;
 
-	bool render_system_vulkan::init(const create_info& info)
+	bool render_system_vulkan::system_init(const instance_create_info& info)
 	{
     	s_instanceVulkan = this;
 
-		if (!super::init(info))
+		if (!super::system_init(info))
 		{
 			return false;
 		}
@@ -80,7 +80,7 @@ namespace engine
 		return true;
 	}
 
-	void render_system_vulkan::clear()
+	void render_system_vulkan::system_clear()
 	{
 		if (m_ctx.m_instance != nullptr)
 		{
@@ -103,10 +103,10 @@ namespace engine
 		}
 
     	s_instanceVulkan = nullptr;
-		super::clear();
+		super::system_clear();
 	}
 
-	bool render_system_vulkan::create_instance(const create_info& info)
+	bool render_system_vulkan::create_instance(const instance_create_info& info)
 	{
 		auto instance = vulkan::instance_builder()
 			.set_application_name(info.appName)

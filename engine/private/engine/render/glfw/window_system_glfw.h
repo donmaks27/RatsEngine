@@ -26,8 +26,8 @@ namespace engine
 
         eastl::vector_map<window_id, GLFWwindow*> m_windowDataGLFW;
 
-        virtual bool init(const create_info& info) override;
-        virtual void clear() override;
+        virtual bool system_init(const instance_create_info& info) override;
+        virtual void system_clear() override;
 
         virtual bool create_window_impl(const window_id& id, const window_create_info& info) override;
         virtual void destroy_window_impl(const window_id& id) override;

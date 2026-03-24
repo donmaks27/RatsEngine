@@ -4,8 +4,7 @@
 namespace engine
 {
     const log::logger window_system::Log = window_system::logger();
-
-    window_system* window_system::s_instance = nullptr;
+    window_system* window_system::Instance = nullptr;
 
     window_system::window_system()
     {
@@ -16,44 +15,7 @@ namespace engine
         engine::instance().event_bus().remove_listener(this);
     }
 
-    window_system* window_system::create_instance(const create_info& info)
-    {
-        if (s_instance != nullptr)
-        {
-            return s_instance;
-        }
-
-        Log.log("Initializing window system ({})...", info.api);
-        s_instance = allocate_instance(info);
-        if (s_instance == nullptr)
-        {
-            Log.fatal("Failed to allocate instance of window system!");
-            return nullptr;
-        }
-        if (!s_instance->init(info))
-        {
-            Log.fatal("Failed to initialize window system!");
-            s_instance->clear();
-            delete s_instance;
-            s_instance = nullptr;
-            return nullptr;
-        }
-        Log.info("Window system initialized successfully");
-        return s_instance;
-    }
-    void window_system::clear_instance()
-    {
-        if (s_instance != nullptr)
-        {
-            Log.log("Clearing window system...");
-            s_instance->clear();
-            delete s_instance;
-            s_instance = nullptr;
-            Log.log("Window system cleared successfully");
-        }
-    }
-
-    bool window_system::init(const create_info& info)
+    bool window_system::system_init(const instance_create_info& info)
     {
         m_mainWindowId = window_id::generate();
         m_windowData.emplace(m_mainWindowId, window_data{ .size = info.mainWindow.size });
@@ -67,8 +29,7 @@ namespace engine
         Log.info("Main window created successfully");
         return true;
     }
-
-    void window_system::clear()
+    void window_system::system_clear()
     {
         m_windowData.clear();
         m_mainWindowId = window_id::invalid_id();

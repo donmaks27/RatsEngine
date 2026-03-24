@@ -56,7 +56,7 @@ namespace engine
 
     bool engine::init_engine()
     {
-        if (render_system::create_instance({ .api = render_api::vulkan }) == nullptr)
+        if (!render_system::instance_create({ .api = render_api::vulkan }))
         {
             return false;
         }
@@ -67,7 +67,7 @@ namespace engine
     {
         Log.log("Clearing engine...");
 
-        render_system::clear_instance();
+        render_system::instance_clear();
 
         Log.log("Engine cleared successfully");
         m_engineStarted = false;

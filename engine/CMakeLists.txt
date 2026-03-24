@@ -37,6 +37,7 @@ list(APPEND RATS_ENGINE_PRIVATE_PCH
 list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/core.h"
 	"include/engine/engine.h"
+	"include/engine/system.h"
 	"include/engine/render/render_api.h"
 	"include/engine/render/render_system.h"
 	"include/engine/render/surface_system.h"

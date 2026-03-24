@@ -25,7 +25,7 @@ namespace engine
         glfwPollEvents();
     }
 
-    bool window_system_glfw::init(const create_info& info)
+    bool window_system_glfw::system_init(const instance_create_info& info)
     {
         glfwSetErrorCallback(glfw_error_callback);
         if (!glfwInit())
@@ -36,13 +36,13 @@ namespace engine
         Log.info("GLFW initialized");
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        return super::init(info);
+        return super::system_init(info);
     }
 
-    void window_system_glfw::clear()
+    void window_system_glfw::system_clear()
     {
         clear_GLFW();
-        super::clear();
+        super::system_clear();
     }
 
     void window_system_glfw::clear_GLFW()
