@@ -37,6 +37,7 @@ list(APPEND RATS_ENGINE_PRIVATE_PCH
 list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/core.h"
 	"include/engine/engine.h"
+	"include/engine/engine_event_listener.h"
 	"include/engine/system.h"
 	"include/engine/render/render_api.h"
 	"include/engine/render/render_system.h"
@@ -71,6 +72,7 @@ if(${RATS_ENGINE_VULKAN_ENABLE})
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 		"private/engine/render/vulkan/core.h"
 		"private/engine/render/vulkan/render_system_vulkan.h"
+		"private/engine/render/vulkan/surface_system_vulkan.h"
 		"private/engine/render/vulkan/window_system_vulkan.h"
 		"private/engine/render/vulkan/builder/instance_builder.h"
 		"private/engine/render/vulkan/builder/device_builder.h"
@@ -78,6 +80,7 @@ if(${RATS_ENGINE_VULKAN_ENABLE})
 	list(APPEND RATS_ENGINE_SRC_FILES
 		"src/render/vulkan/core.cpp"
 		"src/render/vulkan/render_system_vulkan.cpp"
+		"src/render/vulkan/surface_system_vulkan.cpp"
 		"src/render/vulkan/window_system_vulkan.cpp"
 		"src/render/vulkan/builder/instance_builder.cpp"
 		"src/render/vulkan/builder/device_builder.cpp"

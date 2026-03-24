@@ -34,11 +34,6 @@ namespace engine
         window_system();
         virtual ~window_system() override;
     public:
-        window_system(const window_system&) = delete;
-        window_system(window_system&&) = delete;
-
-        window_system& operator=(const window_system&) = delete;
-        window_system& operator=(window_system&&) = delete;
 
         [[nodiscard]] static constexpr log::logger logger() { return log::logger("window_system", logger_engine()); }
 

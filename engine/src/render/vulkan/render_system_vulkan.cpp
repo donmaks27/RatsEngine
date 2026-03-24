@@ -19,12 +19,11 @@ namespace engine
 	}
 
 	const log::logger render_system_vulkan::Log = render_system_vulkan::logger();
-
-	render_system_vulkan* render_system_vulkan::s_instanceVulkan = nullptr;
+	render_system_vulkan* render_system_vulkan::Instance = nullptr;
 
 	bool render_system_vulkan::system_init(const instance_create_info& info)
 	{
-    	s_instanceVulkan = this;
+    	Instance = this;
 
 		if (!super::system_init(info))
 		{
@@ -102,8 +101,8 @@ namespace engine
 			m_ctx.m_instance.clear();
 		}
 
-    	s_instanceVulkan = nullptr;
 		super::system_clear();
+    	Instance = nullptr;
 	}
 
 	bool render_system_vulkan::create_instance(const instance_create_info& info)

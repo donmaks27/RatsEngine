@@ -6,8 +6,7 @@
 namespace engine
 {
     const log::logger window_system_vulkan::Log = window_system_vulkan::logger();
-
-    window_system_vulkan* window_system_vulkan::s_instanceVulkan = nullptr;
+    window_system_vulkan* window_system_vulkan::Instance = nullptr;
 
     bool window_system_vulkan::handle_event(const utils::event_info& event)
     {
@@ -20,11 +19,11 @@ namespace engine
 
     void window_system_vulkan::on_init()
     {
-        s_instanceVulkan = this;
+        Instance = this;
     }
     void window_system_vulkan::on_clear()
     {
-        s_instanceVulkan = nullptr;
+        Instance = nullptr;
     }
 
     bool window_system_vulkan::on_window_created(const window_id& id)

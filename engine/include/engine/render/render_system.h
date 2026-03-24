@@ -22,11 +22,6 @@ namespace engine
         render_system() = default;
         virtual ~render_system() override = default;
     public:
-        render_system(const render_system&) = delete;
-        render_system(render_system&&) = delete;
-
-        render_system& operator=(const render_system&) = delete;
-        render_system& operator=(render_system&&) = delete;
 
         [[nodiscard]] static constexpr log::logger logger() { return log::logger("render_system", logger_engine()); }
 

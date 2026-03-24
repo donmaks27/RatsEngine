@@ -22,8 +22,7 @@ namespace engine
         virtual ~render_system_vulkan() override = default;
 
         [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
-
-        [[nodiscard]] static render_system_vulkan* instance() { return s_instanceVulkan; }
+        [[nodiscard]] static render_system_vulkan* instance() { return Instance; }
 
         [[nodiscard]] const vulkan::context& vk_ctx() const { return m_ctx; }
 
@@ -37,7 +36,7 @@ namespace engine
     private:
 
         static const log::logger Log;
-        static render_system_vulkan* s_instanceVulkan;
+        static render_system_vulkan* Instance;
 
         struct frame_data
         {

@@ -1,5 +1,6 @@
 #include <engine/engine.h>
 
+#include <engine/engine_event_listener.h>
 #include <engine/render/render_system.h>
 #include <engine/render/window_system.h>
 #include <engine/utils/macro/defer.h>
@@ -71,5 +72,14 @@ namespace engine
 
         Log.log("Engine cleared successfully");
         m_engineStarted = false;
+    }
+
+    engine_event_listener::engine_event_listener()
+    {
+        engine::instance().event_bus().add_listener(this);
+    }
+    engine_event_listener::~engine_event_listener()
+    {
+        engine::instance().event_bus().remove_listener(this);
     }
 }
