@@ -57,7 +57,7 @@ namespace engine
 
     bool engine::init_engine()
     {
-        if (!render_system::instance_create({ .api = render_api::vulkan }))
+        if (!render_system::instance_create({ .renderApi = render_api::vulkan }))
         {
             return false;
         }

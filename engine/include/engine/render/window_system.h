@@ -22,7 +22,7 @@ namespace engine
     };
     struct window_system_create_info
     {
-        render_api api = render_api::vulkan;
+        render_api renderApi = render_api::vulkan;
         window_create_info mainWindow{};
     };
 
@@ -76,5 +76,6 @@ namespace engine
         static const log::logger Log;
         static window_system* Instance;
         static window_system* instance_allocate(const instance_create_info& info);
+        static window_system* instance_allocate_vulkan();
     };
 }

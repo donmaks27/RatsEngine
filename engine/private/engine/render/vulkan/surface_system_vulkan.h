@@ -20,11 +20,11 @@ namespace engine
 		[[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
 		[[nodiscard]] static auto instance() { return Instance; }
 
-		[[nodiscard]] surface_id on_surface_created(const vulkan::context& ctx, vk::SurfaceKHR surface, const glm::uvec2& size);
-		void on_surface_cleared(const vulkan::context& ctx, surface_id id);
+		[[nodiscard]] surface_id create_surface(const vulkan::context& ctx, vk::SurfaceKHR surface, const glm::uvec2& size);
+		void clear_surface(const vulkan::context& ctx, surface_id id);
 
-		[[nodiscard]] vulkan::swapchain& swapchain(const surface_id id) { return m_surfaces.at_key(id).swapchain; }
-		[[nodiscard]] const vulkan::swapchain& swapchain(const surface_id id) const { return m_surfaces.at_key(id).swapchain; }
+		[[nodiscard]] vulkan::swapchain& surface_swapchain(const surface_id id) { return m_surfaces.at_key(id).swapchain; }
+		[[nodiscard]] const vulkan::swapchain& surface_swapchain(const surface_id id) const { return m_surfaces.at_key(id).swapchain; }
 
 	protected:
 

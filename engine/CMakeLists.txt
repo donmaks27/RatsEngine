@@ -36,6 +36,7 @@ list(APPEND RATS_ENGINE_PRIVATE_PCH
 	"src/pch.h")
 list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/core.h"
+	"include/engine/eastl_config.h"
 	"include/engine/engine.h"
 	"include/engine/engine_event_listener.h"
 	"include/engine/system.h"
@@ -52,10 +53,10 @@ list(APPEND RATS_ENGINE_SRC_FILES
 	"src/utils/events.cpp"
 	"src/engine.cpp"
 	"src/render/render_system.cpp" 
+	"src/render/vulkan/render_system_allocator.cpp"
 	"src/render/surface_system.cpp"
-	"src/render/window_system.cpp"
-	"src/render/render_system_constructor.cpp"
-	"src/render/window_system_constructor.cpp")
+	"src/render/vulkan/surface_system_allocator.cpp"
+	"src/render/window_system.cpp")
 list(APPEND RATS_ENGINE_SRC_FILES_NO_PCH
 	"src/utils/eastl_operator_new.cpp"
 	"src/utils/log.cpp"
@@ -95,7 +96,8 @@ if(${RATS_ENGINE_GLFW_ENABLE})
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 		"private/engine/render/glfw/window_system_glfw.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/glfw/window_system_glfw.cpp")
+		"src/render/glfw/window_system_glfw.cpp"
+		"src/render/glfw/window_system_allocator_vulkan.cpp")
 
 	if(${RATS_ENGINE_VULKAN_ENABLE})
 		list(APPEND RATS_ENGINE_PRIVATE_HEADERS
@@ -106,8 +108,7 @@ if(${RATS_ENGINE_GLFW_ENABLE})
 
 endif()
 
-add_library(rats-engine SHARED
-	include/engine/eastl_config.h)
+add_library(rats-engine SHARED)
 target_link_libraries(rats-engine
 	PUBLIC ${RATS_ENGINE_PUBLIC_LIBS}
 	PRIVATE ${RATS_ENGINE_PRIVATE_LIBS})
