@@ -22,9 +22,6 @@ namespace engine
         [[nodiscard]] virtual eastl::vector<const char*> required_instance_extensions() const override;
         [[nodiscard]] virtual vk::SurfaceKHR create_surface_impl(const vulkan::context& ctx, const window_id& id) const override;
 
-        virtual bool system_init(const instance_create_info& info) override;
-        virtual void system_clear() override;
-
         virtual bool on_event(const utils::event_info& event) override;
 
         virtual bool create_window_impl(const window_id& id, const window_create_info& info) override;

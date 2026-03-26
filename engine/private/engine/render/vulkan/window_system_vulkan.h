@@ -15,8 +15,8 @@ namespace engine
         friend render_system_vulkan;
 
     protected:
-        window_system_vulkan() = default;
-        virtual ~window_system_vulkan() = default;
+        window_system_vulkan();
+        virtual ~window_system_vulkan();
     public:
         window_system_vulkan(const window_system_vulkan&) = delete;
         window_system_vulkan(window_system_vulkan&&) = delete;
@@ -36,9 +36,6 @@ namespace engine
         [[nodiscard]] virtual vk::SurfaceKHR create_surface_impl(const vulkan::context& ctx, const window_id& id) const = 0;
 
         bool handle_event(const utils::event_info& event);
-
-        void on_init();
-        static void on_clear();
 
         [[nodiscard]] bool on_window_created(const window_id& id);
         void on_window_destroying(const window_id& id);

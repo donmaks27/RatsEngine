@@ -8,6 +8,15 @@ namespace engine
     const log::logger window_system_vulkan::Log = window_system_vulkan::logger();
     window_system_vulkan* window_system_vulkan::Instance = nullptr;
 
+    window_system_vulkan::window_system_vulkan()
+    {
+        Instance = this;
+    }
+    window_system_vulkan::~window_system_vulkan()
+    {
+        Instance = nullptr;
+    }
+
     bool window_system_vulkan::handle_event(const utils::event_info& event)
     {
         return event.dispatch<vulkan_instance_created_event>([this] {
@@ -15,15 +24,6 @@ namespace engine
         }) && event.dispatch<vulkan_device_created_event>([this] {
             return on_device_created();
         });
-    }
-
-    void window_system_vulkan::on_init()
-    {
-        Instance = this;
-    }
-    void window_system_vulkan::on_clear()
-    {
-        Instance = nullptr;
     }
 
     bool window_system_vulkan::on_window_created(const window_id& id)

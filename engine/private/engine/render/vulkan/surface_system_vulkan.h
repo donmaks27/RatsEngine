@@ -14,8 +14,8 @@ namespace engine
 		using super = surface_system;
 
 	public:
-		surface_system_vulkan() = default;
-		virtual ~surface_system_vulkan() override = default;
+		surface_system_vulkan();
+		virtual ~surface_system_vulkan() override;
 
 		[[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
 		[[nodiscard]] static auto instance() { return Instance; }
@@ -28,7 +28,6 @@ namespace engine
 
 	protected:
 
-		virtual bool system_init(const instance_create_info& info) override;
 		virtual void system_clear() override;
 
 		virtual bool on_event(const utils::event_info& event) override;
@@ -49,5 +48,11 @@ namespace engine
 
 		[[nodiscard]] bool create_swapchain(const vulkan::context& ctx, surface_id id);
 		[[nodiscard]] bool on_device_created();
+	};
+
+	class surface_backend_vulkan
+	{
+	protected:
+		surface_backend_vulkan() = default;
 	};
 }

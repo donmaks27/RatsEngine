@@ -18,8 +18,8 @@ namespace engine
         using super = render_system;
 
     public:
-        render_system_vulkan() = default;
-        virtual ~render_system_vulkan() override = default;
+        render_system_vulkan();
+        virtual ~render_system_vulkan() override;
 
         [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
         [[nodiscard]] static render_system_vulkan* instance() { return Instance; }

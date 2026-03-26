@@ -7,11 +7,15 @@ namespace engine
 	const log::logger surface_system_vulkan::Log = surface_system_vulkan::logger();
 	surface_system_vulkan* surface_system_vulkan::Instance = nullptr;
 
-	bool surface_system_vulkan::system_init(const instance_create_info& info)
+	surface_system_vulkan::surface_system_vulkan()
 	{
 		Instance = this;
-		return super::system_init(info);
 	}
+	surface_system_vulkan::~surface_system_vulkan()
+	{
+		Instance = nullptr;
+	}
+
 	void surface_system_vulkan::system_clear()
 	{
 		const auto& ctx = render_system_vulkan::instance()->vk_ctx();
@@ -21,7 +25,6 @@ namespace engine
 		m_surfaces.clear();
 
 		super::system_clear();
-		Instance = nullptr;
 	}
 
 	bool surface_system_vulkan::on_event(const utils::event_info& event)
