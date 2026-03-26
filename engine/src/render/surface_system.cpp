@@ -5,22 +5,10 @@ namespace engine
 	const log::logger surface_system::Log = surface_system::logger();
 	surface_system* surface_system::Instance = nullptr;
 
-	surface_system* surface_system::instance_allocate(const instance_create_info& info)
-	{
-		surface_system* result = nullptr;
-		switch (info.renderApi)
-		{
-		case render_api::vulkan: result = instance_allocate_vulkan(); break;
-		default:;
-		}
-		if (result == nullptr)
-		{
-			Log.fatal("Render API '{}' is not implemented", info.renderApi);
-		}
-		return result;
-	}
+	const log::logger surface_backend_system::Log = surface_backend_system::logger();
+	surface_backend_system* surface_backend_system::Instance = nullptr;
 
-	surface_id surface_system::create_surface(const glm::uvec2& size)
+	surface_id surface_system::create_surface(const surface_create_info& info)
 	{
 		static surface_id prevSurfaceId = invalid_surface_id;
 		if (m_surfaces.size() >= std::numeric_limits<surface_id>::max())
@@ -33,7 +21,7 @@ namespace engine
 		{
 			id++;
 		}
-		m_surfaces[id] = { .size = size };
+		m_surfaces[id] = { .size = info.size };
 		return id;
 	}
 	void surface_system::clear_surface(const surface_id id)

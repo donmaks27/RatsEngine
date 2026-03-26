@@ -14,7 +14,7 @@ namespace engine
         render_api renderApi = render_api::vulkan;
     };
 
-    class RATS_ENGINE_EXPORT render_system : public system<render_system, render_system_create_info>
+    class RATS_ENGINE_EXPORT render_system : public render_api_system<render_system, render_system_create_info>
     {
         friend system;
 
@@ -36,7 +36,6 @@ namespace engine
 
         static const log::logger Log;
         static render_system* Instance;
-        static render_system* instance_allocate(const instance_create_info& info);
         static render_system* instance_allocate_vulkan();
     };
 }

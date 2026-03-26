@@ -26,7 +26,7 @@ namespace engine
         window_create_info mainWindow{};
     };
 
-    class RATS_ENGINE_EXPORT window_system : public utils::event_listener, public system<window_system, window_system_create_info>
+    class RATS_ENGINE_EXPORT window_system : public utils::event_listener, public render_api_system<window_system, window_system_create_info>
     {
         friend system;
 
@@ -75,7 +75,6 @@ namespace engine
 
         static const log::logger Log;
         static window_system* Instance;
-        static window_system* instance_allocate(const instance_create_info& info);
         static window_system* instance_allocate_vulkan();
     };
 }

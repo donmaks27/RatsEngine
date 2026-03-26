@@ -3,8 +3,6 @@
 #include <engine/core.h>
 #include <engine/system.h>
 
-#include <engine/render/render_api.h>
-
 #include <glm/vec2.hpp>
 
 namespace engine
@@ -12,12 +10,7 @@ namespace engine
 	using surface_id = std::uint8_t;
 	constexpr surface_id invalid_surface_id = 0;
 
-	struct surface_system_create_info
-	{
-		render_api renderApi = render_api::vulkan;
-	};
-
-	class RATS_ENGINE_EXPORT surface_system : public system<surface_system, surface_system_create_info>
+	class RATS_ENGINE_EXPORT surface_system : public render_api_system<surface_system>
 	{
 		friend system;
 
@@ -40,17 +33,21 @@ namespace engine
 
 	protected:
 
+		struct surface_create_info
+		{
+			glm::uvec2 size = { 0, 0 };
+		};
+
 		virtual bool system_init(const instance_create_info& info) override { return false; }
 		virtual void system_clear() override {}
 
-		[[nodiscard]] surface_id create_surface(const glm::uvec2& size);
+		[[nodiscard]] surface_id create_surface(const surface_create_info& info);
 		void clear_surface(surface_id id);
 
 	private:
 
 		static const log::logger Log;
 		static surface_system* Instance;
-		static surface_system* instance_allocate(const instance_create_info& info);
 		static surface_system* instance_allocate_vulkan();
 
 		struct surface_data
@@ -59,5 +56,23 @@ namespace engine
 		};
 
 		eastl::vector_map<surface_id, surface_data> m_surfaces;
+	};
+
+	class RATS_ENGINE_EXPORT surface_backend_system : public render_api_system<surface_backend_system>
+	{
+		friend system;
+
+	protected:
+		surface_backend_system() = default;
+		virtual ~surface_backend_system() override = default;
+	public:
+
+		[[nodiscard]] static constexpr log::logger logger() { return log::logger("surface_backend_system", logger_engine()); }
+
+	private:
+
+		static const log::logger Log;
+		static surface_backend_system* Instance;
+		static surface_backend_system* instance_allocate_vulkan() { return nullptr; }
 	};
 }

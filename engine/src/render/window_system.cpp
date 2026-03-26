@@ -6,21 +6,6 @@ namespace engine
     const log::logger window_system::Log = window_system::logger();
     window_system* window_system::Instance = nullptr;
 
-    window_system* window_system::instance_allocate(const instance_create_info& info)
-    {
-        window_system* result = nullptr;
-        switch (info.renderApi)
-        {
-        case render_api::vulkan: result = instance_allocate_vulkan(); break;
-        default:;
-        }
-        if (result == nullptr)
-        {
-            Log.fatal("Render API '{}' is not implemented", info.renderApi);
-        }
-        return result;
-    }
-
     window_system::window_system()
     {
         engine::instance().event_bus().add_listener(this);

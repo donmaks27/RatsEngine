@@ -2,11 +2,20 @@
 
 #include <engine/core.h>
 
+#include <engine/render/render_api.h>
+
 namespace engine
 {
+	template<typename CreateInfo>
+	concept render_api_system_create_info = requires(CreateInfo info) {
+		{ info.renderApi } -> std::convertible_to<render_api>;
+	};
+
 	template<typename SystemType, typename CreateInfo>
 	class system
 	{
+		static constexpr bool RenderApiSystem = render_api_system_create_info<CreateInfo>;
+
 	protected:
 		system() = default;
 		virtual ~system() = default;
@@ -25,7 +34,7 @@ namespace engine
 			if (SystemType::Instance == nullptr)
 			{
 				SystemType::Log.log("Creating system...");
-				SystemType::Instance = SystemType::instance_allocate(info);
+				SystemType::Instance = system::instance_allocate(info);
 				if (SystemType::Instance == nullptr)
 				{
 					SystemType::Log.fatal("Failed to allocate system!");
@@ -59,5 +68,36 @@ namespace engine
 
 		virtual bool system_init(const instance_create_info& info) = 0;
 		virtual void system_clear() = 0;
+
+	private:
+
+		static SystemType* instance_allocate(const instance_create_info& info)
+		{
+			if constexpr (!RenderApiSystem)
+			{
+				return SystemType::instance_allocate_impl(info);
+			}
+			else
+			{
+				SystemType* result = nullptr;
+				switch (info.renderApi)
+				{
+				case render_api::vulkan: result = SystemType::instance_allocate_vulkan(); break;
+				default:;
+				}
+				if (result == nullptr)
+				{
+					SystemType::Log.fatal("Render API '{}' is not implemented", info.renderApi);
+				}
+				return result;
+			}
+		}
 	};
+
+	struct default_render_api_system_create_info
+	{
+		render_api renderApi = render_api::vulkan;
+	};
+	template<typename SystemType, render_api_system_create_info CreateInfo = default_render_api_system_create_info>
+	using render_api_system = system<SystemType, CreateInfo>;
 }

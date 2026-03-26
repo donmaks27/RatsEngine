@@ -9,9 +9,13 @@
 
 namespace engine
 {
+	class surface_backend_system_vulkan;
+
 	class surface_system_vulkan final : public surface_system, public engine_event_listener
 	{
 		using super = surface_system;
+
+		friend surface_backend_system_vulkan;
 
 	public:
 		surface_system_vulkan();
@@ -19,9 +23,6 @@ namespace engine
 
 		[[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
 		[[nodiscard]] static auto instance() { return Instance; }
-
-		[[nodiscard]] surface_id create_surface(const vulkan::context& ctx, vk::SurfaceKHR surface, const glm::uvec2& size);
-		void clear_surface(const vulkan::context& ctx, surface_id id);
 
 		[[nodiscard]] vulkan::swapchain& surface_swapchain(const surface_id id) { return m_surfaces.at_key(id).swapchain; }
 		[[nodiscard]] const vulkan::swapchain& surface_swapchain(const surface_id id) const { return m_surfaces.at_key(id).swapchain; }
@@ -37,22 +38,39 @@ namespace engine
 		static const log::logger Log;
 		static surface_system_vulkan* Instance;
 
-		struct surface_data_vulkan
+		struct vulkan_surface_create_info : surface_create_info
+		{
+			vk::SurfaceKHR surface = nullptr;
+		};
+		struct vulkan_surface_data
 		{
 			vk::SurfaceKHR surface = nullptr;
 			vulkan::swapchain swapchain = nullptr;
 		};
 
-		eastl::vector_map<surface_id, surface_data_vulkan> m_surfaces;
+		eastl::vector_map<surface_id, vulkan_surface_data> m_surfaces;
 
+
+		[[nodiscard]] surface_id create_surface(const vulkan::context& ctx, const vulkan_surface_create_info& info);
+		void clear_surface(const vulkan::context& ctx, surface_id id);
 
 		[[nodiscard]] bool create_swapchain(const vulkan::context& ctx, surface_id id);
 		[[nodiscard]] bool on_device_created();
 	};
 
-	class surface_backend_vulkan
+	class surface_backend_system_vulkan : public surface_backend_system
 	{
 	protected:
-		surface_backend_vulkan() = default;
+		surface_backend_system_vulkan() = default;
+		virtual ~surface_backend_system_vulkan() override = default;
+
+		[[nodiscard]] static surface_id create_surface(const vulkan::context& ctx, const surface_system_vulkan::vulkan_surface_create_info& info)
+		{
+			return surface_system_vulkan::instance()->create_surface(ctx, info);
+		}
+		static void clear_surface(const vulkan::context& ctx, const surface_id id)
+		{
+			surface_system_vulkan::instance()->clear_surface(ctx, id);
+		}
 	};
 }

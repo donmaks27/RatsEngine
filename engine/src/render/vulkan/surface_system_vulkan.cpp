@@ -34,12 +34,12 @@ namespace engine
 		});
 	}
 
-	surface_id surface_system_vulkan::create_surface(const vulkan::context& ctx, const vk::SurfaceKHR surface, const glm::uvec2& size)
+	surface_id surface_system_vulkan::create_surface(const vulkan::context& ctx, const vulkan_surface_create_info& info)
 	{
-		const auto id = super::create_surface(size);
+		const auto id = super::create_surface(info);
 		if (id != invalid_surface_id)
 		{
-			m_surfaces[id] = { .surface = surface };
+			m_surfaces[id] = { .surface = info.surface };
 			if (!create_swapchain(ctx, id))
 			{
 				clear_surface(ctx, id);
