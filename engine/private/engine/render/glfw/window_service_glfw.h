@@ -1,19 +1,19 @@
 #pragma once
 
 #include <engine/core.h>
-#include <engine/render/window_system.h>
+#include <engine/render/window_service.h>
 
 struct GLFWwindow;
 
 namespace engine
 {
-    class window_system_glfw : public window_system
+    class window_service_glfw : public window_service
     {
-        using super = window_system;
+        using super = window_service;
 
     protected:
-        window_system_glfw() = default;
-        virtual ~window_system_glfw() override = default;
+        window_service_glfw() = default;
+        virtual ~window_service_glfw() override = default;
     public:
 
         [[nodiscard]] static constexpr log::logger logger() { return log::logger("GLFW", super::logger());  }
@@ -26,8 +26,8 @@ namespace engine
 
         eastl::vector_map<window_id, GLFWwindow*> m_windowDataGLFW;
 
-        virtual bool system_init(const instance_create_info& info) override;
-        virtual void system_clear() override;
+        virtual bool service_init(const service_create_info& info) override;
+        virtual void service_clear() override;
 
         virtual bool create_window_impl(const window_id& id, const window_create_info& info) override;
         virtual void destroy_window_impl(const window_id& id) override;

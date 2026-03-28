@@ -3,29 +3,29 @@
 #include <engine/core.h>
 #include <engine/render/vulkan/core.h>
 
-#include <engine/render/window_system.h>
+#include <engine/render/window_service.h>
 #include <engine/render/vulkan/swapchain.h>
 
 namespace engine
 {
-    class render_system_vulkan;
+    class render_service_vulkan;
 
-    class window_system_vulkan
+    class window_service_vulkan
     {
-        friend render_system_vulkan;
+        friend render_service_vulkan;
 
     protected:
-        window_system_vulkan();
-        virtual ~window_system_vulkan();
+        window_service_vulkan() { Instance = this; }
+        virtual ~window_service_vulkan() { Instance = nullptr; }
     public:
-        window_system_vulkan(const window_system_vulkan&) = delete;
-        window_system_vulkan(window_system_vulkan&&) = delete;
+        window_service_vulkan(const window_service_vulkan&) = delete;
+        window_service_vulkan(window_service_vulkan&&) = delete;
 
-        window_system_vulkan& operator=(const window_system_vulkan&) = delete;
-        window_system_vulkan& operator=(window_system_vulkan&&) = delete;
+        window_service_vulkan& operator=(const window_service_vulkan&) = delete;
+        window_service_vulkan& operator=(window_service_vulkan&&) = delete;
 
-        [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(window_system::logger()); }
-        [[nodiscard]] static window_system_vulkan* instance() { return Instance; }
+        [[nodiscard]] static constexpr auto logger() { return vulkan::logger_vulkan(window_service::logger()); }
+        [[nodiscard]] static auto instance() { return Instance; }
 
         [[nodiscard]] vk::SurfaceKHR surface(const window_id& id) const;
 		[[nodiscard]] vulkan::swapchain* swapchain(const window_id& id);
@@ -43,7 +43,7 @@ namespace engine
     private:
 
         static const log::logger Log;
-        static window_system_vulkan* Instance;
+        static window_service_vulkan* Instance;
 
         struct window_data_vulkan
         {

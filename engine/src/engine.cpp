@@ -1,8 +1,8 @@
 #include <engine/engine.h>
 
 #include <engine/engine_event_listener.h>
-#include <engine/render/render_system.h>
-#include <engine/render/window_system.h>
+#include <engine/render/render_service.h>
+#include <engine/render/window_service.h>
 #include <engine/utils/macro/defer.h>
 
 namespace engine
@@ -37,8 +37,8 @@ namespace engine
         Log.info("Engine initialized successfully");
 
         Log.log("Game loop started");
-        auto* windowSystem = window_system::instance();
-        auto* renderSystem = render_system::instance();
+        auto* windowSystem = window_service::instance();
+        auto* renderSystem = render_service::instance();
         while (!windowSystem->should_close_main_window())
         {
             if (!renderSystem->render())
@@ -57,7 +57,7 @@ namespace engine
 
     bool engine::init_engine()
     {
-        if (!render_system::instance_create({ .renderApi = render_api::vulkan }))
+        if (!render_service::instance_create({ .renderApi = render_api::vulkan }))
         {
             return false;
         }
@@ -68,7 +68,7 @@ namespace engine
     {
         Log.log("Clearing engine...");
 
-        render_system::instance_clear();
+        render_service::instance_clear();
 
         Log.log("Engine cleared successfully");
         m_engineStarted = false;

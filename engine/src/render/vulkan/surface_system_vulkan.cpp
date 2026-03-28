@@ -1,6 +1,6 @@
 #include <engine/render/vulkan/surface_system_vulkan.h>
 
-#include <engine/render/vulkan/render_system_vulkan.h>
+#include <engine/render/vulkan/render_service_vulkan.h>
 
 namespace engine
 {
@@ -18,7 +18,7 @@ namespace engine
 
 	void surface_system_vulkan::system_clear()
 	{
-		const auto& ctx = render_system_vulkan::instance()->vk_ctx();
+		const auto& ctx = render_service_vulkan::instance()->vk_ctx();
 		std::ranges::for_each(surface_ids(), [this, &ctx](const surface_id id) {
 			clear_surface(ctx, id);
 		});
@@ -80,7 +80,7 @@ namespace engine
 	}
 	bool surface_system_vulkan::on_device_created()
 	{
-		const auto& ctx = render_system_vulkan::instance()->vk_ctx();
+		const auto& ctx = render_service_vulkan::instance()->vk_ctx();
 		return std::ranges::all_of(surface_ids(), [this, &ctx](const surface_id id) {
 			return create_swapchain(ctx, id);
 		});
