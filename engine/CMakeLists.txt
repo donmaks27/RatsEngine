@@ -46,6 +46,7 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/render/window_system.h"
 	"include/engine/utils/log.h"
 	"include/engine/utils/uuid.h"
+	"include/engine/utils/type_storage.h"
 	"include/engine/utils/events.h"
 	"include/engine/utils/macro/defer.h")
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS)

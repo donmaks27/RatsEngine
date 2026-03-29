@@ -10,8 +10,8 @@
 
 namespace engine
 {
-    struct vulkan_instance_created_event final : utils::event<vulkan_instance_created_event> {};
-    struct vulkan_device_created_event final : utils::event<vulkan_device_created_event> {};
+    struct vulkan_instance_created_event final : utils::event_of<vulkan_instance_created_event> {};
+    struct vulkan_device_created_event final : utils::event_of<vulkan_device_created_event> {};
 
     class render_system_vulkan final : public render_system
     {

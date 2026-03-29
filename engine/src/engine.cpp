@@ -1,3 +1,4 @@
+#include <typeindex>
 #include <engine/engine.h>
 
 #include <engine/engine_event_listener.h>

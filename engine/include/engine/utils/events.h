@@ -4,6 +4,8 @@
 
 #include <engine/core.h>
 
+#include <engine/utils/type_storage.h>
+
 #include <cstdint>
 #include <algorithm>
 
@@ -17,39 +19,44 @@ namespace engine::utils
     class event_bus;
 
     using event_id = std::uint32_t;
-    inline constexpr event_id invalid_event_id = 0;
+    inline constexpr event_id invalid_event_id = type_storage<event_id>::invalid_id;
 
-    struct RATS_ENGINE_EXPORT event_base
+    struct RATS_ENGINE_EXPORT event
     {
     protected:
 
-        [[nodiscard]] static event_id generate_event_type();
-    };
-    template<typename EventType>
-    struct event : event_base
-    {
-        [[nodiscard]] static event_id type()
+        template<typename EventType>
+        [[nodiscard]] static event_id event_type()
         {
-            static event_id id = generate_event_type();
+            static const event_id id = m_typeIds.get_type_id<EventType>();
             return id;
         }
+
+    private:
+
+        static type_storage<event_id> m_typeIds;
+    };
+    template<typename EventType>
+    struct event_of : event
+    {
+        [[nodiscard]] static event_id type() { return event_type<EventType>(); }
     };
     template<typename T>
-    concept event_type = std::derived_from<T, event<T>> && std::is_final_v<T>;
+    concept event_type = std::derived_from<T, event_of<T>> && std::is_final_v<T>;
 
     struct RATS_ENGINE_EXPORT event_info
     {
-        const event_base& event;
-        const event_id eventType;
+        const event& e;
+        const event_id t;
 
         template<typename EventType, typename Func> requires event_type<EventType> && (std::invocable<Func, const EventType&> || std::invocable<Func>)
         bool dispatch(Func&& func) const
         {
-            if (eventType == EventType::type())
+            if (t == EventType::type())
             {
                 if constexpr (std::predicate<Func, const EventType&>)
                 {
-                    return func(static_cast<const EventType&>(event));
+                    return func(static_cast<const EventType&>(e));
                 }
                 else if constexpr (std::predicate<Func>)
                 {
@@ -57,7 +64,7 @@ namespace engine::utils
                 }
                 else if constexpr (std::invocable<Func, const EventType&>)
                 {
-                    func(static_cast<const EventType&>(event));
+                    func(static_cast<const EventType&>(e));
                 }
                 else
                 {
