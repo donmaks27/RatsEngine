@@ -2,7 +2,7 @@
 
 namespace engine::utils
 {
-    type_storage<event_id> event::m_typeIds;
+    type_storage<event_id> event::TypeIds;
 
     void event_bus::add_listener(event_listener* listener)
     {

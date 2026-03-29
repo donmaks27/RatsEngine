@@ -21,6 +21,7 @@ namespace engine
     {
         using super = service_of<T, CreateInfo>;
         friend super;
+        friend super::super;
 
         static T* instance_allocate(const super::service_create_info& info)
         {

@@ -28,13 +28,13 @@ namespace engine::utils
         template<typename EventType>
         [[nodiscard]] static event_id event_type()
         {
-            static const event_id id = m_typeIds.get_type_id<EventType>();
+            static const event_id id = TypeIds.get_type_id<EventType>();
             return id;
         }
 
     private:
 
-        static type_storage<event_id> m_typeIds;
+        static type_storage<event_id> TypeIds;
     };
     template<typename EventType>
     struct event_of : event

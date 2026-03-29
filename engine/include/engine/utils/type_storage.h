@@ -14,7 +14,7 @@ namespace engine::utils
             : m_types(std::move(value.m_types))
             , m_nextId(value.m_nextId)
         {
-            value.m_nextId = 1;
+            value.m_nextId = 0;
         }
         ~type_storage() = default;
 
@@ -23,12 +23,12 @@ namespace engine::utils
         {
             m_types = std::move(value.m_types);
             m_nextId = value.m_nextId;
-            value.m_nextId = 1;
+            value.m_nextId = 0;
             return *this;
         }
 
         using type_id = TypeId;
-        static constexpr type_id invalid_id = 0;
+        static constexpr type_id invalid_id = std::numeric_limits<type_id>::max();
 
         template<typename T>
         [[nodiscard]] type_id get_type_id() { return get_type_id(typeid(T)); }
@@ -36,7 +36,7 @@ namespace engine::utils
         void clear()
         {
             m_types.clear();
-            m_nextId = 1;
+            m_nextId = 0;
         }
 
     private:
@@ -57,7 +57,7 @@ namespace engine::utils
         };
 
         eastl::hash_map<const std::type_info*, type_id, type_hash, type_compare> m_types;
-        type_id m_nextId = 1;
+        type_id m_nextId = 0;
 
         type_id get_type_id(const std::type_info& type)
         {

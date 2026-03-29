@@ -2,10 +2,14 @@
 
 #include <engine/core.h>
 
+#include <engine/utils/type_storage.h>
+
+#include <EASTL/array.h>
+
 namespace engine
 {
     using service_type = std::uint8_t;
-    constexpr service_type invalid_service_type = std::numeric_limits<service_type>::max();
+    constexpr service_type invalid_service_type = utils::type_storage<service_type>::invalid_id;
 
     template<typename T, typename... CreateInfo>
     class service_impl;
@@ -29,9 +33,12 @@ namespace engine
 
     protected:
 
-        static service* ServiceInstance;
-
         virtual void service_clear() = 0;
+
+    private:
+
+        static utils::type_storage<service_type> ServiceTypes;
+        static eastl::array<service*, std::numeric_limits<service_type>::max()> ServiceInstances;
     };
 
     template<typename T, typename... CreateArgs>
@@ -39,9 +46,16 @@ namespace engine
     {
     public:
 
+        [[nodiscard]] static service_type type()
+        {
+            static const service_type id = ServiceTypes.get_type_id<T>();
+            return id;
+        }
+
         [[nodiscard]] static bool instance_create(CreateArgs&&... args)
         {
-            if (ServiceInstance == nullptr)
+            auto& serviceInstance = ServiceInstances[type()];
+            if (serviceInstance == nullptr)
             {
                 const log::logger Log = T::logger();
                 Log.log("Creating system...");
@@ -51,13 +65,13 @@ namespace engine
                     Log.fatal("Failed to allocate system!");
                     return false;
                 }
-                ServiceInstance = instance;
+                serviceInstance = instance;
                 if (!instance->service_init(args...))
                 {
                     Log.fatal("Failed to initialize system!");
-                    ServiceInstance->service_clear();
-                    delete ServiceInstance;
-                    ServiceInstance = nullptr;
+                    serviceInstance->service_clear();
+                    delete serviceInstance;
+                    serviceInstance = nullptr;
                     return false;
                 }
                 Log.info("System created successfully");
@@ -66,13 +80,14 @@ namespace engine
         }
         static void instance_clear()
         {
-            if (ServiceInstance != nullptr)
+            auto& serviceInstance = ServiceInstances[type()];
+            if (serviceInstance != nullptr)
             {
                 const log::logger Log = T::logger();
                 Log.log("Clearing system...");
-                ServiceInstance->service_clear();
-                delete ServiceInstance;
-                ServiceInstance = nullptr;
+                serviceInstance->service_clear();
+                delete serviceInstance;
+                serviceInstance = nullptr;
                 Log.log("System cleared successfully");
             }
         }
@@ -88,9 +103,12 @@ namespace engine
     public:
         static_assert(std::is_class_v<CreateInfo>, "CreateInfo must be a class/struct");
         using service_create_info = CreateInfo;
+        using super = service_impl<T, const CreateInfo&>;
     };
     template<typename T>
     class service_of<T, void> : public service_impl<T>
     {
+    public:
+        using super = service_impl<T>;
     };
 }
