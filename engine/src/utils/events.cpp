@@ -2,11 +2,7 @@
 
 namespace engine::utils
 {
-    event_id event_base::generate_event_type()
-    {
-        static event_id id = invalid_event_id;
-        return ++id;
-    }
+    type_storage<event_id> event::m_typeIds;
 
     void event_bus::add_listener(event_listener* listener)
     {
