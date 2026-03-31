@@ -48,7 +48,7 @@ namespace engine
 
         [[nodiscard]] static service_type type()
         {
-            static const service_type id = ServiceTypes.get_type_id<T>();
+            static const service_type id = ServiceTypes.type_id<T>();
             return id;
         }
 

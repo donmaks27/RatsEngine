@@ -2,7 +2,7 @@
 
 #include <engine/core.h>
 
-#include <engine/utils/events.h>
+#include <engine/events.h>
 
 namespace engine
 {

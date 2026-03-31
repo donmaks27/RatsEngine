@@ -4,7 +4,7 @@
 #include <engine/render/vulkan/core.h>
 
 #include <engine/render/render_service.h>
-#include <engine/utils/events.h>
+#include <engine/events.h>
 
 #include "EASTL/array.h"
 

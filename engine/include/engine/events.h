@@ -6,7 +6,6 @@
 
 #include <engine/utils/type_storage.h>
 
-#include <cstdint>
 #include <algorithm>
 
 #include <EASTL/deque.h>
@@ -28,7 +27,7 @@ namespace engine::utils
         template<typename EventType>
         [[nodiscard]] static event_id event_type()
         {
-            static const event_id id = TypeIds.get_type_id<EventType>();
+            static const event_id id = TypeIds.type_id<EventType>();
             return id;
         }
 
@@ -100,6 +99,8 @@ namespace engine::utils
         template<typename EventType> requires event_type<EventType>
         struct events_list
         {
+            using const_iterator = eastl::deque<EventType>::const_iterator;
+
             friend event_bus;
 
             events_list() = delete;
@@ -107,13 +108,12 @@ namespace engine::utils
             explicit events_list(const eastl::deque<EventType>* e) : events(e) {}
         public:
 
-            [[nodiscard]] auto begin() const { return events != nullptr ? events->cbegin() : dummy.cbegin(); }
-            [[nodiscard]] auto end() const { return events != nullptr ? events->cend() : dummy.cend(); }
+            [[nodiscard]] auto begin() const { return events != nullptr ? events->cbegin() : const_iterator(); }
+            [[nodiscard]] auto end() const { return events != nullptr ? events->cend() : const_iterator(); }
 
         private:
 
             const eastl::deque<EventType>* events = nullptr;
-            const eastl::deque<EventType> dummy;
         };
 
         void add_listener(event_listener* listener);

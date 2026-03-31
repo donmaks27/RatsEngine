@@ -4,7 +4,7 @@
 #include <engine/render/render_service_of.h>
 
 #include <engine/utils/uuid.h>
-#include <engine/utils/events.h>
+#include <engine/events.h>
 
 #include <EASTL/vector_map.h>
 #include <glm/vec2.hpp>

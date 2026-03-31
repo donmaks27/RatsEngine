@@ -38,6 +38,7 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/core.h"
 	"include/engine/eastl_config.h"
 	"include/engine/engine.h"
+	"include/engine/events.h"
 	"include/engine/engine_event_listener.h"
 	"include/engine/system.h"
 	"include/engine/render/render_api.h"
@@ -47,12 +48,11 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/utils/log.h"
 	"include/engine/utils/uuid.h"
 	"include/engine/utils/type_storage.h"
-	"include/engine/utils/events.h"
 	"include/engine/utils/macro/defer.h")
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS)
 list(APPEND RATS_ENGINE_SRC_FILES
-	"src/utils/events.cpp"
 	"src/engine.cpp"
+	"src/events.cpp"
 	"src/render/render_service.cpp"
 	"src/render/vulkan/render_service_allocator.cpp"
 	"src/render/surface_system.cpp"
