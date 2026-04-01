@@ -34,7 +34,7 @@ namespace engine
         return surface;
     }
 
-    bool window_service_glfw_vulkan::on_event(const utils::event_info& event)
+    bool window_service_glfw_vulkan::on_event(const event_info& event)
     {
         return super_vulkan::handle_event(event);
     }

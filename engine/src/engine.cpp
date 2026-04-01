@@ -8,6 +8,8 @@
 
 namespace engine
 {
+
+
     const log::logger engine::Log = engine::logger();
 
     engine::~engine()
@@ -77,10 +79,10 @@ namespace engine
 
     engine_event_listener::engine_event_listener()
     {
-        engine::instance().event_bus().add_listener(this);
+        engine::instance().events().add_listener(this);
     }
     engine_event_listener::~engine_event_listener()
     {
-        engine::instance().event_bus().remove_listener(this);
+        engine::instance().events().remove_listener(this);
     }
 }

@@ -9,11 +9,11 @@ namespace engine
     window_service::window_service()
     {
         Instance = this;
-        engine::instance().event_bus().add_listener(this);
+        engine::instance().events().add_listener(this);
     }
     window_service::~window_service()
     {
-        engine::instance().event_bus().remove_listener(this);
+        engine::instance().events().remove_listener(this);
         Instance = nullptr;
     }
 

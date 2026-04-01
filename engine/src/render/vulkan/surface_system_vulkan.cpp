@@ -27,7 +27,7 @@ namespace engine
 		super::system_clear();
 	}
 
-	bool surface_system_vulkan::on_event(const utils::event_info& event)
+	bool surface_system_vulkan::on_event(const event_info& event)
 	{
 		return event.dispatch<vulkan_device_created_event>([this] {
 			return on_device_created();

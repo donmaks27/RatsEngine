@@ -35,7 +35,7 @@ namespace engine
         [[nodiscard]] virtual eastl::vector<const char*> required_instance_extensions() const = 0;
         [[nodiscard]] virtual vk::SurfaceKHR create_surface_impl(const vulkan::context& ctx, const window_id& id) const = 0;
 
-        bool handle_event(const utils::event_info& event);
+        bool handle_event(const event_info& event);
 
         [[nodiscard]] bool on_window_created(const window_id& id);
         void on_window_destroying(const window_id& id);

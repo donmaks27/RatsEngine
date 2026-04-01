@@ -31,7 +31,7 @@ namespace engine
 
 		virtual void system_clear() override;
 
-		virtual bool on_event(const utils::event_info& event) override;
+		virtual bool on_event(const event_info& event) override;
 
 	private:
 

@@ -25,7 +25,7 @@ namespace engine
         render_api renderApi = render_api::vulkan;
     };
 
-    class RATS_ENGINE_EXPORT window_service : public render_service_of<window_service, window_service_create_info>, public utils::event_listener
+    class RATS_ENGINE_EXPORT window_service : public render_service_of<window_service, window_service_create_info>, public event_listener
     {
         using super = render_service_of;
         friend super;

@@ -1,8 +1,8 @@
 #include <engine/events.h>
 
-namespace engine::utils
+namespace engine
 {
-    type_storage<event_id> event::TypeIds;
+    utils::type_storage<event_id> event::TypeIds;
 
     void event_bus::add_listener(event_listener* listener)
     {

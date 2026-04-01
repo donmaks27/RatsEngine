@@ -8,7 +8,7 @@ namespace engine
     const log::logger window_service_vulkan::Log = window_service_vulkan::logger();
     window_service_vulkan* window_service_vulkan::Instance = nullptr;
 
-    bool window_service_vulkan::handle_event(const utils::event_info& event)
+    bool window_service_vulkan::handle_event(const event_info& event)
     {
         return event.dispatch<vulkan_instance_created_event>([this] {
             return on_instance_created();

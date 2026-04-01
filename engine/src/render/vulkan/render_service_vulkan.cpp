@@ -28,7 +28,7 @@ namespace engine
 			return false;
 		}
 
-		auto& event_bus = engine::instance().event_bus();
+		auto& event_bus = engine::instance().events();
 		if (!create_instance(info))
 		{
 			Log.fatal("Failed to create Vulkan instance!");

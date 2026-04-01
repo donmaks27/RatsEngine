@@ -13,12 +13,12 @@
 #include <EASTL/vector_set.h>
 #include <EASTL/unique_ptr.h>
 
-namespace engine::utils
+namespace engine
 {
     class event_bus;
 
     using event_id = std::uint32_t;
-    inline constexpr event_id invalid_event_id = type_storage<event_id>::invalid_id;
+    inline constexpr event_id invalid_event_id = utils::type_storage<event_id>::invalid_id;
 
     struct RATS_ENGINE_EXPORT event
     {
@@ -33,7 +33,7 @@ namespace engine::utils
 
     private:
 
-        static type_storage<event_id> TypeIds;
+        static utils::type_storage<event_id> TypeIds;
     };
     template<typename EventType>
     struct event_of : event
