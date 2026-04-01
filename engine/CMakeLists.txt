@@ -41,7 +41,9 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/events.h"
 	"include/engine/engine_event_listener.h"
 	"include/engine/system.h"
+	"include/engine/service.h"
 	"include/engine/render/render_api.h"
+	"include/engine/render/render_service_of.h"
 	"include/engine/render/render_service.h"
 	"include/engine/render/surface_system.h"
 	"include/engine/render/window_service.h"
@@ -52,7 +54,6 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS)
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
-	"src/events.cpp"
 	"src/render/render_service.cpp"
 	"src/render/vulkan/render_service_allocator.cpp"
 	"src/render/surface_system.cpp"
@@ -109,10 +110,7 @@ if(${RATS_ENGINE_GLFW_ENABLE})
 
 endif()
 
-add_library(rats-engine SHARED
-	include/engine/service.h
-	src/service.cpp
-	include/engine/render/render_service_of.h)
+add_library(rats-engine SHARED)
 target_link_libraries(rats-engine
 	PUBLIC ${RATS_ENGINE_PUBLIC_LIBS}
 	PRIVATE ${RATS_ENGINE_PRIVATE_LIBS})

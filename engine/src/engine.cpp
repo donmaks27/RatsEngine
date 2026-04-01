@@ -8,7 +8,10 @@
 
 namespace engine
 {
+    utils::type_storage<event_id> event::TypeIds;
 
+    utils::type_storage<service_type> service::ServiceTypes;
+    eastl::array<service*, std::numeric_limits<service_type>::max()> service::ServiceInstances;
 
     const log::logger engine::Log = engine::logger();
 

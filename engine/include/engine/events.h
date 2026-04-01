@@ -116,8 +116,14 @@ namespace engine
             const eastl::deque<EventType>* events = nullptr;
         };
 
-        void add_listener(event_listener* listener);
-        void remove_listener(event_listener* listener);
+        void add_listener(event_listener* listener)
+        {
+            m_listeners.insert(listener);
+        }
+        void remove_listener(event_listener* listener)
+        {
+            m_listeners.erase(listener);
+        }
         template<typename EventType> requires event_type<EventType>
         bool post_immediate(const EventType& event)
         {
@@ -131,7 +137,13 @@ namespace engine
         {
             event_channel<EventType>().deferredEvents.push_back(std::forward<EventType>(event));
         }
-        void refresh_events();
+        void refresh_events()
+        {
+            for (auto& [id, ch] : m_eventChannels)
+            {
+                ch->refresh_events();
+            }
+        }
         template<typename EventType> requires event_type<EventType>
         events_list<EventType> events() const
         {
@@ -147,8 +159,6 @@ namespace engine
 
             void refresh_events() { on_refresh_events(this); }
 
-        protected:
-
             using callback_t = void(*)(channel_base*);
             callback_t on_refresh_events = nullptr;
         };
@@ -162,14 +172,14 @@ namespace engine
                 };
             }
 
-            eastl::deque<EventType> events;
-            eastl::deque<EventType> deferredEvents;
-
             void refresh_events_impl()
             {
                 events.clear();
                 std::swap(events, deferredEvents);
             }
+
+            eastl::deque<EventType> events;
+            eastl::deque<EventType> deferredEvents;
         };
 
         eastl::vector_set<event_listener*> m_listeners;
