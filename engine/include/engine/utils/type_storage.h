@@ -1,7 +1,7 @@
 #pragma once
 
 #include <typeinfo>
-#include <unordered_map>
+#include <EASTL/unordered_map.h>
 
 namespace engine::utils
 {
@@ -40,7 +40,7 @@ namespace engine::utils
             }
         };
 
-        std::unordered_map<const std::type_info*, id, type_hash, type_compare> m_types;
+        eastl::unordered_map<const std::type_info*, id, type_hash, type_compare> m_types;
         id m_nextId = 0;
 
         id type_id(const std::type_info& type)
