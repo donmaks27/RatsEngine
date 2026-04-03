@@ -4,19 +4,9 @@
 
 namespace engine
 {
-	const log::logger surface_system_vulkan::Log = surface_system_vulkan::logger();
 	surface_system_vulkan* surface_system_vulkan::Instance = nullptr;
 
-	surface_system_vulkan::surface_system_vulkan()
-	{
-		Instance = this;
-	}
-	surface_system_vulkan::~surface_system_vulkan()
-	{
-		Instance = nullptr;
-	}
-
-	void surface_system_vulkan::system_clear()
+	void surface_system_vulkan::service_clear()
 	{
 		const auto& ctx = render_service_vulkan::instance()->vk_ctx();
 		std::ranges::for_each(surface_ids(), [this, &ctx](const surface_id id) {
@@ -24,7 +14,7 @@ namespace engine
 		});
 		m_surfaces.clear();
 
-		super::system_clear();
+		super::service_clear();
 	}
 
 	bool surface_system_vulkan::on_event(const event_info& event)

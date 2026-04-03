@@ -40,7 +40,6 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/engine.h"
 	"include/engine/events.h"
 	"include/engine/engine_event_listener.h"
-	"include/engine/system.h"
 	"include/engine/service.h"
 	"include/engine/render/render_api.h"
 	"include/engine/render/render_service.h"
