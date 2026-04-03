@@ -20,7 +20,9 @@ namespace engine
         virtual ~render_service() override { Instance = nullptr; }
     public:
 
-        [[nodiscard]] static constexpr auto logger() { return log::logger("render", super::logger()); }
+        [[nodiscard]] static constexpr log::logger logger() { return { "render", super::logger() }; }
+        inline static const log::logger Log = logger();
+
         [[nodiscard]] static auto instance() { return Instance; }
         [[nodiscard]] static render_service* instance_allocate_vulkan();
 
@@ -33,7 +35,6 @@ namespace engine
 
     private:
 
-        static const log::logger Log;
         static render_service* Instance;
     };
 }

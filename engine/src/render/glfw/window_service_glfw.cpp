@@ -12,8 +12,6 @@ namespace
 
 namespace engine
 {
-    const log::logger window_service_glfw::Log = window_service_glfw::logger();
-
     bool window_service_glfw::should_close_window(const window_id& id) const
     {
         const auto iter = m_windowDataGLFW.find(id);

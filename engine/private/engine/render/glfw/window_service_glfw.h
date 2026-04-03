@@ -16,7 +16,8 @@ namespace engine
         virtual ~window_service_glfw() override = default;
     public:
 
-        [[nodiscard]] static constexpr log::logger logger() { return log::logger("GLFW", super::logger());  }
+        [[nodiscard]] static constexpr log::logger logger() { return { "GLFW", super::logger() }; }
+        inline static const log::logger Log = logger();
 
         [[nodiscard]] virtual bool should_close_window(const window_id& id) const override;
 
@@ -33,8 +34,6 @@ namespace engine
         virtual void destroy_window_impl(const window_id& id) override;
 
     private:
-
-        static const log::logger Log;
 
         void clear_GLFW();
     };

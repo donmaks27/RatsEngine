@@ -24,7 +24,9 @@ namespace engine
         window_service_vulkan& operator=(const window_service_vulkan&) = delete;
         window_service_vulkan& operator=(window_service_vulkan&&) = delete;
 
-        [[nodiscard]] static constexpr auto logger() { return vulkan::logger_vulkan(window_service::logger()); }
+        [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(window_service::logger()); }
+        inline static const log::logger Log = logger();
+
         [[nodiscard]] static auto instance() { return Instance; }
 
         [[nodiscard]] vk::SurfaceKHR surface(const window_id& id) const;
@@ -42,7 +44,6 @@ namespace engine
 
     private:
 
-        static const log::logger Log;
         static window_service_vulkan* Instance;
 
         struct window_data_vulkan

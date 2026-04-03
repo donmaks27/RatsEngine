@@ -18,7 +18,6 @@ namespace engine
 		constexpr auto MinDeviceVulkanApiVersion = vk::ApiVersion11;
 	}
 
-	const log::logger render_service_vulkan::Log = render_service_vulkan::logger();
 	render_service_vulkan* render_service_vulkan::Instance = nullptr;
 
 	bool render_service_vulkan::service_init(const service_create_info& info)

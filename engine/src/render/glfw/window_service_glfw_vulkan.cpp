@@ -6,8 +6,6 @@
 
 namespace engine
 {
-    const log::logger window_service_glfw_vulkan::Log = window_service_glfw_vulkan::logger();
-
     eastl::vector<const char*> window_service_glfw_vulkan::required_instance_extensions() const
     {
         uint32_t extensionCount = 0;

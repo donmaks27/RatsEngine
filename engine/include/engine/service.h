@@ -65,24 +65,23 @@ namespace engine
             auto& serviceInstance = ServiceInstances[type()];
             if (serviceInstance == nullptr)
             {
-                const log::logger Log = T::logger();
-                Log.log("Creating service...");
+                T::Log.log("Creating service...");
                 service_impl* instance = T::instance_allocate(args...);
                 if (instance == nullptr)
                 {
-                    Log.fatal("Failed to allocate service!");
+                    T::Log.fatal("Failed to allocate service!");
                     return false;
                 }
                 serviceInstance = instance;
                 if (!instance->service_init(args...))
                 {
-                    Log.fatal("Failed to initialize service!");
+                    T::Log.fatal("Failed to initialize service!");
                     serviceInstance->service_clear();
                     delete serviceInstance;
                     serviceInstance = nullptr;
                     return false;
                 }
-                Log.info("Service created successfully");
+                T::Log.info("Service created successfully");
             }
             return true;
         }
@@ -91,12 +90,11 @@ namespace engine
             auto& serviceInstance = ServiceInstances[type()];
             if (serviceInstance != nullptr)
             {
-                const log::logger Log = T::logger();
-                Log.log("Clearing service...");
+                T::Log.log("Clearing service...");
                 serviceInstance->service_clear();
                 delete serviceInstance;
                 serviceInstance = nullptr;
-                Log.log("Service cleared successfully");
+                T::Log.log("Service cleared successfully");
             }
         }
 

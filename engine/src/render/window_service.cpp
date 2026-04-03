@@ -2,7 +2,6 @@
 
 namespace engine
 {
-    const log::logger window_service::Log = window_service::logger();
     window_service* window_service::Instance = nullptr;
 
     bool window_service::service_init(const service_create_info& info)

@@ -34,7 +34,9 @@ namespace engine
         virtual ~window_service() override { Instance = nullptr; }
     public:
 
-        [[nodiscard]] static constexpr auto logger() { return log::logger("window", super::logger()); }
+        [[nodiscard]] static constexpr log::logger logger() { return { "window", super::logger() }; }
+        inline static const log::logger Log = logger();
+
         [[nodiscard]] static auto instance() { return Instance; }
         [[nodiscard]] static window_service* instance_allocate_vulkan();
 
@@ -74,7 +76,6 @@ namespace engine
 
     private:
 
-        static const log::logger Log;
         static window_service* Instance;
     };
 }
