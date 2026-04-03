@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/core.h>
-#include <engine/render/render_service_of.h>
+#include <engine/service.h>
 
 namespace engine
 {
@@ -11,10 +11,9 @@ namespace engine
         render_api renderApi = render_api::vulkan;
     };
 
-    class RATS_ENGINE_EXPORT render_service : public render_service_of<render_service, render_service_instance_create_info>
+    class RATS_ENGINE_EXPORT render_service : public service_of<render_service, render_service_instance_create_info>
     {
-        using super = render_service_of;
-        friend super;
+        using super = service_of;
 
     protected:
         render_service() { Instance = this; }
@@ -23,6 +22,7 @@ namespace engine
 
         [[nodiscard]] static constexpr auto logger() { return log::logger("render", super::logger()); }
         [[nodiscard]] static auto instance() { return Instance; }
+        [[nodiscard]] static render_service* instance_allocate_vulkan();
 
         [[nodiscard]] virtual bool render() = 0;
 
@@ -35,6 +35,5 @@ namespace engine
 
         static const log::logger Log;
         static render_service* Instance;
-        static render_service* instance_allocate_vulkan();
     };
 }

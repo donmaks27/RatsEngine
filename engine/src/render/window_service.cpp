@@ -1,21 +1,9 @@
 #include <engine/render/window_service.h>
-#include <engine/engine.h>
 
 namespace engine
 {
     const log::logger window_service::Log = window_service::logger();
     window_service* window_service::Instance = nullptr;
-
-    window_service::window_service()
-    {
-        Instance = this;
-        engine::instance().events().add_listener(this);
-    }
-    window_service::~window_service()
-    {
-        engine::instance().events().remove_listener(this);
-        Instance = nullptr;
-    }
 
     bool window_service::service_init(const service_create_info& info)
     {

@@ -12,6 +12,7 @@ namespace engine
 
     utils::type_storage<service_type> service::ServiceTypes;
     eastl::array<service*, std::numeric_limits<service_type>::max()> service::ServiceInstances;
+    bool service::ServiceAllocateEnabled = false;
 
     const log::logger engine::Log = engine::logger();
 
@@ -30,7 +31,6 @@ namespace engine
             Log.error("Engine already started!");
             return false;
         }
-        m_engineStarted = true;
 
         RATS_ENGINE_DEFER([this] { clear_engine(); });
 
@@ -63,6 +63,9 @@ namespace engine
 
     bool engine::init_engine()
     {
+        m_engineStarted = true;
+        service::ServiceAllocateEnabled = true;
+
         if (!render_service::instance_create({ .renderApi = render_api::vulkan }))
         {
             return false;
@@ -77,6 +80,17 @@ namespace engine
         render_service::instance_clear();
 
         Log.log("Engine cleared successfully");
+
+        for (auto& instance : service::ServiceInstances)
+        {
+            if (instance != nullptr)
+            {
+                instance->service_clear();
+                delete instance;
+                instance = nullptr;
+            }
+        }
+        service::ServiceAllocateEnabled = false;
         m_engineStarted = false;
     }
 

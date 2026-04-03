@@ -1,10 +1,10 @@
 #pragma once
 
 #include <engine/core.h>
-#include <engine/render/render_service_of.h>
+#include <engine/service.h>
+#include <engine/engine_event_listener.h>
 
 #include <engine/utils/uuid.h>
-#include <engine/events.h>
 
 #include <EASTL/vector_map.h>
 #include <glm/vec2.hpp>
@@ -25,18 +25,18 @@ namespace engine
         render_api renderApi = render_api::vulkan;
     };
 
-    class RATS_ENGINE_EXPORT window_service : public render_service_of<window_service, window_service_create_info>, public event_listener
+    class RATS_ENGINE_EXPORT window_service : public service_of<window_service, window_service_create_info>, public engine_event_listener
     {
-        using super = render_service_of;
-        friend super;
+        using super = service_of;
 
     protected:
-        window_service();
-        virtual ~window_service() override;
+        window_service() { Instance = this; }
+        virtual ~window_service() override { Instance = nullptr; }
     public:
 
         [[nodiscard]] static constexpr auto logger() { return log::logger("window", super::logger()); }
         [[nodiscard]] static auto instance() { return Instance; }
+        [[nodiscard]] static window_service* instance_allocate_vulkan();
 
         [[nodiscard]] auto window_ids() const
         {
@@ -76,6 +76,5 @@ namespace engine
 
         static const log::logger Log;
         static window_service* Instance;
-        static window_service* instance_allocate_vulkan();
     };
 }

@@ -43,7 +43,6 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/system.h"
 	"include/engine/service.h"
 	"include/engine/render/render_api.h"
-	"include/engine/render/render_service_of.h"
 	"include/engine/render/render_service.h"
 	"include/engine/render/surface_system.h"
 	"include/engine/render/window_service.h"
