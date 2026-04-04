@@ -3,29 +3,31 @@
 #include <engine/core.h>
 #include <engine/render/vulkan/core.h>
 
-#include <engine/render/window_system.h>
+#include <engine/render/window_service.h>
 #include <engine/render/vulkan/swapchain.h>
 
 namespace engine
 {
-    class render_system_vulkan;
+    class render_service_vulkan;
 
-    class window_system_vulkan
+    class window_service_vulkan
     {
-        friend render_system_vulkan;
+        friend render_service_vulkan;
 
     protected:
-        window_system_vulkan();
-        virtual ~window_system_vulkan();
+        window_service_vulkan() { Instance = this; }
+        virtual ~window_service_vulkan() { Instance = nullptr; }
     public:
-        window_system_vulkan(const window_system_vulkan&) = delete;
-        window_system_vulkan(window_system_vulkan&&) = delete;
+        window_service_vulkan(const window_service_vulkan&) = delete;
+        window_service_vulkan(window_service_vulkan&&) = delete;
 
-        window_system_vulkan& operator=(const window_system_vulkan&) = delete;
-        window_system_vulkan& operator=(window_system_vulkan&&) = delete;
+        window_service_vulkan& operator=(const window_service_vulkan&) = delete;
+        window_service_vulkan& operator=(window_service_vulkan&&) = delete;
 
-        [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(window_system::logger()); }
-        [[nodiscard]] static window_system_vulkan* instance() { return Instance; }
+        [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(window_service::logger()); }
+        inline static const log::logger Log = logger();
+
+        [[nodiscard]] static auto instance() { return Instance; }
 
         [[nodiscard]] vk::SurfaceKHR surface(const window_id& id) const;
 		[[nodiscard]] vulkan::swapchain* swapchain(const window_id& id);
@@ -35,15 +37,14 @@ namespace engine
         [[nodiscard]] virtual eastl::vector<const char*> required_instance_extensions() const = 0;
         [[nodiscard]] virtual vk::SurfaceKHR create_surface_impl(const vulkan::context& ctx, const window_id& id) const = 0;
 
-        bool handle_event(const utils::event_info& event);
+        bool handle_event(const event_info& event);
 
         [[nodiscard]] bool on_window_created(const window_id& id);
         void on_window_destroying(const window_id& id);
 
     private:
 
-        static const log::logger Log;
-        static window_system_vulkan* Instance;
+        static window_service_vulkan* Instance;
 
         struct window_data_vulkan
         {

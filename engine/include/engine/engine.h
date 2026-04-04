@@ -2,7 +2,7 @@
 
 #include <engine/core.h>
 
-#include <engine/utils/events.h>
+#include <engine/events.h>
 
 namespace engine
 {
@@ -28,13 +28,13 @@ namespace engine
         bool start();
         [[nodiscard]] bool is_started() const { return m_engineStarted; }
 
-        [[nodiscard]] utils::event_bus& event_bus() { return m_engineEventBus; }
+        [[nodiscard]] event_bus& events() { return m_engineEventBus; }
 
     private:
 
         static const log::logger Log;
 
-        utils::event_bus m_engineEventBus{};
+        event_bus m_engineEventBus{};
 
         bool m_engineStarted = false;
 

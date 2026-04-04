@@ -2,10 +2,7 @@
 
 namespace engine
 {
-	const log::logger surface_system::Log = surface_system::logger();
 	surface_system* surface_system::Instance = nullptr;
-
-	const log::logger surface_backend_system::Log = surface_backend_system::logger();
 	surface_backend_system* surface_backend_system::Instance = nullptr;
 
 	surface_id surface_system::create_surface(const surface_create_info& info)

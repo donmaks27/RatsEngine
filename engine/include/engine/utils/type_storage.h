@@ -1,6 +1,7 @@
 #pragma once
 
-#include <EASTL/hash_map.h>
+#include <typeinfo>
+#include <EASTL/unordered_map.h>
 
 namespace engine::utils
 {
@@ -10,40 +11,23 @@ namespace engine::utils
     public:
         type_storage() = default;
         type_storage(const type_storage&) = delete;
-        type_storage(type_storage&& value) noexcept
-            : m_types(std::move(value.m_types))
-            , m_nextId(value.m_nextId)
-        {
-            value.m_nextId = 1;
-        }
+        type_storage(type_storage&&) = delete;
         ~type_storage() = default;
 
         type_storage& operator=(const type_storage&) = delete;
-        type_storage& operator=(type_storage&& value) noexcept
-        {
-            m_types = std::move(value.m_types);
-            m_nextId = value.m_nextId;
-            value.m_nextId = 1;
-            return *this;
-        }
+        type_storage& operator=(type_storage&&) = delete;
 
-        using type_id = TypeId;
-        static constexpr type_id invalid_id = 0;
+        using id = TypeId;
+        static constexpr id invalid_id = std::numeric_limits<id>::max();
 
         template<typename T>
-        [[nodiscard]] type_id get_type_id() { return get_type_id(typeid(T)); }
-
-        void clear()
-        {
-            m_types.clear();
-            m_nextId = 1;
-        }
+        [[nodiscard]] id type_id() { return type_id(typeid(T)); }
 
     private:
 
         struct type_hash
         {
-            [[nodiscard]] size_t operator()(const std::type_info* value) const
+            [[nodiscard]] std::size_t operator()(const std::type_info* value) const
             {
                 return value->hash_code();
             }
@@ -56,10 +40,10 @@ namespace engine::utils
             }
         };
 
-        eastl::hash_map<const std::type_info*, type_id, type_hash, type_compare> m_types;
-        type_id m_nextId = 1;
+        eastl::unordered_map<const std::type_info*, id, type_hash, type_compare> m_types;
+        id m_nextId = 0;
 
-        type_id get_type_id(const std::type_info& type)
+        id type_id(const std::type_info& type)
         {
             const auto iter = m_types.find(&type);
             if (iter != m_types.end())

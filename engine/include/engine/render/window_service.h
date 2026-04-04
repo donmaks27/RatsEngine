@@ -1,11 +1,10 @@
 #pragma once
 
 #include <engine/core.h>
-#include <engine/system.h>
+#include <engine/service.h>
+#include <engine/engine_event_listener.h>
 
-#include <engine/render/render_api.h>
 #include <engine/utils/uuid.h>
-#include <engine/utils/events.h>
 
 #include <EASTL/vector_map.h>
 #include <glm/vec2.hpp>
@@ -20,22 +19,26 @@ namespace engine
     {
 		glm::uvec2 size = { 800, 600 };
     };
-    struct window_system_create_info
+    struct window_service_create_info
     {
-        render_api renderApi = render_api::vulkan;
         window_create_info mainWindow{};
+        render_api renderApi = render_api::vulkan;
     };
 
-    class RATS_ENGINE_EXPORT window_system : public utils::event_listener, public render_api_system<window_system, window_system_create_info>
+    class RATS_ENGINE_EXPORT window_service : public service_of<window_service, window_service_create_info>, public engine_event_listener
     {
-        friend system;
+        using super = service_of;
 
     protected:
-        window_system();
-        virtual ~window_system() override;
+        window_service() { Instance = this; }
+        virtual ~window_service() override { Instance = nullptr; }
     public:
 
-        [[nodiscard]] static constexpr log::logger logger() { return log::logger("window_system", logger_engine()); }
+        [[nodiscard]] static constexpr log::logger logger() { return { "window", super::logger() }; }
+        inline static const log::logger Log = logger();
+
+        [[nodiscard]] static auto instance() { return Instance; }
+        [[nodiscard]] static window_service* instance_allocate_vulkan();
 
         [[nodiscard]] auto window_ids() const
         {
@@ -65,16 +68,14 @@ namespace engine
         eastl::vector_map<window_id, window_data> m_windowData;
         window_id m_mainWindowId = window_id::invalid_id();
 
-        [[nodiscard]] virtual bool system_init(const instance_create_info& info) override;
-        virtual void system_clear() override;
+        virtual bool service_init(const service_create_info& info) override;
+        virtual void service_clear() override;
 
         [[nodiscard]] virtual bool create_window_impl(const window_id& id, const window_create_info& info) = 0;
         virtual void destroy_window_impl(const window_id& id) = 0;
 
     private:
 
-        static const log::logger Log;
-        static window_system* Instance;
-        static window_system* instance_allocate_vulkan();
+        static window_service* Instance;
     };
 }

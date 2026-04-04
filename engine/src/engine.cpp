@@ -2,12 +2,18 @@
 #include <engine/engine.h>
 
 #include <engine/engine_event_listener.h>
-#include <engine/render/render_system.h>
-#include <engine/render/window_system.h>
+#include <engine/render/render_service.h>
+#include <engine/render/window_service.h>
 #include <engine/utils/macro/defer.h>
 
 namespace engine
 {
+    utils::type_storage<event_id> event::TypeIds;
+
+    utils::type_storage<service_type> service::ServiceTypes;
+    eastl::array<service*, std::numeric_limits<service_type>::max()> service::ServiceInstances;
+    bool service::ServiceAllocateEnabled = false;
+
     const log::logger engine::Log = engine::logger();
 
     engine::~engine()
@@ -25,7 +31,6 @@ namespace engine
             Log.error("Engine already started!");
             return false;
         }
-        m_engineStarted = true;
 
         RATS_ENGINE_DEFER([this] { clear_engine(); });
 
@@ -38,8 +43,8 @@ namespace engine
         Log.info("Engine initialized successfully");
 
         Log.log("Game loop started");
-        auto* windowSystem = window_system::instance();
-        auto* renderSystem = render_system::instance();
+        auto* windowSystem = window_service::instance();
+        auto* renderSystem = render_service::instance();
         while (!windowSystem->should_close_main_window())
         {
             if (!renderSystem->render())
@@ -58,7 +63,10 @@ namespace engine
 
     bool engine::init_engine()
     {
-        if (!render_system::instance_create({ .renderApi = render_api::vulkan }))
+        m_engineStarted = true;
+        service::ServiceAllocateEnabled = true;
+
+        if (!render_service::instance_create({ .renderApi = render_api::vulkan }))
         {
             return false;
         }
@@ -69,18 +77,29 @@ namespace engine
     {
         Log.log("Clearing engine...");
 
-        render_system::instance_clear();
+        render_service::instance_clear();
 
         Log.log("Engine cleared successfully");
+
+        for (auto& instance : service::ServiceInstances)
+        {
+            if (instance != nullptr)
+            {
+                instance->service_clear();
+                delete instance;
+                instance = nullptr;
+            }
+        }
+        service::ServiceAllocateEnabled = false;
         m_engineStarted = false;
     }
 
     engine_event_listener::engine_event_listener()
     {
-        engine::instance().event_bus().add_listener(this);
+        engine::instance().events().add_listener(this);
     }
     engine_event_listener::~engine_event_listener()
     {
-        engine::instance().event_bus().remove_listener(this);
+        engine::instance().events().remove_listener(this);
     }
 }

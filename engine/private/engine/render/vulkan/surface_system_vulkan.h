@@ -18,10 +18,12 @@ namespace engine
 		friend surface_backend_system_vulkan;
 
 	public:
-		surface_system_vulkan();
-		virtual ~surface_system_vulkan() override;
+		surface_system_vulkan() { Instance = this; }
+		virtual ~surface_system_vulkan() override { Instance = nullptr; }
 
 		[[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
+		inline static const log::logger Log = logger();
+
 		[[nodiscard]] static auto instance() { return Instance; }
 
 		[[nodiscard]] vulkan::swapchain& surface_swapchain(const surface_id id) { return m_surfaces.at_key(id).swapchain; }
@@ -29,13 +31,12 @@ namespace engine
 
 	protected:
 
-		virtual void system_clear() override;
+		virtual void service_clear() override;
 
-		virtual bool on_event(const utils::event_info& event) override;
+		virtual bool on_event(const event_info& event) override;
 
 	private:
 
-		static const log::logger Log;
 		static surface_system_vulkan* Instance;
 
 		struct vulkan_surface_create_info : surface_create_info

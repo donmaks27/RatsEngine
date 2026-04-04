@@ -1,6 +1,6 @@
-#include <engine/render/vulkan/render_system_vulkan.h>
+#include <engine/render/vulkan/render_service_vulkan.h>
 
-#include <engine/render/vulkan/window_system_vulkan.h>
+#include <engine/render/vulkan/window_service_vulkan.h>
 #include <engine/render/vulkan/builder/instance_builder.h>
 #include <engine/render/vulkan/builder/device_builder.h>
 
@@ -18,26 +18,16 @@ namespace engine
 		constexpr auto MinDeviceVulkanApiVersion = vk::ApiVersion11;
 	}
 
-	const log::logger render_system_vulkan::Log = render_system_vulkan::logger();
-	render_system_vulkan* render_system_vulkan::Instance = nullptr;
+	render_service_vulkan* render_service_vulkan::Instance = nullptr;
 
-	render_system_vulkan::render_system_vulkan()
+	bool render_service_vulkan::service_init(const service_create_info& info)
 	{
-		Instance = this;
-	}
-	render_system_vulkan::~render_system_vulkan()
-	{
-		Instance = nullptr;
-	}
-
-	bool render_system_vulkan::system_init(const instance_create_info& info)
-	{
-		if (!super::system_init(info))
+		if (!super::service_init(info))
 		{
 			return false;
 		}
 
-		auto& event_bus = engine::instance().event_bus();
+		auto& event_bus = engine::instance().events();
 		if (!create_instance(info))
 		{
 			Log.fatal("Failed to create Vulkan instance!");
@@ -86,7 +76,7 @@ namespace engine
 		return true;
 	}
 
-	void render_system_vulkan::system_clear()
+	void render_service_vulkan::service_clear()
 	{
 		if (m_ctx.m_instance != nullptr)
 		{
@@ -103,22 +93,22 @@ namespace engine
 			m_transferCommandPool.clear(m_ctx);
 			m_graphicsCommandPool.clear(m_ctx);
 
-			window_system_vulkan::instance()->clear_vulkan(m_ctx);
+			window_service_vulkan::instance()->clear_vulkan(m_ctx);
             m_ctx.m_device.clear();
 			m_ctx.m_instance.clear();
 		}
 
-		super::system_clear();
+		super::service_clear();
 	}
 
-	bool render_system_vulkan::create_instance(const instance_create_info& info)
+	bool render_service_vulkan::create_instance(const service_create_info& info)
 	{
 		auto instance = vulkan::instance_builder()
 			.set_application_name(info.appName)
 			.set_engine_name("RatsEngine")
 			.set_application_version(0, 1, 0)
 			.set_engine_version(0, 1, 0)
-			.add_required_extensions(window_system_vulkan::instance()->required_instance_extensions())
+			.add_required_extensions(window_service_vulkan::instance()->required_instance_extensions())
 			.add_required_extensions(RequiredInstanceExtensions)
 			.set_max_vulkan_version(MaxInstanceVulkanApiVersion)
 			.build();
@@ -130,9 +120,9 @@ namespace engine
 		return true;
 	}
 
-	bool render_system_vulkan::create_device()
+	bool render_service_vulkan::create_device()
     {
-    	const auto mainSurface = window_system_vulkan::instance()->surface(window_system::instance()->main_window_id());
+    	const auto mainSurface = window_service_vulkan::instance()->surface(window_service::instance()->main_window_id());
         auto device = vulkan::device_builder()
             .add_required_extensions(RequiredDeviceExtensions)
             .set_min_vulkan_version(MinDeviceVulkanApiVersion)
@@ -149,7 +139,7 @@ namespace engine
         return true;
 	}
 
-	bool render_system_vulkan::create_command_pools()
+	bool render_service_vulkan::create_command_pools()
 	{
 		m_graphicsCommandPool = m_ctx.d().queue(vulkan::queue_type::graphics).command_pool(m_ctx,
 			vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
@@ -158,10 +148,10 @@ namespace engine
 		return m_graphicsCommandPool.valid() && m_transferCommandPool.valid();
 	}
 
-	bool render_system_vulkan::render()
+	bool render_service_vulkan::render()
 	{
-		const auto windowSystem = window_system::instance();
-		const auto windowSystemVulkan = window_system_vulkan::instance();
+		const auto windowSystem = window_service::instance();
+		const auto windowSystemVulkan = window_service_vulkan::instance();
 		const auto mainWindowId = windowSystem->main_window_id();
 		const auto& device = m_ctx.d();
 		const auto swapchainSize = windowSystem->window_size(mainWindowId);

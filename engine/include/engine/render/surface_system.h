@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/core.h>
-#include <engine/system.h>
+#include <engine/service.h>
 
 #include <glm/vec2.hpp>
 
@@ -10,16 +10,20 @@ namespace engine
 	using surface_id = std::uint8_t;
 	constexpr surface_id invalid_surface_id = 0;
 
-	class RATS_ENGINE_EXPORT surface_system : public render_api_system<surface_system>
+	class RATS_ENGINE_EXPORT surface_system : public service_of<surface_system, render_api_service_create_info>
 	{
-		friend system;
+		using super = service_of;
 
 	protected:
-		surface_system() = default;
-		virtual ~surface_system() override = default;
+		surface_system() { Instance = this; }
+		virtual ~surface_system() override { Instance = nullptr; }
 	public:
 
-		[[nodiscard]] static constexpr log::logger logger() { return log::logger("surface_system", logger_engine()); }
+		[[nodiscard]] static constexpr log::logger logger() { return { "surface", super::logger() }; }
+		inline static const log::logger Log = logger();
+
+		[[nodiscard]] static auto instance() { return Instance; }
+		[[nodiscard]] static surface_system* instance_allocate_vulkan();
 
 		[[nodiscard]] auto surface_ids() const
 		{
@@ -38,17 +42,15 @@ namespace engine
 			glm::uvec2 size = { 0, 0 };
 		};
 
-		virtual bool system_init(const instance_create_info& info) override { return false; }
-		virtual void system_clear() override {}
+		virtual bool service_init(const service_create_info& info) override { return false; }
+		virtual void service_clear() override {}
 
 		[[nodiscard]] surface_id create_surface(const surface_create_info& info);
 		void clear_surface(surface_id id);
 
 	private:
 
-		static const log::logger Log;
 		static surface_system* Instance;
-		static surface_system* instance_allocate_vulkan();
 
 		struct surface_data
 		{
@@ -58,21 +60,23 @@ namespace engine
 		eastl::vector_map<surface_id, surface_data> m_surfaces;
 	};
 
-	class RATS_ENGINE_EXPORT surface_backend_system : public render_api_system<surface_backend_system>
+	class RATS_ENGINE_EXPORT surface_backend_system : public service_of<surface_backend_system, render_api_service_create_info>
 	{
-		friend system;
+		using super = service_of;
 
 	protected:
-		surface_backend_system() = default;
-		virtual ~surface_backend_system() override = default;
+		surface_backend_system() { Instance = this; }
+		virtual ~surface_backend_system() override { Instance = nullptr; }
 	public:
 
-		[[nodiscard]] static constexpr log::logger logger() { return log::logger("surface_backend_system", logger_engine()); }
+		[[nodiscard]] static constexpr log::logger logger() { return { "surface_backend", super::logger() }; }
+		inline static const log::logger Log = logger();
+
+		[[nodiscard]] static auto instance() { return Instance; }
+		[[nodiscard]] static surface_backend_system* instance_allocate_vulkan() { return nullptr; }
 
 	private:
 
-		static const log::logger Log;
 		static surface_backend_system* Instance;
-		static surface_backend_system* instance_allocate_vulkan() { return nullptr; }
 	};
 }

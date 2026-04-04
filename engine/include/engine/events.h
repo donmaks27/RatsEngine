@@ -6,7 +6,6 @@
 
 #include <engine/utils/type_storage.h>
 
-#include <cstdint>
 #include <algorithm>
 
 #include <EASTL/deque.h>
@@ -14,12 +13,12 @@
 #include <EASTL/vector_set.h>
 #include <EASTL/unique_ptr.h>
 
-namespace engine::utils
+namespace engine
 {
     class event_bus;
 
     using event_id = std::uint32_t;
-    inline constexpr event_id invalid_event_id = type_storage<event_id>::invalid_id;
+    inline constexpr event_id invalid_event_id = utils::type_storage<event_id>::invalid_id;
 
     struct RATS_ENGINE_EXPORT event
     {
@@ -28,13 +27,13 @@ namespace engine::utils
         template<typename EventType>
         [[nodiscard]] static event_id event_type()
         {
-            static const event_id id = m_typeIds.get_type_id<EventType>();
+            static const event_id id = TypeIds.type_id<EventType>();
             return id;
         }
 
     private:
 
-        static type_storage<event_id> m_typeIds;
+        static utils::type_storage<event_id> TypeIds;
     };
     template<typename EventType>
     struct event_of : event
@@ -100,6 +99,8 @@ namespace engine::utils
         template<typename EventType> requires event_type<EventType>
         struct events_list
         {
+            using const_iterator = eastl::deque<EventType>::const_iterator;
+
             friend event_bus;
 
             events_list() = delete;
@@ -107,17 +108,22 @@ namespace engine::utils
             explicit events_list(const eastl::deque<EventType>* e) : events(e) {}
         public:
 
-            [[nodiscard]] auto begin() const { return events != nullptr ? events->cbegin() : dummy.cbegin(); }
-            [[nodiscard]] auto end() const { return events != nullptr ? events->cend() : dummy.cend(); }
+            [[nodiscard]] auto begin() const { return events != nullptr ? events->cbegin() : const_iterator(); }
+            [[nodiscard]] auto end() const { return events != nullptr ? events->cend() : const_iterator(); }
 
         private:
 
             const eastl::deque<EventType>* events = nullptr;
-            const eastl::deque<EventType> dummy;
         };
 
-        void add_listener(event_listener* listener);
-        void remove_listener(event_listener* listener);
+        void add_listener(event_listener* listener)
+        {
+            m_listeners.insert(listener);
+        }
+        void remove_listener(event_listener* listener)
+        {
+            m_listeners.erase(listener);
+        }
         template<typename EventType> requires event_type<EventType>
         bool post_immediate(const EventType& event)
         {
@@ -131,7 +137,13 @@ namespace engine::utils
         {
             event_channel<EventType>().deferredEvents.push_back(std::forward<EventType>(event));
         }
-        void refresh_events();
+        void refresh_events()
+        {
+            for (auto& [id, ch] : m_eventChannels)
+            {
+                ch->refresh_events();
+            }
+        }
         template<typename EventType> requires event_type<EventType>
         events_list<EventType> events() const
         {
@@ -147,8 +159,6 @@ namespace engine::utils
 
             void refresh_events() { on_refresh_events(this); }
 
-        protected:
-
             using callback_t = void(*)(channel_base*);
             callback_t on_refresh_events = nullptr;
         };
@@ -162,14 +172,14 @@ namespace engine::utils
                 };
             }
 
-            eastl::deque<EventType> events;
-            eastl::deque<EventType> deferredEvents;
-
             void refresh_events_impl()
             {
                 events.clear();
                 std::swap(events, deferredEvents);
             }
+
+            eastl::deque<EventType> events;
+            eastl::deque<EventType> deferredEvents;
         };
 
         eastl::vector_set<event_listener*> m_listeners;
