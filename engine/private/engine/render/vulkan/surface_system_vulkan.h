@@ -58,20 +58,4 @@ namespace engine
 		[[nodiscard]] bool create_swapchain(const vulkan::context& ctx, surface_id id);
 		[[nodiscard]] bool on_device_created();
 	};
-
-	class surface_backend_system_vulkan : public surface_backend_system
-	{
-	protected:
-		surface_backend_system_vulkan() = default;
-		virtual ~surface_backend_system_vulkan() override = default;
-
-		[[nodiscard]] static surface_id create_surface(const vulkan::context& ctx, const surface_system_vulkan::vulkan_surface_create_info& info)
-		{
-			return surface_system_vulkan::instance()->create_surface(ctx, info);
-		}
-		static void clear_surface(const vulkan::context& ctx, const surface_id id)
-		{
-			surface_system_vulkan::instance()->clear_surface(ctx, id);
-		}
-	};
 }

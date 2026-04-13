@@ -59,24 +59,4 @@ namespace engine
 
 		eastl::vector_map<surface_id, surface_data> m_surfaces;
 	};
-
-	class RATS_ENGINE_EXPORT surface_backend_system : public service_of<surface_backend_system, render_api_service_create_info>
-	{
-		using super = service_of;
-
-	protected:
-		surface_backend_system() { Instance = this; }
-		virtual ~surface_backend_system() override { Instance = nullptr; }
-	public:
-
-		[[nodiscard]] static constexpr log::logger logger() { return { "surface_backend", super::logger() }; }
-		inline static const log::logger Log = logger();
-
-		[[nodiscard]] static auto instance() { return Instance; }
-		[[nodiscard]] static surface_backend_system* instance_allocate_vulkan() { return nullptr; }
-
-	private:
-
-		static surface_backend_system* Instance;
-	};
 }

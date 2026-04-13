@@ -44,12 +44,12 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/render/render_api.h"
 	"include/engine/render/render_service.h"
 	"include/engine/render/surface_system.h"
-	"include/engine/render/window_service.h"
 	"include/engine/utils/log.h"
 	"include/engine/utils/uuid.h"
 	"include/engine/utils/type_storage.h"
 	"include/engine/utils/macro/defer.h")
-list(APPEND RATS_ENGINE_PRIVATE_HEADERS)
+list(APPEND RATS_ENGINE_PRIVATE_HEADERS
+	"private/engine/render/window_service.h")
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
 	"src/render/render_service.cpp"
