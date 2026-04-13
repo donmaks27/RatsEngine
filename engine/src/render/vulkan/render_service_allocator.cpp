@@ -3,7 +3,7 @@
 #if RATS_ENGINE_VULKAN_ENABLE
 #include <engine/render/vulkan/render_service_vulkan.h>
 #else
-#include <engine/render/render_system.h>
+#include <engine/render/render_service.h>
 #endif
 
 namespace engine

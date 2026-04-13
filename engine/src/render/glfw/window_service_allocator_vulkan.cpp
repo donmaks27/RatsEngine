@@ -3,7 +3,7 @@
 #if RATS_ENGINE_VULKAN_ENABLE
 #include <engine/render/glfw/window_service_glfw_vulkan.h>
 #else
-#include <engine/render/window_system.h>
+#include <engine/render/window_service.h>
 #endif
 
 namespace engine

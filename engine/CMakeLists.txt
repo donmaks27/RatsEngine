@@ -43,7 +43,7 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/service.h"
 	"include/engine/render/render_api.h"
 	"include/engine/render/render_service.h"
-	"include/engine/render/surface_system.h"
+	"include/engine/render/surface_service.h"
 	"include/engine/utils/log.h"
 	"include/engine/utils/uuid.h"
 	"include/engine/utils/type_storage.h"
@@ -54,8 +54,8 @@ list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
 	"src/render/render_service.cpp"
 	"src/render/vulkan/render_service_allocator.cpp"
-	"src/render/surface_system.cpp"
-	"src/render/vulkan/surface_system_allocator.cpp"
+	"src/render/surface_service.cpp"
+	"src/render/vulkan/surface_service_allocator.cpp"
 	"src/render/window_service.cpp")
 list(APPEND RATS_ENGINE_SRC_FILES_NO_PCH
 	"src/utils/eastl_operator_new.cpp"
@@ -73,7 +73,7 @@ if(${RATS_ENGINE_VULKAN_ENABLE})
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 		"private/engine/render/vulkan/core.h"
 		"private/engine/render/vulkan/render_service_vulkan.h"
-		"private/engine/render/vulkan/surface_system_vulkan.h"
+		"private/engine/render/vulkan/surface_service_vulkan.h"
 		"private/engine/render/vulkan/window_service_vulkan.h"
 		"private/engine/render/vulkan/builder/instance_builder.h"
 		"private/engine/render/vulkan/builder/device_builder.h"
@@ -81,7 +81,7 @@ if(${RATS_ENGINE_VULKAN_ENABLE})
 	list(APPEND RATS_ENGINE_SRC_FILES
 		"src/render/vulkan/core.cpp"
 		"src/render/vulkan/render_service_vulkan.cpp"
-		"src/render/vulkan/surface_system_vulkan.cpp"
+		"src/render/vulkan/surface_service_vulkan.cpp"
 		"src/render/vulkan/window_service_vulkan.cpp"
 		"src/render/vulkan/builder/instance_builder.cpp"
 		"src/render/vulkan/builder/device_builder.cpp"

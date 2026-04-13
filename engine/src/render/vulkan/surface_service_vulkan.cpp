@@ -1,12 +1,12 @@
-#include <engine/render/vulkan/surface_system_vulkan.h>
+#include <engine/render/vulkan/surface_service_vulkan.h>
 
 #include <engine/render/vulkan/render_service_vulkan.h>
 
 namespace engine
 {
-	surface_system_vulkan* surface_system_vulkan::Instance = nullptr;
+	surface_service_vulkan* surface_service_vulkan::Instance = nullptr;
 
-	void surface_system_vulkan::service_clear()
+	void surface_service_vulkan::service_clear()
 	{
 		const auto& ctx = render_service_vulkan::instance()->vk_ctx();
 		std::ranges::for_each(surface_ids(), [this, &ctx](const surface_id id) {
@@ -17,14 +17,14 @@ namespace engine
 		super::service_clear();
 	}
 
-	bool surface_system_vulkan::on_event(const event_info& event)
+	bool surface_service_vulkan::on_event(const event_info& event)
 	{
 		return event.dispatch<vulkan_device_created_event>([this] {
 			return on_device_created();
 		});
 	}
 
-	surface_id surface_system_vulkan::create_surface(const vulkan::context& ctx, const vulkan_surface_create_info& info)
+	surface_id surface_service_vulkan::create_surface(const vulkan::context& ctx, const vulkan_surface_create_info& info)
 	{
 		const auto id = super::create_surface(info);
 		if (id != invalid_surface_id)
@@ -38,7 +38,7 @@ namespace engine
 		}
 		return id;
 	}
-	void surface_system_vulkan::clear_surface(const vulkan::context& ctx, const surface_id id)
+	void surface_service_vulkan::clear_surface(const vulkan::context& ctx, const surface_id id)
 	{
 		const auto iter = m_surfaces.find(id);
 		if (iter != m_surfaces.end())
@@ -52,7 +52,7 @@ namespace engine
 		super::clear_surface(id);
 	}
 
-	bool surface_system_vulkan::create_swapchain(const vulkan::context& ctx, const surface_id id)
+	bool surface_service_vulkan::create_swapchain(const vulkan::context& ctx, const surface_id id)
 	{
 		if (ctx.d() == nullptr)
 		{
@@ -68,7 +68,7 @@ namespace engine
 		}
 		return true;
 	}
-	bool surface_system_vulkan::on_device_created()
+	bool surface_service_vulkan::on_device_created()
 	{
 		const auto& ctx = render_service_vulkan::instance()->vk_ctx();
 		return std::ranges::all_of(surface_ids(), [this, &ctx](const surface_id id) {

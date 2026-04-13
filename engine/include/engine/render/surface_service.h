@@ -10,20 +10,20 @@ namespace engine
 	using surface_id = std::uint8_t;
 	constexpr surface_id invalid_surface_id = 0;
 
-	class RATS_ENGINE_EXPORT surface_system : public service_of<surface_system, render_api_service_create_info>
+	class RATS_ENGINE_EXPORT surface_service : public service_of<surface_service, render_api_service_create_info>
 	{
 		using super = service_of;
 
 	protected:
-		surface_system() { Instance = this; }
-		virtual ~surface_system() override { Instance = nullptr; }
+		surface_service() { Instance = this; }
+		virtual ~surface_service() override { Instance = nullptr; }
 	public:
 
 		[[nodiscard]] static constexpr log::logger logger() { return { "surface", super::logger() }; }
 		inline static const log::logger Log = logger();
 
 		[[nodiscard]] static auto instance() { return Instance; }
-		[[nodiscard]] static surface_system* instance_allocate_vulkan();
+		[[nodiscard]] static surface_service* instance_allocate_vulkan();
 
 		[[nodiscard]] auto surface_ids() const
 		{
@@ -50,7 +50,7 @@ namespace engine
 
 	private:
 
-		static surface_system* Instance;
+		static surface_service* Instance;
 
 		struct surface_data
 		{

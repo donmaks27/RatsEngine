@@ -1,10 +1,10 @@
-#include <engine/render/surface_system.h>
+#include <engine/render/surface_service.h>
 
 namespace engine
 {
-	surface_system* surface_system::Instance = nullptr;
+	surface_service* surface_service::Instance = nullptr;
 
-	surface_id surface_system::create_surface(const surface_create_info& info)
+	surface_id surface_service::create_surface(const surface_create_info& info)
 	{
 		static surface_id prevSurfaceId = invalid_surface_id;
 		if (m_surfaces.size() >= std::numeric_limits<surface_id>::max())
@@ -20,7 +20,7 @@ namespace engine
 		m_surfaces[id] = { .size = info.size };
 		return id;
 	}
-	void surface_system::clear_surface(const surface_id id)
+	void surface_service::clear_surface(const surface_id id)
 	{
 		m_surfaces.erase(id);
 	}

@@ -2,7 +2,7 @@
 
 #include <engine/core.h>
 #include <engine/render/vulkan/core.h>
-#include <engine/render/surface_system.h>
+#include <engine/render/surface_service.h>
 #include <engine/engine_event_listener.h>
 
 #include <engine/render/vulkan/swapchain.h>
@@ -11,15 +11,15 @@ namespace engine
 {
 	class surface_backend_system_vulkan;
 
-	class surface_system_vulkan final : public surface_system, public engine_event_listener
+	class surface_service_vulkan final : public surface_service, public engine_event_listener
 	{
-		using super = surface_system;
+		using super = surface_service;
 
 		friend surface_backend_system_vulkan;
 
 	public:
-		surface_system_vulkan() { Instance = this; }
-		virtual ~surface_system_vulkan() override { Instance = nullptr; }
+		surface_service_vulkan() { Instance = this; }
+		virtual ~surface_service_vulkan() override { Instance = nullptr; }
 
 		[[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
 		inline static const log::logger Log = logger();
@@ -37,7 +37,7 @@ namespace engine
 
 	private:
 
-		static surface_system_vulkan* Instance;
+		static surface_service_vulkan* Instance;
 
 		struct vulkan_surface_create_info : surface_create_info
 		{
