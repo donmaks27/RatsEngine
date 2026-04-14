@@ -28,17 +28,16 @@ namespace engine
     class RATS_ENGINE_EXPORT window_service : public service_of<window_service, window_service_create_info>, public engine_event_listener
     {
         using super = service_of;
+        friend super;
 
     protected:
         window_service() { Instance = this; }
         virtual ~window_service() override { Instance = nullptr; }
     public:
 
-        [[nodiscard]] static constexpr log::logger logger() { return { "window", super::logger() }; }
         inline static const log::logger Log = logger();
-
+        [[nodiscard]] static constexpr log::logger logger() { return { "window", super::logger() }; }
         [[nodiscard]] static auto instance() { return Instance; }
-        [[nodiscard]] static window_service* instance_allocate_vulkan();
 
         [[nodiscard]] auto window_ids() const
         {
@@ -77,5 +76,6 @@ namespace engine
     private:
 
         static window_service* Instance;
+        [[nodiscard]] static window_service* instance_allocate_vulkan();
     };
 }

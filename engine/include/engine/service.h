@@ -66,7 +66,7 @@ namespace engine
             if (serviceInstance == nullptr)
             {
                 T::Log.log("Creating service...");
-                service_impl* instance = T::instance_allocate(args...);
+                service_impl* instance = T::instance_allocate_impl(args...);
                 if (instance == nullptr)
                 {
                     T::Log.fatal("Failed to allocate service!");
@@ -106,16 +106,28 @@ namespace engine
     template<typename T, typename CreateInfo>
     class service_of : public service_impl<T, const CreateInfo&>
     {
+        friend service_impl<T, const CreateInfo&>;
+
     public:
         static_assert(std::is_class_v<CreateInfo>, "CreateInfo must be a class/struct");
         using service_create_info = CreateInfo;
-        using super = service_impl<T, const CreateInfo&>;
+
+    private:
+
+        [[nodiscard]] static T* instance_allocate_impl(const service_create_info& info)
+        {
+            return T::instance_allocate(info);
+        }
     };
     template<typename T>
     class service_of<T, void> : public service_impl<T>
     {
-    public:
-        using super = service_impl<T>;
+        friend service_impl<T>;
+
+        [[nodiscard]] static T* instance_allocate_impl()
+        {
+            return T::instance_allocate();
+        }
     };
 
     template<typename CreateInfo>
@@ -130,17 +142,21 @@ namespace engine
     template<typename T, render_api_class CreateInfo>
     class service_of<T, CreateInfo> : public service_impl<T, const CreateInfo&>
     {
+        friend service_impl<T, const CreateInfo&>;
+
     public:
         using service_create_info = CreateInfo;
         using super = service_impl<T, const CreateInfo&>;
 
-        [[nodiscard]] static T* instance_allocate(const service_create_info& info)
+    private:
+
+        [[nodiscard]] static T* instance_allocate_impl(const service_create_info& info)
         {
             T* result = nullptr;
             switch (info.renderApi)
             {
-            case render_api::vulkan: result = T::instance_allocate_vulkan(); break;
-            default:;
+                case render_api::vulkan: result = T::instance_allocate_vulkan(); break;
+                default:;
             }
             if (result == nullptr)
             {

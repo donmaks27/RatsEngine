@@ -5,6 +5,8 @@
 
 #include <glm/vec2.hpp>
 
+#include <engine/render/vulkan/render_service_vulkan.h>
+
 namespace engine
 {
 	using surface_id = std::uint8_t;
@@ -13,17 +15,16 @@ namespace engine
 	class RATS_ENGINE_EXPORT surface_service : public service_of<surface_service, render_api_service_create_info>
 	{
 		using super = service_of;
+        friend super;
 
 	protected:
 		surface_service() { Instance = this; }
 		virtual ~surface_service() override { Instance = nullptr; }
 	public:
 
-		[[nodiscard]] static constexpr log::logger logger() { return { "surface", super::logger() }; }
 		inline static const log::logger Log = logger();
-
+		[[nodiscard]] static constexpr log::logger logger() { return { "surface", super::logger() }; }
 		[[nodiscard]] static auto instance() { return Instance; }
-		[[nodiscard]] static surface_service* instance_allocate_vulkan();
 
 		[[nodiscard]] auto surface_ids() const
 		{
@@ -51,6 +52,7 @@ namespace engine
 	private:
 
 		static surface_service* Instance;
+		[[nodiscard]] static surface_service* instance_allocate_vulkan();
 
 		struct surface_data
 		{
@@ -58,5 +60,25 @@ namespace engine
 		};
 
 		eastl::vector_map<surface_id, surface_data> m_surfaces;
+	};
+
+	class surface_backend_service : public service_of<surface_backend_service, render_api_service_create_info>
+	{
+		using super = service_of;
+        friend super;
+
+	protected:
+		surface_backend_service() { Instance = this; }
+		virtual ~surface_backend_service() override { Instance = nullptr; }
+	public:
+
+		inline static const log::logger Log = logger();
+		[[nodiscard]] static constexpr log::logger logger() { return { "surface_backend", super::logger() }; }
+		[[nodiscard]] static auto instance() { return Instance; }
+
+	private:
+
+		static surface_backend_service* Instance;
+		[[nodiscard]] static surface_service* instance_allocate_vulkan() { return nullptr; }
 	};
 }

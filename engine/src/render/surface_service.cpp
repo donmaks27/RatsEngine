@@ -3,6 +3,7 @@
 namespace engine
 {
 	surface_service* surface_service::Instance = nullptr;
+	surface_backend_service* surface_backend_service::Instance = nullptr;
 
 	surface_id surface_service::create_surface(const surface_create_info& info)
 	{

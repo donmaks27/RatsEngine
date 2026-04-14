@@ -11,6 +11,13 @@ namespace engine
 {
 	class surface_backend_system_vulkan;
 
+	struct vulkan_surface_created_event : event_of<vulkan_surface_created_event>
+	{
+		vk::SurfaceKHR surface = nullptr;
+		glm::uvec2 size = { 0, 0 };
+		surface_id id = invalid_surface_id;
+	};
+
 	class surface_service_vulkan final : public surface_service, public engine_event_listener
 	{
 		using super = surface_service;
