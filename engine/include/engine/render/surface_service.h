@@ -14,6 +14,7 @@ namespace engine
 
 	class RATS_ENGINE_EXPORT surface_service : public service_of<surface_service, render_api_service_create_info>
 	{
+	public:
 		using super = service_of;
         friend super;
 
@@ -22,8 +23,8 @@ namespace engine
 		virtual ~surface_service() override { Instance = nullptr; }
 	public:
 
-		inline static const log::logger Log = logger();
 		[[nodiscard]] static constexpr log::logger logger() { return { "surface", super::logger() }; }
+		inline static const log::logger Log = logger();
 		[[nodiscard]] static auto instance() { return Instance; }
 
 		[[nodiscard]] auto surface_ids() const
@@ -64,6 +65,7 @@ namespace engine
 
 	class surface_backend_service : public service_of<surface_backend_service, render_api_service_create_info>
 	{
+	public:
 		using super = service_of;
         friend super;
 
@@ -75,6 +77,8 @@ namespace engine
 		inline static const log::logger Log = logger();
 		[[nodiscard]] static constexpr log::logger logger() { return { "surface_backend", super::logger() }; }
 		[[nodiscard]] static auto instance() { return Instance; }
+
+		[[nodiscard]] virtual bool should_stop_engine() const { return false; }
 
 	private:
 

@@ -13,6 +13,7 @@ namespace engine
 
     class RATS_ENGINE_EXPORT render_service : public service_of<render_service, render_service_instance_create_info>
     {
+	public:
         using super = service_of;
         friend super;
 
@@ -21,8 +22,9 @@ namespace engine
         virtual ~render_service() override { Instance = nullptr; }
     public:
 
-        inline static const log::logger Log = logger();
         [[nodiscard]] static constexpr log::logger logger() { return { "render", super::logger() }; }
+        inline static const log::logger Log = logger();
+
         [[nodiscard]] static auto instance() { return Instance; }
 
         [[nodiscard]] virtual bool render() = 0;

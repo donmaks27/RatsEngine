@@ -49,14 +49,14 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/utils/type_storage.h"
 	"include/engine/utils/macro/defer.h")
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS
-	"private/engine/render/window_service.h")
+	"private/engine/render/window_service.h"
+	"private/engine/render/window1_service.h")
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
 	"src/render/render_service.cpp"
-	"src/render/vulkan/render_service_allocator.cpp"
 	"src/render/surface_service.cpp"
-	"src/render/vulkan/surface_service_allocator.cpp"
-	"src/render/window_service.cpp")
+	"src/render/window_service.cpp"
+	"src/render/window1_service.cpp")
 list(APPEND RATS_ENGINE_SRC_FILES_NO_PCH
 	"src/utils/eastl_operator_new.cpp"
 	"src/utils/log.cpp"
@@ -96,8 +96,7 @@ if(${RATS_ENGINE_GLFW_ENABLE})
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 		"private/engine/render/glfw/window_service_glfw.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/glfw/window_service_glfw.cpp"
-		"src/render/glfw/window_service_allocator_vulkan.cpp")
+		"src/render/glfw/window_service_glfw.cpp")
 
 	if(${RATS_ENGINE_VULKAN_ENABLE})
 		list(APPEND RATS_ENGINE_PRIVATE_HEADERS

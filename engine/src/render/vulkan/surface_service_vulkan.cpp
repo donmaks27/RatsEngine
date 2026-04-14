@@ -6,6 +6,8 @@ namespace engine
 {
 	surface_service_vulkan* surface_service_vulkan::Instance = nullptr;
 
+	surface_service* surface_service::instance_allocate_vulkan() { return new surface_service_vulkan(); }
+
 	void surface_service_vulkan::service_clear()
 	{
 		const auto& ctx = render_service_vulkan::instance()->vk_ctx();

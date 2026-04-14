@@ -4,6 +4,10 @@ namespace engine
 {
     window_service* window_service::Instance = nullptr;
 
+#if !RATS_ENGINE_VULKAN_ENABLE
+    window_service* window_service::instance_allocate_vulkan() { return nullptr; }
+#endif
+
     bool window_service::service_init(const service_create_info& info)
     {
         m_mainWindowId = window_id::generate();

@@ -6,6 +6,8 @@
 
 namespace engine
 {
+    window_service* window_service::instance_allocate_vulkan() { return new window_service_glfw_vulkan(); }
+
     eastl::vector<const char*> window_service_glfw_vulkan::required_instance_extensions() const
     {
         uint32_t extensionCount = 0;

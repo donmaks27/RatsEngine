@@ -20,6 +20,8 @@ namespace engine
 
 	render_service_vulkan* render_service_vulkan::Instance = nullptr;
 
+	render_service* render_service::instance_allocate_vulkan() { return new render_service_vulkan(); }
+
 	bool render_service_vulkan::service_init(const service_create_info& info)
 	{
 		if (!super::service_init(info))

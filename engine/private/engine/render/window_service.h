@@ -27,6 +27,7 @@ namespace engine
 
     class RATS_ENGINE_EXPORT window_service : public service_of<window_service, window_service_create_info>, public engine_event_listener
     {
+	public:
         using super = service_of;
         friend super;
 
@@ -35,8 +36,8 @@ namespace engine
         virtual ~window_service() override { Instance = nullptr; }
     public:
 
-        inline static const log::logger Log = logger();
         [[nodiscard]] static constexpr log::logger logger() { return { "window", super::logger() }; }
+        inline static const log::logger Log = logger();
         [[nodiscard]] static auto instance() { return Instance; }
 
         [[nodiscard]] auto window_ids() const

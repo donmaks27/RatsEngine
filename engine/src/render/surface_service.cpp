@@ -5,6 +5,10 @@ namespace engine
 	surface_service* surface_service::Instance = nullptr;
 	surface_backend_service* surface_backend_service::Instance = nullptr;
 
+#if !RATS_ENGINE_VULKAN_ENABLE
+	surface_service* surface_service::instance_allocate_vulkan() { return nullptr; }
+#endif
+
 	surface_id surface_service::create_surface(const surface_create_info& info)
 	{
 		static surface_id prevSurfaceId = invalid_surface_id;
