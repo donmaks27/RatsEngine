@@ -4,7 +4,7 @@
 
 namespace engine
 {
-	surface_service_vulkan* surface_service_vulkan::Instance = nullptr;
+	RATS_ENGINE_SERVICE_IMPL(surface_service_vulkan)
 
 	surface_service* surface_service::instance_allocate_vulkan() { return new surface_service_vulkan(); }
 
@@ -16,7 +16,7 @@ namespace engine
 		});
 		m_surfaces.clear();
 
-		super::service_clear();
+		super_t::service_clear();
 	}
 
 	bool surface_service_vulkan::on_event(const event_info& event)
@@ -28,7 +28,7 @@ namespace engine
 
 	surface_id surface_service_vulkan::create_surface(const vulkan::context& ctx, const vulkan_surface_create_info& info)
 	{
-		const auto id = super::create_surface(info);
+		const auto id = super_t::create_surface(info);
 		if (id != invalid_surface_id)
 		{
 			m_surfaces[id] = { .surface = info.surface };
@@ -51,7 +51,7 @@ namespace engine
 		}
 		m_surfaces.erase(id);
 
-		super::clear_surface(id);
+		super_t::clear_surface(id);
 	}
 
 	bool surface_service_vulkan::create_swapchain(const vulkan::context& ctx, const surface_id id)

@@ -9,15 +9,9 @@ namespace engine
 {
     class window_service_glfw : public window_service
     {
-        using super = window_service;
+        RATS_ENGINE_SERVICE(window_service_glfw, "GLFW")
 
-    protected:
-        window_service_glfw() = default;
-        virtual ~window_service_glfw() override = default;
     public:
-
-        [[nodiscard]] static constexpr log::logger logger() { return { "GLFW", super::logger() }; }
-        inline static const log::logger Log = logger();
 
         [[nodiscard]] virtual bool should_close_window(const window_id& id) const override;
 
@@ -27,7 +21,7 @@ namespace engine
 
         eastl::vector_map<window_id, GLFWwindow*> m_windowDataGLFW;
 
-        virtual bool service_init(const service_create_info& info) override;
+        virtual bool service_init(const service_create_info_t& info) override;
         virtual void service_clear() override;
 
         virtual bool create_window_impl(const window_id& id, const window_create_info& info) override;

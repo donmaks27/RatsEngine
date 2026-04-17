@@ -12,6 +12,8 @@ namespace
 
 namespace engine
 {
+    RATS_ENGINE_SERVICE_IMPL(window_service_glfw)
+
     bool window_service_glfw::should_close_window(const window_id& id) const
     {
         const auto iter = m_windowDataGLFW.find(id);
@@ -23,7 +25,7 @@ namespace engine
         glfwPollEvents();
     }
 
-    bool window_service_glfw::service_init(const service_create_info& info)
+    bool window_service_glfw::service_init(const service_create_info_t& info)
     {
         glfwSetErrorCallback(glfw_error_callback);
         if (!glfwInit())
@@ -34,13 +36,13 @@ namespace engine
         Log.info("GLFW initialized");
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        return super::service_init(info);
+        return super_t::service_init(info);
     }
 
     void window_service_glfw::service_clear()
     {
         clear_GLFW();
-        super::service_clear();
+        super_t::service_clear();
     }
 
     void window_service_glfw::clear_GLFW()

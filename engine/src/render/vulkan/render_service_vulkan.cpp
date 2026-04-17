@@ -18,13 +18,13 @@ namespace engine
 		constexpr auto MinDeviceVulkanApiVersion = vk::ApiVersion11;
 	}
 
-	render_service_vulkan* render_service_vulkan::Instance = nullptr;
+	RATS_ENGINE_SERVICE_IMPL(render_service_vulkan)
 
 	render_service* render_service::instance_allocate_vulkan() { return new render_service_vulkan(); }
 
-	bool render_service_vulkan::service_init(const service_create_info& info)
+	bool render_service_vulkan::service_init(const service_create_info_t& info)
 	{
-		if (!super::service_init(info))
+		if (!super_t::service_init(info))
 		{
 			return false;
 		}
@@ -100,10 +100,10 @@ namespace engine
 			m_ctx.m_instance.clear();
 		}
 
-		super::service_clear();
+		super_t::service_clear();
 	}
 
-	bool render_service_vulkan::create_instance(const service_create_info& info)
+	bool render_service_vulkan::create_instance(const service_create_info_t& info)
 	{
 		auto instance = vulkan::instance_builder()
 			.set_application_name(info.appName)

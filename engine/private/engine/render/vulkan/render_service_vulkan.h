@@ -15,16 +15,9 @@ namespace engine
 
     class render_service_vulkan final : public render_service
     {
-        using super = render_service;
+        RATS_ENGINE_SERVICE(render_service_vulkan, "vulkan")
 
     public:
-        render_service_vulkan() { Instance = this; }
-        virtual ~render_service_vulkan() override { Instance = nullptr; }
-
-        [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
-        inline static const log::logger Log = logger();
-
-        [[nodiscard]] static render_service_vulkan* instance() { return Instance; }
 
         [[nodiscard]] const vulkan::context& vk_ctx() const { return m_ctx; }
 
@@ -32,12 +25,10 @@ namespace engine
 
     protected:
 
-        virtual bool service_init(const service_create_info& info) override;
+        virtual bool service_init(const service_create_info_t& info) override;
         virtual void service_clear() override;
 
     private:
-
-        static render_service_vulkan* Instance;
 
         struct frame_data
         {
@@ -54,7 +45,7 @@ namespace engine
         eastl::array<frame_data, 2> m_framesInFlight;
         std::uint8_t m_currentFrameInFlight = 0;
 
-        [[nodiscard]] bool create_instance(const service_create_info& info);
+        [[nodiscard]] bool create_instance(const service_create_info_t& info);
         [[nodiscard]] bool create_device();
         [[nodiscard]] bool create_command_pools();
     };

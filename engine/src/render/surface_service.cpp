@@ -2,7 +2,8 @@
 
 namespace engine
 {
-	surface_service* surface_service::Instance = nullptr;
+	RATS_ENGINE_SERVICE_IMPL(surface_service)
+
 	surface_backend_service* surface_backend_service::Instance = nullptr;
 
 #if !RATS_ENGINE_VULKAN_ENABLE

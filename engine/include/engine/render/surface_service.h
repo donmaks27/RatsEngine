@@ -14,18 +14,9 @@ namespace engine
 
 	class RATS_ENGINE_EXPORT surface_service : public service_of<surface_service, render_api_service_create_info>
 	{
-	public:
-		using super = service_of;
-        friend super;
+		RATS_ENGINE_SERVICE_BASE(surface_service, "surface")
 
-	protected:
-		surface_service() { Instance = this; }
-		virtual ~surface_service() override { Instance = nullptr; }
 	public:
-
-		[[nodiscard]] static constexpr log::logger logger() { return { "surface", super::logger() }; }
-		inline static const log::logger Log = logger();
-		[[nodiscard]] static auto instance() { return Instance; }
 
 		[[nodiscard]] auto surface_ids() const
 		{
@@ -44,7 +35,7 @@ namespace engine
 			glm::uvec2 size = { 0, 0 };
 		};
 
-		virtual bool service_init(const service_create_info& info) override { return false; }
+		virtual bool service_init(const service_create_info_t& info) override { return false; }
 		virtual void service_clear() override {}
 
 		[[nodiscard]] surface_id create_surface(const surface_create_info& info);
@@ -52,7 +43,6 @@ namespace engine
 
 	private:
 
-		static surface_service* Instance;
 		[[nodiscard]] static surface_service* instance_allocate_vulkan();
 
 		struct surface_data

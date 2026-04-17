@@ -6,6 +6,8 @@
 
 namespace engine
 {
+    RATS_ENGINE_SERVICE_IMPL(window_service_glfw_vulkan)
+
     window_service* window_service::instance_allocate_vulkan() { return new window_service_glfw_vulkan(); }
 
     eastl::vector<const char*> window_service_glfw_vulkan::required_instance_extensions() const
@@ -36,16 +38,16 @@ namespace engine
 
     bool window_service_glfw_vulkan::on_event(const event_info& event)
     {
-        return super_vulkan::handle_event(event);
+        return vulkan_super_t::handle_event(event);
     }
 
     bool window_service_glfw_vulkan::create_window_impl(const window_id& id, const window_create_info& info)
     {
-        return super::create_window_impl(id, info) && super_vulkan::on_window_created(id);
+        return super_t::create_window_impl(id, info) && vulkan_super_t::on_window_created(id);
     }
     void window_service_glfw_vulkan::destroy_window_impl(const window_id& id)
     {
-        super_vulkan::on_window_destroying(id);
-        super::destroy_window_impl(id);
+        vulkan_super_t::on_window_destroying(id);
+        super_t::destroy_window_impl(id);
     }
 }

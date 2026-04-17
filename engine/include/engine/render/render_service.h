@@ -13,30 +13,19 @@ namespace engine
 
     class RATS_ENGINE_EXPORT render_service : public service_of<render_service, render_service_instance_create_info>
     {
-	public:
-        using super = service_of;
-        friend super;
+        RATS_ENGINE_SERVICE_BASE(render_service, "render")
 
-    protected:
-        render_service() { Instance = this; }
-        virtual ~render_service() override { Instance = nullptr; }
     public:
-
-        [[nodiscard]] static constexpr log::logger logger() { return { "render", super::logger() }; }
-        inline static const log::logger Log = logger();
-
-        [[nodiscard]] static auto instance() { return Instance; }
 
         [[nodiscard]] virtual bool render() = 0;
 
     protected:
 
-        virtual bool service_init(const service_create_info& info) override;
+        virtual bool service_init(const service_create_info_t& info) override;
         virtual void service_clear() override;
 
     private:
 
-        static render_service* Instance;
         [[nodiscard]] static render_service* instance_allocate_vulkan();
     };
 }

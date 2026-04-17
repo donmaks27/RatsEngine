@@ -27,18 +27,9 @@ namespace engine
 
     class RATS_ENGINE_EXPORT window_service : public service_of<window_service, window_service_create_info>, public engine_event_listener
     {
-	public:
-        using super = service_of;
-        friend super;
+        RATS_ENGINE_SERVICE_BASE(window_service, "window")
 
-    protected:
-        window_service() { Instance = this; }
-        virtual ~window_service() override { Instance = nullptr; }
     public:
-
-        [[nodiscard]] static constexpr log::logger logger() { return { "window", super::logger() }; }
-        inline static const log::logger Log = logger();
-        [[nodiscard]] static auto instance() { return Instance; }
 
         [[nodiscard]] auto window_ids() const
         {
@@ -68,7 +59,7 @@ namespace engine
         eastl::vector_map<window_id, window_data> m_windowData;
         window_id m_mainWindowId = window_id::invalid_id();
 
-        virtual bool service_init(const service_create_info& info) override;
+        virtual bool service_init(const service_create_info_t& info) override;
         virtual void service_clear() override;
 
         [[nodiscard]] virtual bool create_window_impl(const window_id& id, const window_create_info& info) = 0;
@@ -76,7 +67,6 @@ namespace engine
 
     private:
 
-        static window_service* Instance;
         [[nodiscard]] static window_service* instance_allocate_vulkan();
     };
 }

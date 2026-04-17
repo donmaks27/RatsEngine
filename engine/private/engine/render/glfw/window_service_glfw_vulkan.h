@@ -8,15 +8,9 @@ namespace engine
 {
     class window_service_glfw_vulkan : public window_service_glfw, public window_service_vulkan
     {
-        using super = window_service_glfw;
-        using super_vulkan = window_service_vulkan;
+        RATS_ENGINE_SERVICE(window_service_glfw_vulkan, "vulkan")
 
-    public:
-        window_service_glfw_vulkan() = default;
-        virtual ~window_service_glfw_vulkan() override = default;
-
-        [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
-        inline static const log::logger Log = logger();
+        using vulkan_super_t = window_service_vulkan;
 
     protected:
 

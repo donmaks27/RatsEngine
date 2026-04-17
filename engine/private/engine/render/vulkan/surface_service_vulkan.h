@@ -20,18 +20,10 @@ namespace engine
 
 	class surface_service_vulkan final : public surface_service, public engine_event_listener
 	{
-		using super = surface_service;
-
-		friend surface_backend_system_vulkan;
+		RATS_ENGINE_SERVICE(surface_service_vulkan, "vulkan")
 
 	public:
-		surface_service_vulkan() { Instance = this; }
-		virtual ~surface_service_vulkan() override { Instance = nullptr; }
-
-		[[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(super::logger()); }
-		inline static const log::logger Log = logger();
-
-		[[nodiscard]] static auto instance() { return Instance; }
+		friend surface_backend_system_vulkan;
 
 		[[nodiscard]] vulkan::swapchain& surface_swapchain(const surface_id id) { return m_surfaces.at_key(id).swapchain; }
 		[[nodiscard]] const vulkan::swapchain& surface_swapchain(const surface_id id) const { return m_surfaces.at_key(id).swapchain; }
@@ -43,8 +35,6 @@ namespace engine
 		virtual bool on_event(const event_info& event) override;
 
 	private:
-
-		static surface_service_vulkan* Instance;
 
 		struct vulkan_surface_create_info : surface_create_info
 		{

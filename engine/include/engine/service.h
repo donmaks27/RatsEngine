@@ -49,7 +49,6 @@ namespace engine
     class service_impl : public service
     {
     public:
-
         [[nodiscard]] static service_type type()
         {
             static const service_type id = ServiceTypes.type_id<T>();
@@ -145,12 +144,11 @@ namespace engine
         friend service_impl<T, const CreateInfo&>;
 
     public:
-        using service_create_info = CreateInfo;
-        using super = service_impl<T, const CreateInfo&>;
-
+        using service_create_info_t = CreateInfo;
+        using this_t = service_of;
     private:
 
-        [[nodiscard]] static T* instance_allocate_impl(const service_create_info& info)
+        [[nodiscard]] static T* instance_allocate_impl(const service_create_info_t& info)
         {
             T* result = nullptr;
             switch (info.renderApi)
@@ -160,9 +158,32 @@ namespace engine
             }
             if (result == nullptr)
             {
-                T::logger().fatal("Render API '{}' is not implemented", info.renderApi);
+                T::Log.fatal("Render API '{}' is not implemented", info.renderApi);
             }
             return result;
         }
     };
 }
+
+#define RATS_ENGINE_SERVICE(Type, LogCategory)                                                              \
+    public:                                                                                                 \
+        using super_t = this_t;                                                                             \
+        using this_t = Type;                                                                                \
+        Type() { Instance = this; }                                                                         \
+        virtual ~Type() override { Instance = nullptr; }                                                    \
+    public:                                                                                                 \
+        static const log::logger Log;                                                                       \
+        [[nodiscard]] static constexpr log::logger logger() { return { LogCategory, super_t::logger() }; }  \
+        [[nodiscard]] static auto instance() { return Instance; }                                           \
+    private:                                                                                                \
+        static Type* Instance;
+
+#define RATS_ENGINE_SERVICE_BASE(Type, LogCategory) \
+    RATS_ENGINE_SERVICE(Type, LogCategory)          \
+    public:                                         \
+        friend super_t;                             \
+    private:
+
+#define RATS_ENGINE_SERVICE_IMPL(Type)                      \
+    Type* Type::Instance = nullptr;                         \
+    const ::engine::log::logger Type::Log = Type::logger();
