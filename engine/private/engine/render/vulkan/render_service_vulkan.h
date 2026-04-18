@@ -6,7 +6,7 @@
 #include <engine/render/render_service.h>
 #include <engine/events.h>
 
-#include "EASTL/array.h"
+#include <EASTL/array.h>
 
 namespace engine
 {

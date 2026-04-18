@@ -11,7 +11,7 @@ namespace engine
 {
 	class surface_backend_system_vulkan;
 
-	struct vulkan_surface_created_event : event_of<vulkan_surface_created_event>
+	struct vulkan_surface_created_event final : event_of<vulkan_surface_created_event>
 	{
 		vk::SurfaceKHR surface = nullptr;
 		glm::uvec2 size = { 0, 0 };
@@ -51,6 +51,7 @@ namespace engine
 
 		[[nodiscard]] surface_id create_surface(const vulkan::context& ctx, const vulkan_surface_create_info& info);
 		void clear_surface(const vulkan::context& ctx, surface_id id);
+		virtual void clear_surface(surface_id id) override;
 
 		[[nodiscard]] bool create_swapchain(const vulkan::context& ctx, surface_id id);
 		[[nodiscard]] bool on_device_created();

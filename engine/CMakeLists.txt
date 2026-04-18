@@ -46,6 +46,7 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/render/surface_service.h"
 	"include/engine/utils/log.h"
 	"include/engine/utils/uuid.h"
+	"include/engine/utils/id.h"
 	"include/engine/utils/type_storage.h"
 	"include/engine/utils/macro/defer.h")
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS
@@ -94,15 +95,19 @@ if(${RATS_ENGINE_GLFW_ENABLE})
 	find_package(glfw3 CONFIG REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
-		"private/engine/render/glfw/window_service_glfw.h")
+		"private/engine/render/glfw/window_service_glfw.h"
+		"private/engine/render/glfw/window1_service_glfw.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/glfw/window_service_glfw.cpp")
+		"src/render/glfw/window_service_glfw.cpp"
+		"src/render/glfw/window1_service_glfw.cpp")
 
 	if(${RATS_ENGINE_VULKAN_ENABLE})
 		list(APPEND RATS_ENGINE_PRIVATE_HEADERS
-			"private/engine/render/glfw/window_service_glfw_vulkan.h")
+			"private/engine/render/glfw/window_service_glfw_vulkan.h"
+			"private/engine/render/glfw/window1_service_glfw_vulkan.h")
 		list(APPEND RATS_ENGINE_SRC_FILES
-			"src/render/glfw/window_service_glfw_vulkan.cpp")
+			"src/render/glfw/window_service_glfw_vulkan.cpp"
+			"src/render/glfw/window1_service_glfw_vulkan.cpp")
 	endif()
 
 endif()

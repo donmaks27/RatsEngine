@@ -7,20 +7,18 @@ namespace engine
 {
     class window1_service : public surface_backend_service
     {
-	public:
-        using super = surface_backend_service;
+	    RATS_ENGINE_SERVICE(window1_service, "window")
 
     protected:
-        window1_service() { Instance = this; }
-        virtual ~window1_service() override { Instance = nullptr; }
-    public:
 
-        [[nodiscard]] static constexpr log::logger logger() { return { "window", super::super::logger() }; }
-        inline static const log::logger Log = logger();
-        [[nodiscard]] static auto instance() { return Instance; }
+        struct window_data
+        {
+            bool minimized = false;
+        };
+        eastl::vector_map<surface_id, window_data> m_windowData;
+        surface_id m_mainSurface = invalid_surface_id;
 
-    private:
-
-        static window1_service* Instance;
+        virtual bool service_init(const render_api_service_create_info&) override;
+        virtual void service_clear() override;
     };
 }

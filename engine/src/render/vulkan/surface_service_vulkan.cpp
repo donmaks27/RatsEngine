@@ -53,6 +53,20 @@ namespace engine
 
 		super_t::clear_surface(id);
 	}
+	void surface_service_vulkan::clear_surface(const surface_id id)
+	{
+		const auto& ctx = render_service_vulkan::instance()->vk_ctx();
+		const auto iter = m_surfaces.find(id);
+		if (iter != m_surfaces.end())
+		{
+			auto& data = iter->second;
+			data.swapchain.clear(ctx);
+			ctx.i()->destroySurfaceKHR(data.surface);
+		}
+		m_surfaces.erase(id);
+
+		super_t::clear_surface(id);
+	}
 
 	bool surface_service_vulkan::create_swapchain(const vulkan::context& ctx, const surface_id id)
 	{

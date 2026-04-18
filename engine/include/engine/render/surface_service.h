@@ -3,18 +3,22 @@
 #include <engine/core.h>
 #include <engine/service.h>
 
-#include <glm/vec2.hpp>
+#include <engine/utils/id.h>
 
-#include <engine/render/vulkan/render_service_vulkan.h>
+#include <glm/vec2.hpp>
 
 namespace engine
 {
 	using surface_id = std::uint8_t;
-	constexpr surface_id invalid_surface_id = 0;
+	constexpr surface_id invalid_surface_id = utils::id<surface_id>::invalid_id;
+
+	class surface_backend_service;
 
 	class RATS_ENGINE_EXPORT surface_service : public service_of<surface_service, render_api_service_create_info>
 	{
 		RATS_ENGINE_SERVICE_BASE(surface_service, "surface")
+
+		friend surface_backend_service;
 
 	public:
 
@@ -39,7 +43,7 @@ namespace engine
 		virtual void service_clear() override {}
 
 		[[nodiscard]] surface_id create_surface(const surface_create_info& info);
-		void clear_surface(surface_id id);
+		virtual void clear_surface(surface_id id);
 
 	private:
 
@@ -55,24 +59,16 @@ namespace engine
 
 	class surface_backend_service : public service_of<surface_backend_service, render_api_service_create_info>
 	{
-	public:
-		using super = service_of;
-        friend super;
+		RATS_ENGINE_SERVICE_BASE(surface_backend_service, "surface_backend")
 
 	protected:
-		surface_backend_service() { Instance = this; }
-		virtual ~surface_backend_service() override { Instance = nullptr; }
-	public:
 
-		inline static const log::logger Log = logger();
-		[[nodiscard]] static constexpr log::logger logger() { return { "surface_backend", super::logger() }; }
-		[[nodiscard]] static auto instance() { return Instance; }
+		utils::id<surface_id> m_surfaceIdGenerator;
 
-		[[nodiscard]] virtual bool should_stop_engine() const { return false; }
+		virtual void service_clear() override;
 
 	private:
 
-		static surface_backend_service* Instance;
-		[[nodiscard]] static surface_service* instance_allocate_vulkan() { return nullptr; }
+		[[nodiscard]] static surface_backend_service* instance_allocate_vulkan();
 	};
 }
