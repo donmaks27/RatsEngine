@@ -7,9 +7,9 @@ struct GLFWwindow;
 
 namespace engine
 {
-    class window_service_glfw : public window_service
+    class window_glfw_service : public window_service
     {
-        RATS_ENGINE_SERVICE(window_service_glfw, "GLFW")
+        RATS_ENGINE_SERVICE(window_glfw_service, "GLFW")
 
     public:
 

@@ -2,13 +2,13 @@
 
 #include <engine/core.h>
 #include <engine/render/vulkan/core.h>
-#include <engine/render/glfw/window1_service_glfw.h>
+#include <engine/render/glfw/window1_glfw_service.h>
 
 namespace engine
 {
-    class window1_service_glfw_vulkan : public window1_service_glfw
+    class window1_glfw_vulkan_service : public window1_glfw_service
     {
-        RATS_ENGINE_SERVICE(window1_service_glfw_vulkan, "vulkan")
+        RATS_ENGINE_SERVICE(window1_glfw_vulkan_service, "vulkan")
 
     protected:
 

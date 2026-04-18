@@ -1,16 +1,16 @@
 #pragma once
 
 #include <engine/core.h>
-#include <engine/render/glfw/window_service_glfw.h>
-#include <engine/render/vulkan/window_service_vulkan.h>
+#include <engine/render/glfw/window_glfw_service.h>
+#include <engine/render/vulkan/window_vulkan_service.h>
 
 namespace engine
 {
-    class window_service_glfw_vulkan : public window_service_glfw, public window_service_vulkan
+    class window_glfw_vulkan_service : public window_glfw_service, public window_vulkan_service
     {
-        RATS_ENGINE_SERVICE(window_service_glfw_vulkan, "vulkan")
+        RATS_ENGINE_SERVICE(window_glfw_vulkan_service, "vulkan")
 
-        using vulkan_super_t = window_service_vulkan;
+        using vulkan_super_t = window_vulkan_service;
 
     protected:
 

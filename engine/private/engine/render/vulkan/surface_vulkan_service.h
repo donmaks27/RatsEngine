@@ -18,9 +18,9 @@ namespace engine
 		surface_id id = invalid_surface_id;
 	};
 
-	class surface_service_vulkan final : public surface_service, public engine_event_listener
+	class surface_vulkan_service final : public surface_service, public engine_event_listener
 	{
-		RATS_ENGINE_SERVICE(surface_service_vulkan, "vulkan")
+		RATS_ENGINE_SERVICE(surface_vulkan_service, "vulkan")
 
 	public:
 		friend surface_backend_system_vulkan;

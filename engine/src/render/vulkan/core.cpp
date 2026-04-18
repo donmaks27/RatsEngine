@@ -1,6 +1,6 @@
 #include <engine/render/vulkan/core.h>
 
-#include <engine/render/vulkan/render_service_vulkan.h>
+#include <engine/render/vulkan/render_vulkan_service.h>
 
 namespace engine::vulkan
 {
@@ -31,7 +31,7 @@ namespace engine::vulkan
     {
         if (valid())
         {
-            clear(render_service_vulkan::instance()->vk_ctx());
+            clear(render_vulkan_service::instance()->vk_ctx());
         }
     }
     void command_pool::clear(const context& ctx)

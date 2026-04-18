@@ -7,9 +7,9 @@
 
 namespace engine
 {
-    class window1_service_glfw : public window1_service
+    class window1_glfw_service : public window1_service
     {
-        RATS_ENGINE_SERVICE(window1_service_glfw, "GLFW")
+        RATS_ENGINE_SERVICE(window1_glfw_service, "GLFW")
 
     protected:
 

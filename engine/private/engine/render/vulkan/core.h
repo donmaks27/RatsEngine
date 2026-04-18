@@ -17,7 +17,7 @@ struct fmt::formatter<vk::Result> : formatter<std::string>
 
 namespace engine
 {
-	class render_service_vulkan;
+	class render_vulkan_service;
 }
 
 namespace engine::vulkan
@@ -191,7 +191,7 @@ namespace engine::vulkan
 
     class context final
     {
-        friend render_service_vulkan;
+        friend render_vulkan_service;
 
     public:
         context() = default;

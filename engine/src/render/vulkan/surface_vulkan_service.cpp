@@ -1,16 +1,16 @@
-#include <engine/render/vulkan/surface_service_vulkan.h>
+#include <engine/render/vulkan/surface_vulkan_service.h>
 
-#include <engine/render/vulkan/render_service_vulkan.h>
+#include <engine/render/vulkan/render_vulkan_service.h>
 
 namespace engine
 {
-	RATS_ENGINE_SERVICE_IMPL(surface_service_vulkan)
+	RATS_ENGINE_SERVICE_IMPL(surface_vulkan_service)
 
-	surface_service* surface_service::instance_allocate_vulkan() { return new surface_service_vulkan(); }
+	surface_service* surface_service::instance_allocate_vulkan() { return new surface_vulkan_service(); }
 
-	void surface_service_vulkan::service_clear()
+	void surface_vulkan_service::service_clear()
 	{
-		const auto& ctx = render_service_vulkan::instance()->vk_ctx();
+		const auto& ctx = render_vulkan_service::instance()->vk_ctx();
 		std::ranges::for_each(surface_ids(), [this, &ctx](const surface_id id) {
 			clear_surface(ctx, id);
 		});
@@ -19,14 +19,14 @@ namespace engine
 		super_t::service_clear();
 	}
 
-	bool surface_service_vulkan::on_event(const event_info& event)
+	bool surface_vulkan_service::on_event(const event_info& event)
 	{
 		return event.dispatch<vulkan_device_created_event>([this] {
 			return on_device_created();
 		});
 	}
 
-	surface_id surface_service_vulkan::create_surface(const vulkan::context& ctx, const vulkan_surface_create_info& info)
+	surface_id surface_vulkan_service::create_surface(const vulkan::context& ctx, const vulkan_surface_create_info& info)
 	{
 		const auto id = super_t::create_surface(info);
 		if (id != invalid_surface_id)
@@ -40,7 +40,7 @@ namespace engine
 		}
 		return id;
 	}
-	void surface_service_vulkan::clear_surface(const vulkan::context& ctx, const surface_id id)
+	void surface_vulkan_service::clear_surface(const vulkan::context& ctx, const surface_id id)
 	{
 		const auto iter = m_surfaces.find(id);
 		if (iter != m_surfaces.end())
@@ -53,9 +53,9 @@ namespace engine
 
 		super_t::clear_surface(id);
 	}
-	void surface_service_vulkan::clear_surface(const surface_id id)
+	void surface_vulkan_service::clear_surface(const surface_id id)
 	{
-		const auto& ctx = render_service_vulkan::instance()->vk_ctx();
+		const auto& ctx = render_vulkan_service::instance()->vk_ctx();
 		const auto iter = m_surfaces.find(id);
 		if (iter != m_surfaces.end())
 		{
@@ -68,7 +68,7 @@ namespace engine
 		super_t::clear_surface(id);
 	}
 
-	bool surface_service_vulkan::create_swapchain(const vulkan::context& ctx, const surface_id id)
+	bool surface_vulkan_service::create_swapchain(const vulkan::context& ctx, const surface_id id)
 	{
 		if (ctx.d() == nullptr)
 		{
@@ -84,9 +84,9 @@ namespace engine
 		}
 		return true;
 	}
-	bool surface_service_vulkan::on_device_created()
+	bool surface_vulkan_service::on_device_created()
 	{
-		const auto& ctx = render_service_vulkan::instance()->vk_ctx();
+		const auto& ctx = render_vulkan_service::instance()->vk_ctx();
 		return std::ranges::all_of(surface_ids(), [this, &ctx](const surface_id id) {
 			return create_swapchain(ctx, id);
 		});

@@ -13,9 +13,9 @@ namespace engine
     struct vulkan_instance_created_event final : event_of<vulkan_instance_created_event> {};
     struct vulkan_device_created_event final : event_of<vulkan_device_created_event> {};
 
-    class render_service_vulkan final : public render_service
+    class render_vulkan_service final : public render_service
     {
-        RATS_ENGINE_SERVICE(render_service_vulkan, "vulkan")
+        RATS_ENGINE_SERVICE(render_vulkan_service, "vulkan")
 
     public:
 

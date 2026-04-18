@@ -8,21 +8,21 @@
 
 namespace engine
 {
-    class render_service_vulkan;
+    class render_vulkan_service;
 
-    class window_service_vulkan
+    class window_vulkan_service
     {
-        friend render_service_vulkan;
+        friend render_vulkan_service;
 
     protected:
-        window_service_vulkan() { Instance = this; }
-        virtual ~window_service_vulkan() { Instance = nullptr; }
+        window_vulkan_service() { Instance = this; }
+        virtual ~window_vulkan_service() { Instance = nullptr; }
     public:
-        window_service_vulkan(const window_service_vulkan&) = delete;
-        window_service_vulkan(window_service_vulkan&&) = delete;
+        window_vulkan_service(const window_vulkan_service&) = delete;
+        window_vulkan_service(window_vulkan_service&&) = delete;
 
-        window_service_vulkan& operator=(const window_service_vulkan&) = delete;
-        window_service_vulkan& operator=(window_service_vulkan&&) = delete;
+        window_vulkan_service& operator=(const window_vulkan_service&) = delete;
+        window_vulkan_service& operator=(window_vulkan_service&&) = delete;
 
         [[nodiscard]] static constexpr log::logger logger() { return vulkan::logger_vulkan(window_service::logger()); }
         inline static const log::logger Log = logger();
@@ -44,7 +44,7 @@ namespace engine
 
     private:
 
-        static window_service_vulkan* Instance;
+        static window_vulkan_service* Instance;
 
         struct window_data_vulkan
         {
