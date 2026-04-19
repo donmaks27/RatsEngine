@@ -26,14 +26,15 @@ namespace engine
 			vk::SurfaceKHR surface = nullptr;
 		};
 
+		[[nodiscard]] static eastl::vector<const char*> required_instance_extensions();
+
 		[[nodiscard]] bool create_surface(const vulkan::context& ctx, surface_id id, const surface_vulkan_create_info& info);
 
+		[[nodiscard]] vk::SurfaceKHR surface(const surface_id id) const { return m_surfaces.at_key(id).surface; }
 		[[nodiscard]] vulkan::swapchain& surface_swapchain(const surface_id id) { return m_surfaces.at_key(id).swapchain; }
 		[[nodiscard]] const vulkan::swapchain& surface_swapchain(const surface_id id) const { return m_surfaces.at_key(id).swapchain; }
 
 	protected:
-
-		virtual void service_clear() override;
 
 		virtual bool on_event(const event_info& event) override;
 

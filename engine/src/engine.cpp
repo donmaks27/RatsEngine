@@ -43,17 +43,17 @@ namespace engine
         Log.info("Engine initialized successfully");
 
         Log.log("Game loop started");
-        auto* windowSystem = window_service::instance();
-        auto* renderSystem = render_service::instance();
-        while (!windowSystem->should_close_main_window())
+        auto* windowService = window_service::instance();
+        auto* renderService = render_service::instance();
+        while (!windowService->should_close_main_window())
         {
-            if (!renderSystem->render())
+            if (!renderService->render())
             {
                 Log.fatal("Render error!");
                 break;
             }
 
-            windowSystem->on_frame_end();
+            windowService->poll_window_events();
 
             m_engineEventBus.refresh_events();
         }

@@ -3,7 +3,7 @@
 #include <engine/core.h>
 #include <engine/render/window_service.h>
 
-struct GLFWwindow;
+#include <GLFW/glfw3.h>
 
 namespace engine
 {
@@ -13,22 +13,27 @@ namespace engine
 
     public:
 
-        [[nodiscard]] virtual bool should_close_window(const window_id& id) const override;
+        [[nodiscard]] virtual bool should_close_main_window() const override;
+        [[nodiscard]] GLFWwindow* glfw_window(surface_id id) const;
 
-        virtual void on_frame_end() override;
+        virtual void poll_window_events() override;
 
     protected:
 
-        eastl::vector_map<window_id, GLFWwindow*> m_windowDataGLFW;
-
-        virtual bool service_init(const service_create_info_t& info) override;
+        virtual bool service_init(const render_api_service_create_info& info) override;
         virtual void service_clear() override;
 
-        virtual bool create_window_impl(const window_id& id, const window_create_info& info) override;
-        virtual void destroy_window_impl(const window_id& id) override;
+        [[nodiscard]] virtual int glfw_client_api() const { return GLFW_NO_API; }
+
+        virtual bool create_window_impl(surface_id id, const window_create_info& info) override;
+        virtual void destroy_window_impl(surface_id id) override;
 
     private:
 
-        void clear_GLFW();
+        struct window_data_GLFW
+        {
+            GLFWwindow* window = nullptr;
+        };
+        eastl::vector_map<surface_id, window_data_GLFW> m_windowDataGLFW;
     };
 }

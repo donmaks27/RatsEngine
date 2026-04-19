@@ -8,11 +8,6 @@ namespace engine
 
 	surface_service* surface_service::instance_allocate_vulkan() { return new surface_vulkan_service(); }
 
-	void surface_vulkan_service::service_clear()
-	{
-		super_t::service_clear();
-	}
-
 	bool surface_vulkan_service::on_event(const event_info& event)
 	{
 		return event.dispatch<vulkan_device_created_event>([this] {

@@ -1,10 +1,10 @@
 #include <engine/render/vulkan/render_vulkan_service.h>
 
-#include <engine/render/vulkan/window_vulkan_service.h>
+#include <engine/engine.h>
+#include <engine/render/window_service.h>
+#include <engine/render/vulkan/surface_vulkan_service.h>
 #include <engine/render/vulkan/builder/instance_builder.h>
 #include <engine/render/vulkan/builder/device_builder.h>
-
-#include <engine/engine.h>
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
@@ -95,7 +95,7 @@ namespace engine
 			m_transferCommandPool.clear(m_ctx);
 			m_graphicsCommandPool.clear(m_ctx);
 
-			window_vulkan_service::instance()->clear_vulkan(m_ctx);
+			surface_service::instance()->clear_surfaces();
             m_ctx.m_device.clear();
 			m_ctx.m_instance.clear();
 		}
@@ -110,7 +110,7 @@ namespace engine
 			.set_engine_name("RatsEngine")
 			.set_application_version(0, 1, 0)
 			.set_engine_version(0, 1, 0)
-			.add_required_extensions(window_vulkan_service::instance()->required_instance_extensions())
+			.add_required_extensions(surface_vulkan_service::instance()->required_instance_extensions())
 			.add_required_extensions(RequiredInstanceExtensions)
 			.set_max_vulkan_version(MaxInstanceVulkanApiVersion)
 			.build();
@@ -124,7 +124,7 @@ namespace engine
 
 	bool render_vulkan_service::create_device()
     {
-    	const auto mainSurface = window_vulkan_service::instance()->surface(window_service::instance()->main_window_id());
+    	const auto mainSurface = surface_vulkan_service::instance()->surface(window_service::instance()->main_window_id());
         auto device = vulkan::device_builder()
             .add_required_extensions(RequiredDeviceExtensions)
             .set_min_vulkan_version(MinDeviceVulkanApiVersion)
@@ -152,12 +152,12 @@ namespace engine
 
 	bool render_vulkan_service::render()
 	{
-		const auto windowSystem = window_service::instance();
-		const auto windowSystemVulkan = window_vulkan_service::instance();
-		const auto mainWindowId = windowSystem->main_window_id();
+		auto windowService = window_service::instance();
+		auto surfaceService = surface_vulkan_service::instance();
+		const auto mainSurfaceId = windowService->main_window_id();
 		const auto& device = m_ctx.d();
-		const auto swapchainSize = windowSystem->window_size(mainWindowId);
-		auto swapchain = windowSystemVulkan->swapchain(mainWindowId);
+		const auto swapchainSize = surfaceService->surface_size(mainSurfaceId);
+		auto& swapchain = surfaceService->surface_swapchain(mainSurfaceId);
 
 		m_currentFrameInFlight = (m_currentFrameInFlight + 1) % m_framesInFlight.size();
 		const auto& frameData = m_framesInFlight[m_currentFrameInFlight];
@@ -165,13 +165,13 @@ namespace engine
 
 		device->waitForFences({ frameData.frameFence }, vk::True, std::numeric_limits<std::uint64_t>::max());
 
-		if (!swapchain->acquire_next_image(m_ctx, frameData.imageAvailableSemaphore))
+		if (!swapchain.acquire_next_image(m_ctx, frameData.imageAvailableSemaphore))
 		{
 			return false;
 		}
-		if (swapchain->outdated())
+		if (swapchain.outdated())
 		{
-			return swapchain->init(m_ctx, { windowSystemVulkan->surface(mainWindowId), swapchainSize });
+			return swapchain.init(m_ctx, { surfaceService->surface(mainSurfaceId), swapchainSize });
 		}
 		device->resetFences({ frameData.frameFence });
 
@@ -180,7 +180,7 @@ namespace engine
 
 		// Render
 		vk::ImageMemoryBarrier2 barrier;
-		barrier.image = swapchain->image();
+		barrier.image = swapchain.image();
 		barrier.subresourceRange = vk::ImageSubresourceRange{ 
 			vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1
 		};
@@ -194,7 +194,7 @@ namespace engine
 		cmd.pipelineBarrier2(dependencyInfo);
 
 		const auto colorAttachmentInfo = vk::RenderingAttachmentInfo()
-			.setImageView(swapchain->image_view())
+			.setImageView(swapchain.image_view())
 			.setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
 			.setLoadOp(vk::AttachmentLoadOp::eClear)
 			.setStoreOp(vk::AttachmentStoreOp::eStore)
@@ -216,7 +216,7 @@ namespace engine
 
 		cmd.end();
 
-		const auto renderFinishedSemaphore = swapchain->render_finished_semaphore();
+		const auto renderFinishedSemaphore = swapchain.render_finished_semaphore();
 		const vk::SemaphoreSubmitInfo waitSemaphoreInfo{ frameData.imageAvailableSemaphore , 0, vk::PipelineStageFlagBits2::eColorAttachmentOutput };
 		const vk::SemaphoreSubmitInfo signalSemaphoreInfo{ renderFinishedSemaphore , 0, vk::PipelineStageFlagBits2::eAllGraphics };
 		const vk::CommandBufferSubmitInfo cmdInfo{ cmd };
@@ -225,7 +225,7 @@ namespace engine
 			.setSignalSemaphoreInfos({ signalSemaphoreInfo })
 			.setCommandBufferInfos({ cmdInfo });
 		device.queue(vulkan::queue_type::graphics)->submit2({ submitInfo }, frameData.frameFence);
-		if (!swapchain->present(m_ctx, renderFinishedSemaphore))
+		if (!swapchain.present(m_ctx, renderFinishedSemaphore))
 		{
 			return false;
 		}

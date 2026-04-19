@@ -1,6 +1,6 @@
 #include <engine/render/render_service.h>
 
-#include <engine/render/window_service.h>
+#include <engine/render/surface_service.h>
 
 namespace engine
 {
@@ -12,9 +12,15 @@ namespace engine
 
     bool render_service::service_init(const service_create_info_t& info)
     {
-        if (!window_service::instance_create({ .renderApi = info.renderApi }))
+        if (!surface_service::instance_create({ .renderApi = info.renderApi }))
         {
-            Log.fatal("Failed to create window system!");
+            Log.fatal("Failed to create surface service!");
+            return false;
+        }
+        if (!surface_backend_service::instance_create({ .renderApi = info.renderApi }))
+        {
+            Log.fatal("Failed to create surface backend service!");
+            surface_service::instance_clear();
             return false;
         }
         return true;
@@ -22,6 +28,7 @@ namespace engine
 
     void render_service::service_clear()
     {
-        window_service::instance_clear();
+        surface_backend_service::instance_clear();
+        surface_service::instance_clear();
     }
 }

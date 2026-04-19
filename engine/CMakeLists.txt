@@ -50,14 +50,12 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/utils/type_storage.h"
 	"include/engine/utils/macro/defer.h")
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS
-	"private/engine/render/window_service.h"
-	"private/engine/render/window1_service.h")
+	"private/engine/render/window_service.h")
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/engine.cpp"
 	"src/render/render_service.cpp"
 	"src/render/surface_service.cpp"
-	"src/render/window_service.cpp"
-	"src/render/window1_service.cpp")
+	"src/render/window_service.cpp")
 list(APPEND RATS_ENGINE_SRC_FILES_NO_PCH
 	"src/utils/eastl_operator_new.cpp"
 	"src/utils/log.cpp"
@@ -75,7 +73,6 @@ if(${RATS_ENGINE_VULKAN_ENABLE})
 		"private/engine/render/vulkan/core.h"
 		"private/engine/render/vulkan/render_vulkan_service.h"
 		"private/engine/render/vulkan/surface_vulkan_service.h"
-		"private/engine/render/vulkan/window_vulkan_service.h"
 		"private/engine/render/vulkan/builder/instance_builder.h"
 		"private/engine/render/vulkan/builder/device_builder.h"
 		"private/engine/render/vulkan/swapchain.h")
@@ -83,7 +80,6 @@ if(${RATS_ENGINE_VULKAN_ENABLE})
 		"src/render/vulkan/core.cpp"
 		"src/render/vulkan/render_vulkan_service.cpp"
 		"src/render/vulkan/surface_vulkan_service.cpp"
-		"src/render/vulkan/window_vulkan_service.cpp"
 		"src/render/vulkan/builder/instance_builder.cpp"
 		"src/render/vulkan/builder/device_builder.cpp"
 		"src/render/vulkan/swapchain.cpp")
@@ -95,19 +91,15 @@ if(${RATS_ENGINE_GLFW_ENABLE})
 	find_package(glfw3 CONFIG REQUIRED)
 	list(APPEND RATS_ENGINE_PRIVATE_LIBS glfw)
 	list(APPEND RATS_ENGINE_PRIVATE_HEADERS
-		"private/engine/render/glfw/window_glfw_service.h"
-		"private/engine/render/glfw/window1_glfw_service.h")
+		"private/engine/render/glfw/window_glfw_service.h")
 	list(APPEND RATS_ENGINE_SRC_FILES
-		"src/render/glfw/window_glfw_service.cpp"
-		"src/render/glfw/window1_glfw_service.cpp")
+		"src/render/glfw/window_glfw_service.cpp")
 
 	if(${RATS_ENGINE_VULKAN_ENABLE})
 		list(APPEND RATS_ENGINE_PRIVATE_HEADERS
-			"private/engine/render/glfw/window_glfw_vulkan_service.h"
-			"private/engine/render/glfw/window1_glfw_vulkan_service.h")
+			"private/engine/render/glfw/window_glfw_vulkan_service.h")
 		list(APPEND RATS_ENGINE_SRC_FILES
-			"src/render/glfw/window_glfw_vulkan_service.cpp"
-			"src/render/glfw/window1_glfw_vulkan_service.cpp")
+			"src/render/glfw/window_glfw_vulkan_service.cpp")
 	endif()
 
 endif()

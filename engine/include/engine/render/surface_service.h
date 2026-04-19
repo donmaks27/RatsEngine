@@ -42,9 +42,12 @@ namespace engine
 		[[nodiscard]] bool surface_valid(const surface_id id) const { return m_surfaces.count(id) != 0; }
 		[[nodiscard]] glm::uvec2 surface_size(const surface_id id) const { return m_surfaces.at_key(id).size; }
 
+		void clear_surfaces();
+
 	protected:
 
-		virtual bool service_init(const service_create_info_t& info) override { return false; }
+		virtual bool service_init(const service_create_info_t& info) override;
+
 		virtual void service_clear() override;
 
 		[[nodiscard]] bool create_surface(surface_id id, const surface_create_info& info);

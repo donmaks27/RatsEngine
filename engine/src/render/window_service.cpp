@@ -4,70 +4,46 @@ namespace engine
 {
     RATS_ENGINE_SERVICE_IMPL(window_service)
 
-#if !RATS_ENGINE_VULKAN_ENABLE
-    window_service* window_service::instance_allocate_vulkan() { return nullptr; }
-#endif
-
     bool window_service::service_init(const service_create_info_t& info)
     {
-        m_mainWindowId = window_id::generate();
-        m_windowData.emplace(m_mainWindowId, window_data{ .size = info.mainWindow.size });
-        Log.log("Creating main window {}...", m_mainWindowId);
-        if (!create_window_impl(m_mainWindowId, info.mainWindow))
+        // Create main window
+        m_mainSurfaceID = m_surfaceIdGenerator.generate();
+        if (!create_window_impl(m_mainSurfaceID, { .size = { 800, 600 } }))
         {
             Log.fatal("Failed to create main window!");
-            m_windowData = {};
+            m_surfaceIdGenerator.free(m_mainSurfaceID);
+            m_mainSurfaceID = invalid_surface_id;
             return false;
         }
-        Log.info("Main window created successfully");
         return true;
     }
     void window_service::service_clear()
     {
-        m_windowData.clear();
-        m_mainWindowId = window_id::invalid_id();
+        while (!m_windowData.empty())
+        {
+            destroy_window_impl(m_windowData.back().first);
+        }
+        m_mainSurfaceID = invalid_surface_id;
+        super_t::service_clear();
     }
 
-    glm::uvec2 window_service::window_size(const window_id& id) const
+    void window_service::destroy_window(const surface_id id)
     {
-        const auto iter = m_windowData.find(id);
-		return iter != m_windowData.end() ? iter->second.size : glm::uvec2{ 0, 0 };
+        if (m_windowData.count(id) != 0)
+        {
+            destroy_window_impl(id);
+            m_surfaceIdGenerator.free(id);
+        }
     }
 
-    window_id window_service::create_window(const window_create_info& info)
+    bool window_service::create_window_impl(const surface_id id, const window_create_info& info)
     {
-        window_id id = window_id::generate();
-        while (m_windowData.find(id) != m_windowData.end())
-        {
-            id = window_id::generate();
-        }
-
-        Log.log("Creating window {}...", id);
-        m_windowData.emplace(id, window_data{ .size = info.size });
-        if (!create_window_impl(m_mainWindowId, { .size = info.size }))
-        {
-            Log.error("Failed to create window!");
-            m_windowData.erase(id);
-            return window_id::invalid_id();
-        }
-        Log.log("Window created successfully");
-        return id;
-    }
-    bool window_service::destroy_window(const window_id& id)
-    {
-        if (m_windowData.count(id) == 0)
-        {
-            return false;
-        }
-        if (id == m_mainWindowId)
-        {
-            Log.warning("Can't destroy main window");
-            return false;
-        }
-        Log.log("Destroying window {}...", id);
-        destroy_window_impl(id);
-        m_windowData.erase(id);
-        Log.log("Window destroyed");
+        m_windowData[id] = { .size = info.size };
         return true;
+    }
+    void window_service::destroy_window_impl(const surface_id id)
+    {
+        destroy_surface(id);
+        m_windowData.erase(id);
     }
 }
