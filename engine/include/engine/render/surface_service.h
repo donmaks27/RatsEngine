@@ -22,6 +22,16 @@ namespace engine
 
 	public:
 
+		struct surface_create_info
+		{
+			surface_create_info() = default;
+			explicit surface_create_info(const glm::uvec2& size)
+				: size(size)
+			{}
+
+			glm::uvec2 size = { 0, 0 };
+		};
+
 		[[nodiscard]] auto surface_ids() const
 		{
 			using pair_type = decltype(m_surfaces)::value_type;
@@ -34,16 +44,11 @@ namespace engine
 
 	protected:
 
-		struct surface_create_info
-		{
-			glm::uvec2 size = { 0, 0 };
-		};
-
 		virtual bool service_init(const service_create_info_t& info) override { return false; }
-		virtual void service_clear() override {}
+		virtual void service_clear() override;
 
-		[[nodiscard]] surface_id create_surface(const surface_create_info& info);
-		virtual void clear_surface(surface_id id);
+		[[nodiscard]] bool create_surface(surface_id id, const surface_create_info& info);
+		virtual void destroy_surface(surface_id id);
 
 	private:
 
@@ -66,6 +71,8 @@ namespace engine
 		utils::id<surface_id> m_surfaceIdGenerator;
 
 		virtual void service_clear() override;
+
+		static void destroy_surface(const surface_id id) { surface_service::instance()->destroy_surface(id); }
 
 	private:
 

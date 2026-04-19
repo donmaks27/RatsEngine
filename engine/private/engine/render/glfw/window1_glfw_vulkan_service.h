@@ -14,5 +14,7 @@ namespace engine
 
         virtual bool service_init(const render_api_service_create_info&) override;
         virtual void service_clear() override;
+
+        virtual bool create_window_impl(surface_id id, const window_create_info& info) override;
     };
 }

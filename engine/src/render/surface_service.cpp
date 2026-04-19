@@ -10,23 +10,20 @@ namespace engine
 	surface_backend_service* surface_backend_service::instance_allocate_vulkan() { return nullptr; }
 #endif
 
-	surface_id surface_service::create_surface(const surface_create_info& info)
+	void surface_service::service_clear()
 	{
-		static surface_id prevSurfaceId = invalid_surface_id;
-		if (m_surfaces.size() >= std::numeric_limits<surface_id>::max())
+		while (!m_surfaces.empty())
 		{
-			return invalid_surface_id;
+			destroy_surface(m_surfaces.back().first);
 		}
-
-		surface_id id = ++prevSurfaceId;
-		while ((m_surfaces.count(id) != 0) || (id == invalid_surface_id))
-		{
-			id++;
-		}
-		m_surfaces[id] = { .size = info.size };
-		return id;
 	}
-	void surface_service::clear_surface(const surface_id id)
+
+	bool surface_service::create_surface(const surface_id id, const surface_create_info& info)
+	{
+		m_surfaces[id] = { .size = info.size };
+		return true;
+	}
+	void surface_service::destroy_surface(const surface_id id)
 	{
 		m_surfaces.erase(id);
 	}

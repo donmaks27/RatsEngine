@@ -10,12 +10,6 @@ namespace engine
 
 	void surface_vulkan_service::service_clear()
 	{
-		const auto& ctx = render_vulkan_service::instance()->vk_ctx();
-		std::ranges::for_each(surface_ids(), [this, &ctx](const surface_id id) {
-			clear_surface(ctx, id);
-		});
-		m_surfaces.clear();
-
 		super_t::service_clear();
 	}
 
@@ -26,46 +20,34 @@ namespace engine
 		});
 	}
 
-	surface_id surface_vulkan_service::create_surface(const vulkan::context& ctx, const vulkan_surface_create_info& info)
+	bool surface_vulkan_service::create_surface(const vulkan::context& ctx, const surface_id id, const surface_vulkan_create_info& info)
 	{
-		const auto id = super_t::create_surface(info);
-		if (id != invalid_surface_id)
+		if (!super_t::create_surface(id, info))
 		{
-			m_surfaces[id] = { .surface = info.surface };
-			if (!create_swapchain(ctx, id))
-			{
-				clear_surface(ctx, id);
-				return invalid_surface_id;
-			}
+			return false;
 		}
-		return id;
+		m_surfaces[id] = { .surface = info.surface };
+		if (!create_swapchain(ctx, id))
+		{
+			destroy_surface(id);
+			return false;
+		}
+		return true;
 	}
-	void surface_vulkan_service::clear_surface(const vulkan::context& ctx, const surface_id id)
+	void surface_vulkan_service::destroy_surface(const surface_id id)
 	{
 		const auto iter = m_surfaces.find(id);
 		if (iter != m_surfaces.end())
 		{
-			auto& data = iter->second;
-			data.swapchain.clear(ctx);
-			ctx.i()->destroySurfaceKHR(data.surface);
-		}
-		m_surfaces.erase(id);
+			const auto& ctx = render_vulkan_service::instance()->vk_ctx();
+			auto& [surface, swapchain] = iter->second;
+			swapchain.clear(ctx);
+			ctx.i()->destroySurfaceKHR(surface);
 
-		super_t::clear_surface(id);
-	}
-	void surface_vulkan_service::clear_surface(const surface_id id)
-	{
-		const auto& ctx = render_vulkan_service::instance()->vk_ctx();
-		const auto iter = m_surfaces.find(id);
-		if (iter != m_surfaces.end())
-		{
-			auto& data = iter->second;
-			data.swapchain.clear(ctx);
-			ctx.i()->destroySurfaceKHR(data.surface);
+			m_surfaces.erase(id);
 		}
-		m_surfaces.erase(id);
 
-		super_t::clear_surface(id);
+		super_t::destroy_surface(id);
 	}
 
 	bool surface_vulkan_service::create_swapchain(const vulkan::context& ctx, const surface_id id)

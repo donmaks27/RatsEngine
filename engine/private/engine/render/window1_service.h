@@ -9,16 +9,31 @@ namespace engine
     {
 	    RATS_ENGINE_SERVICE(window1_service, "window")
 
-    protected:
+    public:
 
-        struct window_data
+        struct window_create_info
         {
-            bool minimized = false;
+            glm::uvec2 size = { 0, 0 };
         };
-        eastl::vector_map<surface_id, window_data> m_windowData;
-        surface_id m_mainSurface = invalid_surface_id;
+
+        void destroy_window(surface_id id);
+
+    protected:
 
         virtual bool service_init(const render_api_service_create_info&) override;
         virtual void service_clear() override;
+
+        [[nodiscard]] virtual bool create_window_impl(surface_id id, const window_create_info& info);
+        virtual void destroy_window_impl(surface_id id);
+
+    private:
+
+        struct window_data
+        {
+            glm::uvec2 size = { 0, 0 };
+        };
+
+        eastl::vector_map<surface_id, window_data> m_windowData;
+        surface_id m_mainSurfaceID = invalid_surface_id;
     };
 }

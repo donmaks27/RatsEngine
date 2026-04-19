@@ -35,7 +35,7 @@ namespace engine::utils
         }
         void free(const id_t id)
         {
-            if (std::ranges::find(m_unusedIDs, id) == m_unusedIDs.end())
+            if (eastl::find(m_unusedIDs.begin(), m_unusedIDs.end(), id) == m_unusedIDs.end())
             {
                 m_unusedIDs.push_back(id);
             }
