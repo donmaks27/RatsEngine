@@ -8,7 +8,7 @@ namespace engine::vulkan
 {
 	namespace 
 	{
-		const auto Log = log::logger("swapchain", logger_vulkan());
+		const auto Log = log::logger("swapchain", logger_render_api<render_api::vulkan>());
 
 		[[nodiscard]] vk::PresentModeKHR pickPresentMode(const eastl::span<const vk::PresentModeKHR> modes, const bool preferDisableVSync)
 		{

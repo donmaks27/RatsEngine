@@ -4,7 +4,7 @@ namespace engine::vulkan
 {
 	namespace
 	{
-        const auto Log = log::logger("device_builder", logger_vulkan());
+        const auto Log = log::logger("device_builder", logger_render_api<render_api::vulkan>());
 
         using feature_location = device_builder::feature_location;
 

@@ -48,7 +48,7 @@ namespace engine::log
                 m_prefix += "] ";
 	        }
         }
-        constexpr logger(std::string_view category, const logger& parent)
+        constexpr logger(const std::string_view category, const logger& parent)
         {
             if (category.empty())
             {

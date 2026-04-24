@@ -3,15 +3,12 @@
 #include <engine/core.h>
 #include <engine/service.h>
 
-#include <engine/utils/id.h>
+#include <engine/render/types.h>
 
 #include <glm/vec2.hpp>
 
 namespace engine
 {
-	using surface_id = std::uint8_t;
-	constexpr surface_id invalid_surface_id = utils::id<surface_id>::invalid_id;
-
 	class surface_backend_service;
 
 	class RATS_ENGINE_EXPORT surface_service : public service_of<surface_service, render_api_service_create_info>

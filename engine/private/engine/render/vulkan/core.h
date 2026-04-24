@@ -1,7 +1,8 @@
 #pragma once
 
+#include <engine/render/types.h>
+
 #include <EASTL/vector_set.h>
-#include <fmt/format.h>
 #include <vulkan/vulkan.hpp>
 
 template<>
@@ -28,9 +29,6 @@ namespace engine::vulkan
     class command_pool;
     class queue;
     class context;
-
-    [[nodiscard]] constexpr log::logger logger_vulkan() { return { "Vulkan", logger_engine() }; }
-    [[nodiscard]] constexpr log::logger logger_vulkan(const log::logger& parent) { return { "vulkan", parent }; }
 
     template<typename AccessType, typename StoreType = AccessType>
     class _value_wrapper

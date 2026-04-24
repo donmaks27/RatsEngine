@@ -4,12 +4,12 @@ namespace engine::vulkan
 {
 	namespace
 	{
-		const auto LogVulkan = logger_vulkan();
-		const auto Log = log::logger("instance_builder", logger_vulkan());
+		const auto Log = log::logger("instance_builder", logger_render_api<render_api::vulkan>());
 
 		vk::Bool32 vulkan_debug_callback(const vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
 			const vk::DebugUtilsMessageTypeFlagsEXT type, const vk::DebugUtilsMessengerCallbackDataEXT* data, void* userData)
 		{
+			static const auto LogVulkan = logger_render_api<render_api::vulkan>();
 			switch (severity)
 			{
 				case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:

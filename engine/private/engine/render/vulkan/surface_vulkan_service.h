@@ -11,7 +11,7 @@ namespace engine
 {
 	class surface_vulkan_service final : public surface_service, public engine_event_listener
 	{
-		RATS_ENGINE_SERVICE(surface_vulkan_service, "vulkan")
+		RATS_ENGINE_SERVICE(surface_vulkan_service, render_api_to_string(render_api::vulkan))
 
 	public:
 

@@ -6,7 +6,7 @@ namespace engine::vulkan
 {
 	namespace 
 	{
-        const auto& Log = logger_vulkan();
+        const auto& Log = logger_render_api<render_api::vulkan>();
 	}
 
     command_pool::command_pool(command_pool&& value) noexcept

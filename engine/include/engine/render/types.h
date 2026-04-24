@@ -2,12 +2,13 @@
 
 #include <engine/core.h>
 
+#include <engine/utils/id.h>
+
 #include <fmt/format.h>
 
 namespace engine
 {
     enum class render_api : std::uint8_t { vulkan, directx12 };
-
     [[nodiscard]] constexpr std::string_view render_api_to_string(const render_api api)
     {
         switch (api)
@@ -18,6 +19,15 @@ namespace engine
         }
         return "NONE";
     }
+
+    template<render_api Api>
+    [[nodiscard]] constexpr log::logger logger_render_api(const log::logger& parent = logger_engine())
+    {
+        return { render_api_to_string(Api), parent };
+    }
+
+    using surface_id = std::uint8_t;
+    constexpr surface_id invalid_surface_id = utils::id<surface_id>::invalid_id;
 }
 
 template<>
