@@ -32,16 +32,16 @@ namespace engine
 
         struct frame_data
         {
+            vulkan::command_pool commandPool = nullptr;
             vk::CommandBuffer commandBuffer = nullptr;
 
-            vk::Semaphore imageAvailableSemaphore = nullptr;
             vk::Fence frameFence = nullptr;
+            vk::Semaphore imageAvailableSemaphore = nullptr;
 
             bool available = true;
         };
 
         vulkan::context m_ctx;
-        vulkan::command_pool m_graphicsCommandPool;
         vulkan::command_pool m_transferCommandPool;
 
         eastl::array<frame_data, 2> m_framesInFlight;
@@ -50,5 +50,6 @@ namespace engine
         [[nodiscard]] bool create_instance(const service_create_info_t& info);
         [[nodiscard]] bool create_device();
         [[nodiscard]] bool create_command_pools();
+        [[nodiscard]] bool create_frame_data();
     };
 }

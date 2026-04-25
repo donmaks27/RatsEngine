@@ -104,9 +104,11 @@ namespace engine::vulkan
         command_pool& operator=(command_pool&&) noexcept;
         command_pool& operator=(std::nullptr_t);
 
-        [[nodiscard]] eastl::vector<vk::CommandBuffer> command_buffers(const context& ctx, std::uint32_t count,
+        [[nodiscard]] eastl::vector<vk::CommandBuffer> allocate(const context& ctx, std::uint32_t count,
             bool primary = true) const;
-        [[nodiscard]] vk::CommandBuffer command_buffer(const context& ctx, bool primary = true) const;
+        [[nodiscard]] vk::CommandBuffer allocate(const context& ctx, bool primary = true) const;
+
+        void reset(const context& ctx, vk::CommandPoolResetFlags flags = {}) const;
 
         void clear();
         void clear(const context& ctx);

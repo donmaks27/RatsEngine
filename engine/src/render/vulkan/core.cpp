@@ -43,7 +43,7 @@ namespace engine::vulkan
         }
     }
 
-    eastl::vector<vk::CommandBuffer> command_pool::command_buffers(const context& ctx, const std::uint32_t count,
+    eastl::vector<vk::CommandBuffer> command_pool::allocate(const context& ctx, const std::uint32_t count,
         const bool primary) const
     {
         if (!valid() || (count == 0))
@@ -65,7 +65,7 @@ namespace engine::vulkan
         std::ranges::move(buffers.value, std::back_inserter(result));
         return result;
     }
-    vk::CommandBuffer command_pool::command_buffer(const context& ctx, const bool primary) const
+    vk::CommandBuffer command_pool::allocate(const context& ctx, const bool primary) const
     {
         if (!valid())
         {
@@ -82,6 +82,14 @@ namespace engine::vulkan
             return {};
         }
         return buffer.value[0];
+    }
+
+    void command_pool::reset(const context& ctx, const vk::CommandPoolResetFlags flags) const
+    {
+	    if (valid())
+	    {
+		    ctx.d()->resetCommandPool(value(), flags);
+	    }
     }
 
     vulkan::command_pool queue::command_pool(const context& ctx, const vk::CommandPoolCreateFlags flags) const

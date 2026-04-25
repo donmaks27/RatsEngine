@@ -53,28 +53,11 @@ namespace engine
 			Log.fatal("Failed to create Vulkan command pools!");
 			return false;
 		}
-
-		for (auto& frame : m_framesInFlight)
-		{
-			auto semaphoreResult = m_ctx.d()->createSemaphore({});
-			if (semaphoreResult.result != vk::Result::eSuccess)
-			{
-				Log.fatal("Failed to create imageAvailableSemaphore: {}", semaphoreResult.result);
-				return false;
-			}
-			frame.imageAvailableSemaphore = semaphoreResult.value;
-
-			const auto fenceResult = m_ctx.d()->createFence({});
-			if (fenceResult.result != vk::Result::eSuccess)
-			{
-				Log.fatal("Failed to create frameFence: {}", fenceResult.result);
-				return false;
-			}
-			frame.frameFence = fenceResult.value;
-
-			frame.commandBuffer = m_graphicsCommandPool.command_buffer(m_ctx);
-		}
-
+    	if (!create_frame_data())
+    	{
+    		Log.fatal("Failed to create Vulkan frame data!");
+    		return false;
+    	}
 		return true;
 	}
 
@@ -82,18 +65,23 @@ namespace engine
 	{
 		if (m_ctx.m_instance != nullptr)
 		{
-			m_ctx.d()->waitIdle();
+			const auto& device = m_ctx.d();
+			device->waitIdle();
 
 			for (auto& frame : m_framesInFlight)
 			{
-				m_ctx.d()->destroySemaphore(frame.imageAvailableSemaphore);
-				m_ctx.d()->destroyFence(frame.frameFence);
+				frame.commandPool.clear(m_ctx);
+				frame.commandBuffer = nullptr;
+
+				device->destroyFence(frame.frameFence);
+				device->destroySemaphore(frame.imageAvailableSemaphore);
 				frame.imageAvailableSemaphore = nullptr;
 				frame.frameFence = nullptr;
+
+				frame.available = true;
 			}
 
 			m_transferCommandPool.clear(m_ctx);
-			m_graphicsCommandPool.clear(m_ctx);
 
 			surface_service::instance()->clear_surfaces();
             m_ctx.m_device.clear();
@@ -143,11 +131,41 @@ namespace engine
 
 	bool render_vulkan_service::create_command_pools()
 	{
-		m_graphicsCommandPool = m_ctx.d().queue(vulkan::queue_type::graphics).command_pool(m_ctx,
-			vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 		m_transferCommandPool = m_ctx.d().queue(vulkan::queue_type::transfer).command_pool(m_ctx,
 			vk::CommandPoolCreateFlagBits::eTransient);
-		return m_graphicsCommandPool.valid() && m_transferCommandPool.valid();
+		return m_transferCommandPool.valid();
+	}
+
+	bool render_vulkan_service::create_frame_data()
+	{
+    	const auto& device = m_ctx.d();
+    	for (auto& frame : m_framesInFlight)
+    	{
+    		const auto fenceResult = device->createFence({});
+    		if (fenceResult.result != vk::Result::eSuccess)
+    		{
+    			Log.fatal("Failed to create frameFence: {}", fenceResult.result);
+    			return false;
+    		}
+    		frame.frameFence = fenceResult.value;
+
+    		auto semaphoreResult = device->createSemaphore({});
+    		if (semaphoreResult.result != vk::Result::eSuccess)
+    		{
+    			Log.fatal("Failed to create imageAvailableSemaphore: {}", semaphoreResult.result);
+    			return false;
+    		}
+    		frame.imageAvailableSemaphore = semaphoreResult.value;
+
+    		frame.commandPool = device.queue(vulkan::queue_type::graphics).command_pool(m_ctx);
+    		if (!frame.commandPool.valid())
+    		{
+    			Log.fatal("Failed to create command pool for frame");
+    			return false;
+    		}
+    		frame.commandBuffer = frame.commandPool.allocate(m_ctx);
+    	}
+    	return true;
 	}
 
 	bool render_vulkan_service::render()
@@ -166,7 +184,6 @@ namespace engine
 
 		m_currentFrameInFlight = (m_currentFrameInFlight + 1) % m_framesInFlight.size();
 		auto& frameData = m_framesInFlight[m_currentFrameInFlight];
-		const auto& cmd = frameData.commandBuffer;
 
     	if (!frameData.available)
     	{
@@ -197,7 +214,8 @@ namespace engine
     	swapchain.set_image_index(swapchainImageIndex);
     	const auto& swapchainImage = swapchain.image();
 
-		cmd.reset();
+		const auto& cmd = frameData.commandBuffer;
+    	frameData.commandPool.reset(m_ctx);
 		cmd.begin(vk::CommandBufferBeginInfo{});
 
 		// Render
@@ -220,7 +238,7 @@ namespace engine
 			.setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
 			.setLoadOp(vk::AttachmentLoadOp::eClear)
 			.setStoreOp(vk::AttachmentStoreOp::eStore)
-			.setClearValue({vk::ClearColorValue{ 1.0f, 0.2f, 0.3f, 1.0f }});
+			.setClearValue({vk::ClearColorValue{ 1.0f, 0.3f, 0.0f, 1.0f }});
 		const auto renderingInfo = vk::RenderingInfo()
 			.setColorAttachments({ colorAttachmentInfo })
 			.setRenderArea({ {}, { swapchainSize.x, swapchainSize.y } })
