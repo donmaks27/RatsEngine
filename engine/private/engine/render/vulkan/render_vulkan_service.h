@@ -32,10 +32,12 @@ namespace engine
 
         struct frame_data
         {
+            vk::CommandBuffer commandBuffer = nullptr;
+
             vk::Semaphore imageAvailableSemaphore = nullptr;
             vk::Fence frameFence = nullptr;
 
-            vk::CommandBuffer commandBuffer = nullptr;
+            bool available = true;
         };
 
         vulkan::context m_ctx;

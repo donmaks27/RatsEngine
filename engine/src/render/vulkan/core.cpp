@@ -100,4 +100,56 @@ namespace engine::vulkan
         result.m_value = commandPool.value;
         return result;
     }
+
+    swapchain::swapchain(swapchain&& other) noexcept
+    {
+	    m_value = other.m_value;
+	    m_images = std::move(other.m_images);
+	    m_imageIndex = other.m_imageIndex;
+	    m_outdated = other.m_outdated;
+	    other.m_value = nullptr;
+	    other.m_images.clear();
+	    other.m_imageIndex = std::numeric_limits<std::uint8_t>::max();
+	    other.m_outdated = false;
+    }
+
+    swapchain& swapchain::operator=(swapchain&& other) noexcept
+    {
+	    clear();
+	    m_value = other.m_value;
+	    m_images = std::move(other.m_images);
+	    m_imageIndex = other.m_imageIndex;
+	    m_outdated = other.m_outdated;
+	    other.m_value = nullptr;
+	    other.m_images.clear();
+	    other.m_imageIndex = std::numeric_limits<std::uint8_t>::max();
+	    other.m_outdated = false;
+	    return *this;
+    }
+
+    void swapchain::clear()
+    {
+	    if (valid())
+	    {
+	        clear(render_vulkan_service::instance()->vk_ctx());
+	    }
+    }
+    void swapchain::clear(const context& ctx)
+    {
+	    if (valid())
+	    {
+	        ctx.d()->waitIdle();
+
+	        std::ranges::for_each(m_images, [&ctx](const image_data& data) {
+	            ctx.d()->destroyImageView(data.imageView);
+	            ctx.d()->destroySemaphore(data.renderFinishedSemaphore);
+	        });
+	        ctx.d()->destroySwapchainKHR(m_value);
+
+	        m_value = nullptr;
+	        m_images.clear();
+	    	m_imageIndex = std::numeric_limits<std::uint8_t>::max();
+	        m_outdated = false;
+	    }
+    }
 }

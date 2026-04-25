@@ -1,6 +1,7 @@
 #include <engine/render/vulkan/surface_vulkan_service.h>
 
 #include <engine/render/vulkan/render_vulkan_service.h>
+#include <engine/render/vulkan/builder/swapchain_builder.h>
 
 namespace engine
 {
@@ -35,9 +36,9 @@ namespace engine
 		if (iter != m_surfaces.end())
 		{
 			const auto& ctx = render_vulkan_service::instance()->vk_ctx();
-			auto& [surface, swapchain] = iter->second;
-			swapchain.clear(ctx);
-			ctx.i()->destroySurfaceKHR(surface);
+			auto& data = iter->second;
+			data.swapchain.clear(ctx);
+			ctx.i()->destroySurfaceKHR(data.surface);
 
 			m_surfaces.erase(id);
 		}
@@ -54,7 +55,11 @@ namespace engine
 		}
 
 		auto& data = m_surfaces.at_key(id);
-		if (!data.swapchain.init(ctx, { .surface = data.surface, .surfaceSize = surface_size(id) }))
+		data.swapchain = vulkan::swapchain_builder()
+			.set_surface(data.surface)
+			.set_size(surface_size(id))
+			.build(ctx);
+		if (data.swapchain == nullptr)
 		{
 			Log.error("Failed to create swapchain for surface {}", id);
 			return false;
@@ -67,5 +72,26 @@ namespace engine
 		return std::ranges::all_of(surface_ids(), [this, &ctx](const surface_id id) {
 			return create_swapchain(ctx, id);
 		});
+	}
+
+	bool surface_vulkan_service::recreate_outdated_swapchains(const vulkan::context& ctx)
+	{
+		for (auto& [id, data] : m_surfaces)
+		{
+			if (!data.swapchain.outdated())
+			{
+				continue;
+			}
+			const bool success = vulkan::swapchain_builder()
+				.set_surface(surface(id))
+				.set_size(surface_size(id))
+				.build(ctx, data.swapchain);
+			if (!success)
+			{
+				Log.error("Failed to recreate swapchain for surface {}", id);
+				return false;
+			}
+		}
+		return true;
 	}
 }

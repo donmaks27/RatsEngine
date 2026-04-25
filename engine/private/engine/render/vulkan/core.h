@@ -25,6 +25,7 @@ namespace engine::vulkan
 {
     class instance_builder;
     class device_builder;
+    class swapchain_builder;
 
     class command_pool;
     class queue;
@@ -185,6 +186,49 @@ namespace engine::vulkan
         vk::PhysicalDevice m_physicalDevice;
         eastl::vector_set<device_feature> m_features;
         eastl::vector_map<queue_type, vulkan::queue> m_queues;
+    };
+
+    class swapchain final : public _value_wrapper<vk::SwapchainKHR>
+    {
+        friend swapchain_builder;
+
+    public:
+        swapchain() = default;
+        swapchain(std::nullptr_t) {}
+        swapchain(const swapchain&) = delete;
+        swapchain(swapchain&& other) noexcept;
+        ~swapchain() { clear(); }
+        
+        swapchain& operator=(const swapchain&) = delete;
+        swapchain& operator=(swapchain&& other) noexcept;
+        swapchain& operator=(std::nullptr_t)
+        {
+            clear();
+            return *this;
+        }
+
+        struct image_data
+        {
+            vk::Image image = nullptr;
+            vk::ImageView imageView = nullptr;
+            vk::Semaphore renderFinishedSemaphore = nullptr;
+        };
+
+        [[nodiscard]] std::uint8_t image_index() const { return m_imageIndex; }
+        [[nodiscard]] const image_data& image() const { return m_images[m_imageIndex]; }
+        [[nodiscard]] bool outdated() const { return m_outdated; }
+
+        void set_image_index(const std::uint8_t index) { m_imageIndex = index; }
+        void mark_outdated() { m_outdated = true; }
+
+        void clear();
+        void clear(const context& ctx);
+
+    private:
+
+        eastl::vector<image_data> m_images;
+        std::uint8_t m_imageIndex = std::numeric_limits<std::uint8_t>::max();
+        bool m_outdated = false;
     };
 
     class context final
