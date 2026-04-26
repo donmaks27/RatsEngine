@@ -45,11 +45,15 @@ namespace engine
         vulkan::command_pool m_transferCommandPool;
 
         eastl::array<frame_data, 2> m_framesInFlight;
-        std::uint8_t m_currentFrameInFlight = 0;
+        std::uint8_t m_currentFrameIndex = 0;
 
         [[nodiscard]] bool create_instance(const service_create_info_t& info);
         [[nodiscard]] bool create_device();
         [[nodiscard]] bool create_command_pools();
         [[nodiscard]] bool create_frame_data();
+
+        void prepare_next_frame();
+        [[nodiscard]] bool acquire_swapchain_images(eastl::vector<surface_id>& enabledSurfaces);
+        [[nodiscard]] bool present_swapchains(const eastl::vector<surface_id>& enabledSurfaces) const;
     };
 }

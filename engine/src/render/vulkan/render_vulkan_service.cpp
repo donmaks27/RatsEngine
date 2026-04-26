@@ -175,44 +175,28 @@ namespace engine
 		const auto mainSurfaceId = windowService->main_window_id();
 		const auto& device = m_ctx.d();
 		const auto swapchainSize = surfaceService->surface_size(mainSurfaceId);
-		auto& swapchain = surfaceService->surface_swapchain(mainSurfaceId);
 
     	if (!surfaceService->recreate_outdated_swapchains(m_ctx))
     	{
     		return false;
     	}
 
-		m_currentFrameInFlight = (m_currentFrameInFlight + 1) % m_framesInFlight.size();
-		auto& frameData = m_framesInFlight[m_currentFrameInFlight];
+		prepare_next_frame();
+		auto& frameData = m_framesInFlight[m_currentFrameIndex];
 
-    	if (!frameData.available)
+    	static eastl::vector<surface_id> enabledSurfaces;
+    	enabledSurfaces.clear();
+    	if (!acquire_swapchain_images(enabledSurfaces))
     	{
-    		device->waitForFences({ frameData.frameFence }, vk::True, std::numeric_limits<std::uint64_t>::max());
-    		device->resetFences({ frameData.frameFence });
-    		frameData.available = true;
-    	}
-
-    	const auto [acquireResult, swapchainImageIndex] = device->acquireNextImage2KHR({
-    		*swapchain, std::numeric_limits<std::uint64_t>::max(),
-    		frameData.imageAvailableSemaphore, nullptr, 1
-    	});
-    	if (acquireResult == vk::Result::eErrorOutOfDateKHR)
-    	{
-    		Log.log("Swapchain is out of date");
-    		swapchain.mark_outdated();
-    		return true;
-    	}
-    	if (acquireResult == vk::Result::eSuboptimalKHR)
-    	{
-    		Log.log("Swapchain is suboptimal");
-    	}
-    	else if (acquireResult != vk::Result::eSuccess)
-    	{
-    		Log.error("Failed to acquire next swapchain image: {}", acquireResult);
     		return false;
     	}
-    	swapchain.set_image_index(swapchainImageIndex);
-    	const auto& swapchainImage = swapchain.image();
+    	if (enabledSurfaces.empty())
+    	{
+    		Log.log("No surfaces are enabled");
+    		return true;
+    	}
+    	auto& swapchain = surfaceService->surface_swapchain(enabledSurfaces.front());
+    	const auto& imageData = swapchain.image();
 
 		const auto& cmd = frameData.commandBuffer;
     	frameData.commandPool.reset(m_ctx);
@@ -220,7 +204,7 @@ namespace engine
 
 		// Render
 		vk::ImageMemoryBarrier2 barrier;
-		barrier.image = swapchainImage.image;
+		barrier.image = imageData.image;
 		barrier.subresourceRange = vk::ImageSubresourceRange{ 
 			vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1
 		};
@@ -234,7 +218,7 @@ namespace engine
 		cmd.pipelineBarrier2(dependencyInfo);
 
 		const auto colorAttachmentInfo = vk::RenderingAttachmentInfo()
-			.setImageView(swapchainImage.imageView)
+			.setImageView(imageData.imageView)
 			.setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
 			.setLoadOp(vk::AttachmentLoadOp::eClear)
 			.setStoreOp(vk::AttachmentStoreOp::eStore)
@@ -257,7 +241,7 @@ namespace engine
 		cmd.end();
 
 		const vk::SemaphoreSubmitInfo waitSemaphoreInfo{ frameData.imageAvailableSemaphore, 0, vk::PipelineStageFlagBits2::eColorAttachmentOutput };
-		const vk::SemaphoreSubmitInfo signalSemaphoreInfo{ swapchainImage.renderFinishedSemaphore, 0, vk::PipelineStageFlagBits2::eAllGraphics };
+		const vk::SemaphoreSubmitInfo signalSemaphoreInfo{ imageData.renderFinishedSemaphore, 0, vk::PipelineStageFlagBits2::eAllGraphics };
 		const vk::CommandBufferSubmitInfo cmdInfo{ cmd };
 		const auto submitInfo = vk::SubmitInfo2()
 			.setWaitSemaphoreInfos({ waitSemaphoreInfo })
@@ -266,26 +250,88 @@ namespace engine
 		device.queue(vulkan::queue_type::graphics)->submit2({ submitInfo }, frameData.frameFence);
     	frameData.available = false;
 
-    	const auto presentResult = device.queue(vulkan::queue_type::present)->presentKHR({
-    		{ swapchainImage.renderFinishedSemaphore },
-    		{ *swapchain },
-    		{ swapchainImageIndex }
-    	});
-    	if (presentResult == vk::Result::eErrorOutOfDateKHR)
+    	if (!present_swapchains(enabledSurfaces))
     	{
-    		Log.log("Swapchain is out of date");
-    		swapchain.mark_outdated();
-    	}
-    	else if (presentResult == vk::Result::eSuboptimalKHR)
-    	{
-    		Log.log("Swapchain is suboptimal");
-    	}
-    	else if (presentResult != vk::Result::eSuccess)
-    	{
-    		Log.error("Failed to present image: {}", presentResult);
     		return false;
     	}
-
 		return true;
+	}
+	void render_vulkan_service::prepare_next_frame()
+    {
+    	m_currentFrameIndex = (m_currentFrameIndex + 1) % m_framesInFlight.size();
+    	auto& frameData = m_framesInFlight[m_currentFrameIndex];
+    	if (!frameData.available)
+    	{
+    		m_ctx.d()->waitForFences({ frameData.frameFence }, vk::True, std::numeric_limits<std::uint64_t>::max());
+    		m_ctx.d()->resetFences({ frameData.frameFence });
+    		frameData.available = true;
+    	}
+    }
+	bool render_vulkan_service::acquire_swapchain_images(eastl::vector<surface_id>& enabledSurfaces)
+	{
+    	auto& surfaceService = *surface_vulkan_service::instance();
+    	auto& frameData = m_framesInFlight[m_currentFrameIndex];
+    	for (const auto id : surfaceService.surface_ids())
+    	{
+			auto& swapchain = surfaceService.surface_swapchain(id);
+    		if (!swapchain.valid() || swapchain.outdated())
+    		{
+    			continue;
+    		}
+
+    		const auto [acquireResult, swapchainImageIndex] = m_ctx.d()->acquireNextImage2KHR({
+    			*swapchain, std::numeric_limits<std::uint64_t>::max(),
+    			frameData.imageAvailableSemaphore, nullptr, 1
+    		});
+    		if (acquireResult == vk::Result::eErrorOutOfDateKHR)
+    		{
+    			Log.log("Swapchain for surface {} is out of date", id);
+    			swapchain.mark_outdated();
+    			continue;
+    		}
+    		if (acquireResult == vk::Result::eSuboptimalKHR)
+    		{
+    			Log.log("Swapchain for surface {} is suboptimal", id);
+    		}
+    		else if (acquireResult != vk::Result::eSuccess)
+    		{
+    			Log.error("Failed to acquire next swapchain image for surface {}: {}", id, acquireResult);
+    			return false;
+    		}
+
+    		swapchain.set_image_index(swapchainImageIndex);
+    		enabledSurfaces.push_back(id);
+    	}
+    	return true;
+	}
+	bool render_vulkan_service::present_swapchains(const eastl::vector<surface_id>& enabledSurfaces) const
+	{
+    	auto& surfaceService = *surface_vulkan_service::instance();
+    	const auto& queue = m_ctx.d().queue(vulkan::queue_type::present);
+    	for (const auto surfaceId : enabledSurfaces)
+    	{
+    		auto& swapchain = surfaceService.surface_swapchain(surfaceId);
+    		const std::uint32_t swapchainImageIndex = swapchain.image_index();
+    		const auto result = queue->presentKHR({
+    			{ swapchain.image().renderFinishedSemaphore },
+    			{ *swapchain },
+    			{ swapchainImageIndex }
+    		});
+    		if (result == vk::Result::eErrorOutOfDateKHR)
+    		{
+    			Log.log("Swapchain for surface {} is out of date", surfaceId);
+    			swapchain.mark_outdated();
+    		}
+    		else if (result == vk::Result::eSuboptimalKHR)
+    		{
+    			Log.log("Swapchain for surface {} is suboptimal", surfaceId);
+    		}
+    		else if (result != vk::Result::eSuccess)
+    		{
+    			Log.error("Failed to present image for surface {}: {}", surfaceId, result);
+    			return false;
+    		}
+    	}
+    	return true;
 	}
 }
