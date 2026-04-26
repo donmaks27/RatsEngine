@@ -30,13 +30,19 @@ namespace engine
 
     private:
 
+        struct frame_swapchain_data
+        {
+            vk::CommandBuffer commandBuffer = nullptr;
+            vk::Semaphore imageAvailableSemaphore = nullptr;
+
+            surface_id surfaceId = invalid_surface_id;
+        };
         struct frame_data
         {
-            vulkan::command_pool commandPool = nullptr;
-            vk::CommandBuffer commandBuffer = nullptr;
-
             vk::Fence frameFence = nullptr;
-            vk::Semaphore imageAvailableSemaphore = nullptr;
+            vulkan::command_pool commandPool = nullptr;
+
+            eastl::vector<frame_swapchain_data> swapchainData;
 
             bool available = true;
         };
@@ -53,7 +59,10 @@ namespace engine
         [[nodiscard]] bool create_frame_data();
 
         void prepare_next_frame();
-        [[nodiscard]] bool acquire_swapchain_images(eastl::vector<surface_id>& enabledSurfaces);
-        [[nodiscard]] bool present_swapchains(const eastl::vector<surface_id>& enabledSurfaces) const;
+        [[nodiscard]] bool prepare_frame_swapchain_data(surface_id currentSurfaceCount, surface_id surfaceId);
+        [[nodiscard]] bool acquire_swapchain_image(surface_id surfaceId, vulkan::swapchain& swapchain,
+            const frame_swapchain_data& frameSwapchainData) const;
+        [[nodiscard]] static bool present_swapchain(surface_id surfaceId, vulkan::swapchain& swapchain,
+            const vulkan::queue& queue);
     };
 }
