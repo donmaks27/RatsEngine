@@ -30,6 +30,7 @@ namespace engine
 
         virtual void poll_window_events() = 0;
 
+        surface_id create_window(const window_create_info& info);
         void destroy_window(surface_id id);
 
     protected:

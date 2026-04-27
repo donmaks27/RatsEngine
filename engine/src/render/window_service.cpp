@@ -27,6 +27,16 @@ namespace engine
         super_t::service_clear();
     }
 
+    surface_id window_service::create_window(const window_create_info& info)
+    {
+        const auto surfaceId = m_surfaceIdGenerator.generate();
+        if (!create_window_impl(surfaceId, info))
+        {
+            m_surfaceIdGenerator.free(surfaceId);
+            return invalid_surface_id;
+        }
+        return surfaceId;
+    }
     void window_service::destroy_window(const surface_id id)
     {
         if (m_windowData.count(id) != 0)

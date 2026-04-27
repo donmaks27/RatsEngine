@@ -1,6 +1,7 @@
 #include <engine/render/render_service.h>
 
 #include <engine/render/surface_service.h>
+#include <engine/render/window_service.h>
 
 namespace engine
 {
@@ -23,6 +24,7 @@ namespace engine
             surface_service::instance_clear();
             return false;
         }
+        window_service::instance()->create_window({ .size = { 1024, 768 } });
         return true;
     }
 
