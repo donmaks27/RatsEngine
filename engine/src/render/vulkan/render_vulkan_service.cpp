@@ -209,7 +209,7 @@ namespace engine
     			return false;
     		}
 			auto& frameSwapchainData = frameData.swapchainData[surfaceCount];
-    		if (!acquire_swapchain_image(surfaceId, swapchain, frameData.swapchainData.back()))
+    		if (!acquire_swapchain_image(surfaceId, swapchain, frameSwapchainData))
     		{
     			return false;
     		}
