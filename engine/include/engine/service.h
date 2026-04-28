@@ -174,7 +174,7 @@ namespace engine
     public:                                                                                                 \
         static const log::logger Log;                                                                       \
         [[nodiscard]] static constexpr log::logger logger() { return { LogCategory, super_t::logger() }; }  \
-        [[nodiscard]] static auto instance() { return Instance; }                                           \
+        [[nodiscard]] static auto& instance() { return *Instance; }                                         \
     private:                                                                                                \
         static Type* Instance;
 

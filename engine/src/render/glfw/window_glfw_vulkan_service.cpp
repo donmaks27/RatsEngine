@@ -42,7 +42,7 @@ namespace engine
             return false;
         }
 
-        const auto& ctx = render_vulkan_service::instance()->vk_ctx();
+        const auto& ctx = render_vulkan_service::instance().vk_ctx();
         if (ctx.i() == nullptr)
         {
             // Surface creation will be deferred until instance creation
@@ -58,7 +58,7 @@ namespace engine
 
     bool window_glfw_vulkan_service::on_instance_created() const
     {
-        const auto& ctx = render_vulkan_service::instance()->vk_ctx();
+        const auto& ctx = render_vulkan_service::instance().vk_ctx();
         return std::ranges::all_of(window_ids(), [this, &ctx](const surface_id id) {
             return create_surface(ctx, id);
         });
@@ -74,6 +74,6 @@ namespace engine
             Log.error("Failed to create window surface: {}", result);
             return false;
         }
-        return surface_vulkan_service::instance()->create_surface(ctx, id, { window_size(id), vulkanSurface });
+        return surface_vulkan_service::instance().create_surface(ctx, id, { window_size(id), vulkanSurface });
     }
 }

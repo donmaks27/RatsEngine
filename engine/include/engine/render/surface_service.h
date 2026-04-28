@@ -72,7 +72,7 @@ namespace engine
 
 		virtual void service_clear() override;
 
-		static void destroy_surface(const surface_id id) { surface_service::instance()->destroy_surface(id); }
+		static void destroy_surface(const surface_id id) { surface_service::instance().destroy_surface(id); }
 
 	private:
 

@@ -84,7 +84,7 @@ namespace engine
 
 			m_transferCommandPool.clear(m_ctx);
 
-			surface_service::instance()->clear_surfaces();
+			surface_service::instance().clear_surfaces();
             m_ctx.m_device.clear();
 			m_ctx.m_instance.clear();
 		}
@@ -113,7 +113,7 @@ namespace engine
 
 	bool render_vulkan_service::create_device()
     {
-    	const auto mainSurface = surface_vulkan_service::instance()->surface(window_service::instance()->main_window_id());
+    	const auto mainSurface = surface_vulkan_service::instance().surface(window_service::instance().main_window_id());
         auto device = vulkan::device_builder()
             .add_required_extensions(RequiredDeviceExtensions)
             .set_min_vulkan_version(MinDeviceVulkanApiVersion)
@@ -178,7 +178,7 @@ namespace engine
 
 	bool render_vulkan_service::render()
 	{
-		auto& surfaceService = *surface_vulkan_service::instance();
+		auto& surfaceService = surface_vulkan_service::instance();
 		const auto& device = m_ctx.d();
 
     	if (!prepare_next_frame())
@@ -291,7 +291,7 @@ namespace engine
     	}
 
     	frameData.commandPool.reset(m_ctx);
-    	return surface_vulkan_service::instance()->recreate_outdated_swapchains(m_ctx);
+    	return surface_vulkan_service::instance().recreate_outdated_swapchains(m_ctx);
     }
 
 	bool render_vulkan_service::allocate_frame_swapchain_data(const surface_id requestedIndex, const surface_id surfaceId)

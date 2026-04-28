@@ -35,7 +35,7 @@ namespace engine
 		const auto iter = m_surfaces.find(id);
 		if (iter != m_surfaces.end())
 		{
-			const auto& ctx = render_vulkan_service::instance()->vk_ctx();
+			const auto& ctx = render_vulkan_service::instance().vk_ctx();
 			auto& data = iter->second;
 			data.swapchain.clear(ctx);
 			ctx.i()->destroySurfaceKHR(data.surface);
@@ -68,7 +68,7 @@ namespace engine
 	}
 	bool surface_vulkan_service::on_device_created()
 	{
-		const auto& ctx = render_vulkan_service::instance()->vk_ctx();
+		const auto& ctx = render_vulkan_service::instance().vk_ctx();
 		return std::ranges::all_of(surface_ids(), [this, &ctx](const surface_id id) {
 			return create_swapchain(ctx, id);
 		});

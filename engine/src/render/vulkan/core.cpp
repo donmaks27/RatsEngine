@@ -31,7 +31,7 @@ namespace engine::vulkan
     {
         if (valid())
         {
-            clear(render_vulkan_service::instance()->vk_ctx());
+            clear(render_vulkan_service::instance().vk_ctx());
         }
     }
     void command_pool::clear(const context& ctx)
@@ -139,7 +139,7 @@ namespace engine::vulkan
     {
 	    if (valid())
 	    {
-	        clear(render_vulkan_service::instance()->vk_ctx());
+	        clear(render_vulkan_service::instance().vk_ctx());
 	    }
     }
     void swapchain::clear(const context& ctx)

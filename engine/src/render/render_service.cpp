@@ -24,7 +24,7 @@ namespace engine
             surface_service::instance_clear();
             return false;
         }
-        window_service::instance()->create_window({ .size = { 1024, 768 } });
+        window_service::instance().create_window({ .size = { 1024, 768 } });
         return true;
     }
 
