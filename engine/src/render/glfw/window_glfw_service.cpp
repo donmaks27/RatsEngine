@@ -1,6 +1,6 @@
 #include <engine/render/glfw/window_glfw_service.h>
 
-#include "engine/engine.h"
+#include <engine/engine.h>
 
 namespace engine
 {
@@ -88,7 +88,7 @@ namespace engine
                 }
                 else
                 {
-                    engine::instance().events().post<engine_shutdown_signal_event>({});
+                    engine::instance().signal_shutdown();
                 }
             }
         }

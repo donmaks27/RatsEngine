@@ -46,7 +46,7 @@ namespace engine
         auto& windowService = window_service::instance();
         auto& renderService = render_service::instance();
 
-        while (m_engineEventBus.events<engine_shutdown_signal_event>().empty())
+        while (!m_signalShutdown)
         {
             m_engineEventBus.clear_events();
 

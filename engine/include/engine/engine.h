@@ -6,8 +6,6 @@
 
 namespace engine
 {
-    struct engine_shutdown_signal_event final : event_of<engine_shutdown_signal_event> {};
-
     class RATS_ENGINE_EXPORT engine final
     {
         engine() = default;
@@ -32,6 +30,8 @@ namespace engine
 
         [[nodiscard]] event_bus& events() { return m_engineEventBus; }
 
+        void signal_shutdown() { m_signalShutdown = true; }
+
     private:
 
         static const log::logger Log;
@@ -39,6 +39,7 @@ namespace engine
         event_bus m_engineEventBus{};
 
         bool m_engineStarted = false;
+        bool m_signalShutdown = false;
 
 
         bool init_engine();
