@@ -6,6 +6,8 @@
 
 namespace engine
 {
+    struct engine_shutdown_signal_event final : event_of<engine_shutdown_signal_event> {};
+
     class RATS_ENGINE_EXPORT engine final
     {
         engine() = default;

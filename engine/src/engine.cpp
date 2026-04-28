@@ -45,17 +45,17 @@ namespace engine
         Log.log("Game loop started");
         auto* windowService = window_service::instance();
         auto* renderService = render_service::instance();
-        while (!windowService->should_close_main_window())
+
+        while (m_engineEventBus.events<engine_shutdown_signal_event>().empty())
         {
+            m_engineEventBus.clear_events();
+
             if (!renderService->render())
             {
                 Log.fatal("Render error!");
                 break;
             }
-
             windowService->poll_window_events();
-
-            m_engineEventBus.refresh_events();
         }
         Log.log("Game loop stopped");
         return true;

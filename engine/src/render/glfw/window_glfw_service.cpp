@@ -1,5 +1,7 @@
 #include <engine/render/glfw/window_glfw_service.h>
 
+#include "engine/engine.h"
+
 namespace engine
 {
     RATS_ENGINE_SERVICE_IMPL(window_glfw_service)
@@ -73,5 +75,22 @@ namespace engine
     void window_glfw_service::poll_window_events()
     {
         glfwPollEvents();
+
+        const auto mainWindowId = main_window_id();
+        for (const auto windowId : window_ids())
+        {
+            const auto window = glfw_window(windowId);
+            if (glfwWindowShouldClose(window) == GLFW_TRUE)
+            {
+                if (windowId != mainWindowId)
+                {
+                    destroy_window(windowId);
+                }
+                else
+                {
+                    engine::instance().events().post<engine_shutdown_signal_event>({});
+                }
+            }
+        }
     }
 }

@@ -151,7 +151,12 @@ namespace engine::vulkan
         std::uint32_t m_queueIndex = 0;
     };
 
-    enum class device_feature : std::uint8_t { sampler_anisotropy, dynamic_render, synchronization2 };
+    enum class device_feature : std::uint8_t {
+        sampler_anisotropy,
+        timeline_semaphore,
+        dynamic_render,
+        synchronization2
+    };
     enum class queue_type : std::uint32_t { graphics, present, compute, transfer };
     class device final : public _value_wrapper<vk::Device, vk::UniqueDevice>
     {

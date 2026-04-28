@@ -58,8 +58,8 @@ namespace engine
         [[nodiscard]] bool create_command_pools();
         [[nodiscard]] bool create_frame_data();
 
-        void prepare_next_frame();
-        [[nodiscard]] bool prepare_frame_swapchain_data(surface_id currentSurfaceCount, surface_id surfaceId);
+        [[nodiscard]] bool prepare_next_frame();
+        [[nodiscard]] bool allocate_frame_swapchain_data(surface_id requestedIndex, surface_id surfaceId);
         [[nodiscard]] bool acquire_swapchain_image(surface_id surfaceId, vulkan::swapchain& swapchain,
             const frame_swapchain_data& frameSwapchainData) const;
         [[nodiscard]] static bool present_swapchain(surface_id surfaceId, vulkan::swapchain& swapchain,

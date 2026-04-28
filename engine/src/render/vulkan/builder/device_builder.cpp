@@ -14,6 +14,11 @@ namespace engine::vulkan
 				: vulkanVersion(vulkanVersion)
             {
                 nextFeature = &data.pNext;
+            	if (vulkanVersion >= vk::ApiVersion12)
+            	{
+            		*nextFeature = &features12;
+            		nextFeature = &features12.pNext;
+            	}
                 if (vulkanVersion >= vk::ApiVersion13)
                 {
                     *nextFeature = &features13;
@@ -23,8 +28,10 @@ namespace engine::vulkan
 
             vk::PhysicalDeviceFeatures2 data;
             // Core features
+            vk::PhysicalDeviceVulkan12Features features12;
             vk::PhysicalDeviceVulkan13Features features13;
             // Extension features
+            vk::PhysicalDeviceTimelineSemaphoreFeatures timelineSemaphoreFeatures;
             vk::PhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures;
             vk::PhysicalDeviceSynchronization2Features synchronization2Features;
 
@@ -55,19 +62,18 @@ namespace engine::vulkan
         struct device_feature_info
         {
             static constexpr const char* extensionName = nullptr;
-            [[nodiscard]] 
-        	static constexpr bool core(const std::uint32_t version) { return true; }
+
+            [[nodiscard]] static constexpr bool core(const std::uint32_t version) { return true; }
             static void chain(device_features_data& data) {}
-            [[nodiscard]]
-			static feature_location location(const device_features_data& data, const std::uint32_t version) { return feature_location::none; }
+            [[nodiscard]] static feature_location location(const device_features_data& data, const std::uint32_t version) { return feature_location::none; }
             static void mark(device_features_data& data, feature_location location) {}
         };
         template<>
         struct device_feature_info<device_feature::sampler_anisotropy>
         {
             static constexpr const char* extensionName = nullptr;
-            [[nodiscard]]
-            static bool core(std::uint32_t) { return true; }
+
+            [[nodiscard]] static bool core(std::uint32_t) { return true; }
             static void chain(device_features_data&) {}
             [[nodiscard]]
             static feature_location location(const device_features_data& data, std::uint32_t)
@@ -79,19 +85,47 @@ namespace engine::vulkan
 				data.data.features.samplerAnisotropy = vk::True;
             }
         };
+		template<>
+		struct device_feature_info<device_feature::timeline_semaphore>
+		{
+			static constexpr const char* extensionName = vk::KHRTimelineSemaphoreExtensionName;
+
+			[[nodiscard]] static bool core(const std::uint32_t version) { return version >= vk::ApiVersion12; }
+			static void chain(device_features_data& data)
+			{
+				*data.nextFeature = &data.timelineSemaphoreFeatures;
+				data.nextFeature = &data.timelineSemaphoreFeatures.pNext;
+			}
+			[[nodiscard]] static feature_location location(const device_features_data& data, const std::uint32_t version)
+			{
+				const bool coreFeature = core(version);
+				const bool featureSupported = coreFeature ? data.features12.timelineSemaphore : data.timelineSemaphoreFeatures.timelineSemaphore;
+				return !featureSupported ? feature_location::none : (coreFeature ? feature_location::core : feature_location::extension);
+			}
+			static void mark(device_features_data& data, const feature_location location)
+			{
+				if (location == feature_location::core)
+				{
+					data.features12.timelineSemaphore = vk::True;
+				}
+				else if (location == feature_location::extension)
+				{
+					data.timelineSemaphoreFeatures.timelineSemaphore = vk::True;
+				}
+			}
+		};
         template<>
         struct device_feature_info<device_feature::dynamic_render>
         {
             static constexpr const char* extensionName = vk::KHRDynamicRenderingExtensionName;
-            [[nodiscard]]
-            static bool core(const std::uint32_t version) { return version >= vk::ApiVersion13; }
+
+            [[nodiscard]] static bool core(const std::uint32_t version) { return version >= vk::ApiVersion13; }
             static void chain(device_features_data& data)
             {
                 *data.nextFeature = &data.dynamicRenderingFeatures;
                 data.nextFeature = &data.dynamicRenderingFeatures.pNext;
             }
-            [[nodiscard]]
-            static feature_location location(const device_features_data& data, const std::uint32_t version)
+            [[nodiscard]] static feature_location location(const device_features_data& data, const std::uint32_t version)
             {
                 const bool coreFeature = core(version);
                 const bool featureSupported = coreFeature ? data.features13.dynamicRendering : data.dynamicRenderingFeatures.dynamicRendering;
@@ -113,15 +147,14 @@ namespace engine::vulkan
         struct device_feature_info<device_feature::synchronization2>
         {
             static constexpr const char* extensionName = vk::KHRSynchronization2ExtensionName;
-            [[nodiscard]]
-            static bool core(const std::uint32_t version) { return version >= vk::ApiVersion13; }
+
+            [[nodiscard]] static bool core(const std::uint32_t version) { return version >= vk::ApiVersion13; }
             static void chain(device_features_data& data)
             {
                 *data.nextFeature = &data.synchronization2Features;
                 data.nextFeature = &data.synchronization2Features.pNext;
             }
-            [[nodiscard]]
-            static feature_location location(const device_features_data& data, const std::uint32_t version)
+            [[nodiscard]] static feature_location location(const device_features_data& data, const std::uint32_t version)
             {
                 const bool coreFeature = core(version);
                 const bool featureSupported = coreFeature ? data.features13.synchronization2 : data.synchronization2Features.synchronization2;
@@ -140,7 +173,7 @@ namespace engine::vulkan
             }
         };
 
-        template <device_feature Name>
+        template<device_feature Name>
         void device_features_data::request(const device_feature_type type, eastl::vector<const char*>& requiredExtensions,
             eastl::vector_map<const char*, bool>& optionalExtensions)
         {
@@ -161,7 +194,7 @@ namespace engine::vulkan
                 }
             }
         }
-        template <device_feature Name>
+        template<device_feature Name>
         bool device_features_data::check(const device_feature_type type, eastl::vector_map<device_feature, feature_location>& locations) const
         {
             using info = device_feature_info<Name>;
@@ -173,7 +206,7 @@ namespace engine::vulkan
 			locations[Name] = location;
             return true;
         }
-        template <device_feature Name>
+        template<device_feature Name>
         void device_features_data::require(const feature_location location)
         {
             using info = device_feature_info<Name>;
@@ -192,6 +225,7 @@ namespace engine::vulkan
 				switch (name)
 				{
                 case device_feature::sampler_anisotropy: request<device_feature::sampler_anisotropy>(type, requiredExtensions, optionalExtensions); break;
+                case device_feature::timeline_semaphore: request<device_feature::timeline_semaphore>(type, requiredExtensions, optionalExtensions); break;
                 case device_feature::dynamic_render: request<device_feature::dynamic_render>(type, requiredExtensions, optionalExtensions); break;
                 case device_feature::synchronization2: request<device_feature::synchronization2>(type, requiredExtensions, optionalExtensions); break;
 				default:;
@@ -205,6 +239,7 @@ namespace engine::vulkan
 	            switch (pair.first)
 	            {
                 case device_feature::sampler_anisotropy: return check<device_feature::sampler_anisotropy>(pair.second, locations);
+                case device_feature::timeline_semaphore: return check<device_feature::timeline_semaphore>(pair.second, locations);
                 case device_feature::dynamic_render: return check<device_feature::dynamic_render>(pair.second, locations);
                 case device_feature::synchronization2: return check<device_feature::synchronization2>(pair.second, locations);
                 default:;
@@ -219,6 +254,7 @@ namespace engine::vulkan
 				switch (name)
 				{
 				case device_feature::sampler_anisotropy: require<device_feature::sampler_anisotropy>(location); break;
+				case device_feature::timeline_semaphore: require<device_feature::timeline_semaphore>(location); break;
 				case device_feature::dynamic_render: require<device_feature::dynamic_render>(location); break;
 				case device_feature::synchronization2: require<device_feature::synchronization2>(location); break;
 				default:;

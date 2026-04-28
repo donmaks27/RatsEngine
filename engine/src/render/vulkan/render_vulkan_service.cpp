@@ -181,21 +181,19 @@ namespace engine
 		auto& surfaceService = *surface_vulkan_service::instance();
 		const auto& device = m_ctx.d();
 
-		prepare_next_frame();
-    	auto& frameData = m_framesInFlight[m_currentFrameIndex];
-
-    	if (!surfaceService.recreate_outdated_swapchains(m_ctx))
+    	if (!prepare_next_frame())
     	{
     		return false;
     	}
+    	auto& frameData = m_framesInFlight[m_currentFrameIndex];
 
     	static eastl::vector<vk::SemaphoreSubmitInfo> waitSemaphoreInfos;
     	static eastl::vector<vk::SemaphoreSubmitInfo> signalSemaphoreInfos;
     	static eastl::vector<vk::CommandBufferSubmitInfo> cmdInfos;
-    	surface_id surfaceCount = 0;
     	waitSemaphoreInfos.clear();
     	signalSemaphoreInfos.clear();
     	cmdInfos.clear();
+    	surface_id usedSwapchainCount = 0;
     	for (const auto surfaceId : surfaceService.surface_ids())
     	{
     		auto& swapchain = surfaceService.surface_swapchain(surfaceId);
@@ -204,17 +202,16 @@ namespace engine
     			continue;
     		}
 
-    		if (!prepare_frame_swapchain_data(surfaceCount, surfaceId))
+    		if (!allocate_frame_swapchain_data(usedSwapchainCount, surfaceId))
     		{
     			return false;
     		}
-			auto& frameSwapchainData = frameData.swapchainData[surfaceCount];
+			auto& frameSwapchainData = frameData.swapchainData[usedSwapchainCount];
     		if (!acquire_swapchain_image(surfaceId, swapchain, frameSwapchainData))
     		{
     			return false;
     		}
-    		frameSwapchainData.surfaceId = surfaceId;
-    		++surfaceCount;
+    		++usedSwapchainCount;
 
     		const auto swapchainSize = surfaceService.surface_size(surfaceId);
     		const auto& swapchainImageData = swapchain.image();
@@ -271,7 +268,7 @@ namespace engine
     	frameData.available = false;
 
     	const auto& presentQueue = m_ctx.d().queue(vulkan::queue_type::present);
-    	for (std::size_t index = 0; index < surfaceCount; ++index)
+    	for (std::size_t index = 0; index < usedSwapchainCount; ++index)
     	{
     		const auto surfaceId = frameData.swapchainData[index].surfaceId;
     		if (!present_swapchain(surfaceId, surfaceService.surface_swapchain(surfaceId), presentQueue))
@@ -282,7 +279,7 @@ namespace engine
 		return true;
 	}
 
-	void render_vulkan_service::prepare_next_frame()
+	bool render_vulkan_service::prepare_next_frame()
     {
     	m_currentFrameIndex = (m_currentFrameIndex + 1) % m_framesInFlight.size();
     	auto& frameData = m_framesInFlight[m_currentFrameIndex];
@@ -294,16 +291,13 @@ namespace engine
     	}
 
     	frameData.commandPool.reset(m_ctx);
-    	for (auto& data : frameData.swapchainData)
-    	{
-    		data.surfaceId = invalid_surface_id;
-    	}
+    	return surface_vulkan_service::instance()->recreate_outdated_swapchains(m_ctx);
     }
 
-	bool render_vulkan_service::prepare_frame_swapchain_data(const surface_id currentSurfaceCount, const surface_id surfaceId)
+	bool render_vulkan_service::allocate_frame_swapchain_data(const surface_id requestedIndex, const surface_id surfaceId)
 	{
     	auto& frameData = m_framesInFlight[m_currentFrameIndex];
-    	if (frameData.swapchainData.size() <= currentSurfaceCount)
+    	if (frameData.swapchainData.size() <= requestedIndex)
     	{
     		const auto [result, semaphore] = m_ctx.d()->createSemaphore({});
     		if (result != vk::Result::eSuccess)
@@ -322,7 +316,7 @@ namespace engine
 				.commandBuffer = buffer, .imageAvailableSemaphore = semaphore
 			});
     	}
-    	frameData.swapchainData[currentSurfaceCount].surfaceId = surfaceId;
+    	frameData.swapchainData[requestedIndex].surfaceId = surfaceId;
     	return true;
 	}
 

@@ -41,7 +41,7 @@ namespace engine
         [[nodiscard]] static event_id type() { return event_type<EventType>(); }
     };
     template<typename T>
-    concept event_type = std::derived_from<T, event_of<T>> && std::is_final_v<T>;
+    concept event_type = std::derived_from<T, event_of<T>>;
 
     struct RATS_ENGINE_EXPORT event_info
     {
@@ -111,6 +111,8 @@ namespace engine
             [[nodiscard]] auto begin() const { return events != nullptr ? events->cbegin() : const_iterator(); }
             [[nodiscard]] auto end() const { return events != nullptr ? events->cend() : const_iterator(); }
 
+            [[nodiscard]] auto empty() const { return (events == nullptr) || events->empty(); }
+
         private:
 
             const eastl::deque<EventType>* events = nullptr;
@@ -137,11 +139,11 @@ namespace engine
         {
             event_channel<EventType>().deferredEvents.push_back(std::forward<EventType>(event));
         }
-        void refresh_events()
+        void clear_events()
         {
             for (auto& [id, ch] : m_eventChannels)
             {
-                ch->refresh_events();
+                ch->clear_events();
             }
         }
         template<typename EventType> requires event_type<EventType>
@@ -157,22 +159,22 @@ namespace engine
         {
             virtual ~channel_base() = default;
 
-            void refresh_events() { on_refresh_events(this); }
+            void clear_events() { on_clear_events(this); }
 
             using callback_t = void(*)(channel_base*);
-            callback_t on_refresh_events = nullptr;
+            callback_t on_clear_events = nullptr;
         };
         template<typename EventType> requires event_type<EventType>
         struct channel : channel_base
         {
             channel()
             {
-                on_refresh_events = [](channel_base* ch) {
-                    reinterpret_cast<channel*>(ch)->refresh_events_impl();
+                on_clear_events = [](channel_base* ch) {
+                    reinterpret_cast<channel*>(ch)->clear_events_impl();
                 };
             }
 
-            void refresh_events_impl()
+            void clear_events_impl()
             {
                 events.clear();
                 std::swap(events, deferredEvents);
