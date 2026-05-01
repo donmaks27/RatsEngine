@@ -66,15 +66,22 @@ namespace engine
 	{
 		RATS_ENGINE_SERVICE_BASE(surface_backend_service, "surface_backend")
 
+	public:
+
+		[[nodiscard]] surface_id primary_surface_id() const { return m_primarySurfaceId; }
+
 	protected:
 
 		utils::id<surface_id> m_surfaceIdGenerator;
 
+		virtual bool service_init(const render_api_service_create_info&) override;
 		virtual void service_clear() override;
 
 		static void destroy_surface(const surface_id id) { surface_service::instance().destroy_surface(id); }
 
 	private:
+
+		surface_id m_primarySurfaceId = invalid_surface_id;
 
 		[[nodiscard]] static surface_backend_service* instance_allocate_vulkan();
 	};

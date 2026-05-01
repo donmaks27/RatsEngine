@@ -37,8 +37,14 @@ namespace engine
 		}
 	}
 
+	bool surface_backend_service::service_init(const render_api_service_create_info&)
+	{
+		m_primarySurfaceId = m_surfaceIdGenerator.generate();
+		return true;
+	}
 	void surface_backend_service::service_clear()
 	{
+		m_primarySurfaceId = invalid_surface_id;
 		m_surfaceIdGenerator.reset();
 	}
 }

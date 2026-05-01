@@ -19,12 +19,10 @@ namespace engine
         [[nodiscard]] auto window_ids() const
         {
             using pair_type = decltype(m_windowData)::value_type;
-            return m_windowData | std::ranges::views::transform([](const pair_type& data) -> surface_id {
+            return m_windowData | std::views::transform([](const pair_type& data) -> surface_id {
                 return data.first;
             });
         }
-        [[nodiscard]] surface_id main_window_id() const { return m_mainSurfaceID; }
-        [[nodiscard]] virtual bool should_close_main_window() const = 0;
 
         [[nodiscard]] glm::uvec2 window_size(const surface_id id) const { return m_windowData.at_key(id).size; }
 
@@ -49,6 +47,5 @@ namespace engine
         };
 
         eastl::vector_map<surface_id, window_data> m_windowData;
-        surface_id m_mainSurfaceID = invalid_surface_id;
     };
 }

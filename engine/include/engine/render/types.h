@@ -28,6 +28,8 @@ namespace engine
 
     using surface_id = std::uint8_t;
     constexpr surface_id invalid_surface_id = utils::id<surface_id>::invalid_id;
+
+    enum class surface_type : std::uint8_t { editor, render_target };
 }
 
 template<>

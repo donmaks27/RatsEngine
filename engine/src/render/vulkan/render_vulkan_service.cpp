@@ -113,7 +113,7 @@ namespace engine
 
 	bool render_vulkan_service::create_device()
     {
-    	const auto mainSurface = surface_vulkan_service::instance().surface(window_service::instance().main_window_id());
+    	const auto mainSurface = surface_vulkan_service::instance().surface(surface_backend_service::instance().primary_surface_id());
         auto device = vulkan::device_builder()
             .add_required_extensions(RequiredDeviceExtensions)
             .set_min_vulkan_version(MinDeviceVulkanApiVersion)

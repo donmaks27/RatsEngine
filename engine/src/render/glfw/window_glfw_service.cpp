@@ -61,11 +61,6 @@ namespace engine
         m_windowDataGLFW.erase(id);
     }
 
-    bool window_glfw_service::should_close_main_window() const
-    {
-        return glfwWindowShouldClose(m_windowDataGLFW.begin()->second.window) != GLFW_FALSE;
-    }
-
     GLFWwindow* window_glfw_service::glfw_window(const surface_id id) const
     {
         const auto iter = m_windowDataGLFW.find(id);
@@ -76,13 +71,22 @@ namespace engine
     {
         glfwPollEvents();
 
-        const auto mainWindowId = main_window_id();
-        for (const auto windowId : window_ids())
+        using window_pair_t = decltype(m_windowDataGLFW)::value_type;
+        static eastl::vector<surface_id> closingWindowIds;
+        closingWindowIds.clear();
+        std::ranges::copy(m_windowDataGLFW | std::views::filter([](const window_pair_t& data) {
+            auto* window = data.second.window;
+            return (window != nullptr) && (glfwWindowShouldClose(window) == GLFW_TRUE);
+        }) | std::views::transform([](const window_pair_t& data) {
+            return data.first;
+        }), std::back_inserter(closingWindowIds));
+
+        for (const auto windowId : closingWindowIds)
         {
             const auto window = glfw_window(windowId);
             if (glfwWindowShouldClose(window) == GLFW_TRUE)
             {
-                if (windowId != mainWindowId)
+                if (windowId != primary_surface_id())
                 {
                     destroy_window(windowId);
                 }

@@ -6,13 +6,13 @@ namespace engine
 
     bool window_service::service_init(const service_create_info_t& info)
     {
-        // Create main window
-        m_mainSurfaceID = m_surfaceIdGenerator.generate();
-        if (!create_window_impl(m_mainSurfaceID, { .size = { 800, 600 } }))
+        if (!super_t::service_init(info))
+        {
+            return false;
+        }
+        if (!create_window_impl(primary_surface_id(), { .size = { 800, 600 } }))
         {
             Log.fatal("Failed to create main window!");
-            m_surfaceIdGenerator.free(m_mainSurfaceID);
-            m_mainSurfaceID = invalid_surface_id;
             return false;
         }
         return true;
@@ -23,7 +23,6 @@ namespace engine
         {
             destroy_window_impl(m_windowData.back().first);
         }
-        m_mainSurfaceID = invalid_surface_id;
         super_t::service_clear();
     }
 

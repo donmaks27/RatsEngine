@@ -13,7 +13,6 @@ namespace engine
 
     public:
 
-        [[nodiscard]] virtual bool should_close_main_window() const override;
         [[nodiscard]] GLFWwindow* glfw_window(surface_id id) const;
 
         virtual void poll_window_events() override;
