@@ -1,7 +1,6 @@
 #include <engine/render/vulkan/render_vulkan_service.h>
 
 #include <engine/engine.h>
-#include <engine/render/window_service.h>
 #include <engine/render/vulkan/surface_vulkan_service.h>
 #include <engine/render/vulkan/builder/instance_builder.h>
 #include <engine/render/vulkan/builder/device_builder.h>

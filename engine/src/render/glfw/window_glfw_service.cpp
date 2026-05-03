@@ -67,7 +67,7 @@ namespace engine
         return iter != m_windowDataGLFW.end() ? iter->second.window : nullptr;
     }
 
-    void window_glfw_service::poll_window_events()
+    void window_glfw_service::poll_events()
     {
         glfwPollEvents();
 

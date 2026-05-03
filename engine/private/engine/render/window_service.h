@@ -26,8 +26,6 @@ namespace engine
 
         [[nodiscard]] glm::uvec2 window_size(const surface_id id) const { return m_windowData.at_key(id).size; }
 
-        virtual void poll_window_events() = 0;
-
         surface_id create_window(const window_create_info& info);
         void destroy_window(surface_id id);
 

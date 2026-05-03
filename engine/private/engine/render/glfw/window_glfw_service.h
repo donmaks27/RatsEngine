@@ -15,7 +15,7 @@ namespace engine
 
         [[nodiscard]] GLFWwindow* glfw_window(surface_id id) const;
 
-        virtual void poll_window_events() override;
+        virtual void poll_events() override;
 
     protected:
 

@@ -70,6 +70,8 @@ namespace engine
 
 		[[nodiscard]] surface_id primary_surface_id() const { return m_primarySurfaceId; }
 
+		virtual void poll_events() = 0;
+
 	protected:
 
 		utils::id<surface_id> m_surfaceIdGenerator;

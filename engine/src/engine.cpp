@@ -3,7 +3,7 @@
 
 #include <engine/engine_event_listener.h>
 #include <engine/render/render_service.h>
-#include <engine/render/window_service.h>
+#include <engine/render/surface_service.h>
 #include <engine/utils/macro/defer.h>
 
 namespace engine
@@ -43,7 +43,7 @@ namespace engine
         Log.info("Engine initialized successfully");
 
         Log.log("Game loop started");
-        auto& windowService = window_service::instance();
+        auto& surfaceBackendService = surface_backend_service::instance();
         auto& renderService = render_service::instance();
 
         while (!m_signalShutdown)
@@ -55,7 +55,7 @@ namespace engine
                 Log.fatal("Render error!");
                 break;
             }
-            windowService.poll_window_events();
+            surfaceBackendService.poll_events();
         }
         Log.log("Game loop stopped");
         return true;
