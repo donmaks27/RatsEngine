@@ -13,7 +13,7 @@ if(MSVC)
 	add_compile_options(/Zc:__cplusplus /permissive- /Zc:preprocessor)
 endif()
 
-add_subdirectory(engine)
-
-add_executable(test_game "launcher/main.cpp")
-target_link_libraries(test_game PRIVATE rats-engine)
+add_subdirectory(engine/core)
+add_subdirectory(engine/runtime)
+add_subdirectory(apps/editor)
+add_subdirectory(apps/launcher)

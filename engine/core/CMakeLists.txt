@@ -3,14 +3,6 @@ include(GenerateExportHeader)
 
 project(rats-engine CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_SCAN_FOR_MODULES ON)
-if(MSVC)
-	add_compile_options(/Zc:__cplusplus /permissive- /Zc:preprocessor)
-endif()
-
 include(cmake/utils.cmake)
 
 option(RATS_ENGINE_GLFW_ENABLE "Use GLFW for window managing" OFF)
@@ -117,31 +109,31 @@ set_target_properties(rats-engine PROPERTIES
 	VISIBILITY_INLINES_HIDDEN ON)
 generate_export_header(rats-engine EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/include/engine/engine_export.h")
 configure_file(
-	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/config.h.in"
+	"cmake/configs/config.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/include/engine/config.h"
 	@ONLY)
 configure_file(
-	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/private_config.h.in"
+	"cmake/configs/private_config.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/private/engine/private_config.h"
 	@ONLY)
 configure_file(
-	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/private_config_macro.h.in"
+	"cmake/configs/private_config_macro.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/private/engine/private_config_macro.h"
 	@ONLY)
 target_include_directories(rats-engine
-	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
-	PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/private" "${CMAKE_CURRENT_BINARY_DIR}/private")
+	PUBLIC "include" "${CMAKE_CURRENT_BINARY_DIR}/include"
+	PRIVATE "private" "${CMAKE_CURRENT_BINARY_DIR}/private")
 
 target_precompile_headers(rats-engine PRIVATE ${RATS_ENGINE_PRIVATE_PCH})
 target_sources(rats-engine PUBLIC
 	FILE_SET public_headers
 		TYPE HEADERS
-		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
+		BASE_DIRS "include"
 		FILES ${RATS_ENGINE_PUBLIC_HEADERS})
 target_sources(rats-engine PRIVATE
 		FILE_SET private_headers
 		TYPE HEADERS
-		BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/private"
+		BASE_DIRS "private"
 		FILES ${RATS_ENGINE_PRIVATE_HEADERS})
 target_sources(rats-engine PRIVATE ${RATS_ENGINE_SRC_FILES} ${RATS_ENGINE_SRC_FILES_NO_PCH})
 set_source_files_properties(${RATS_ENGINE_SRC_FILES_NO_PCH} PROPERTIES
