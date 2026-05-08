@@ -21,15 +21,15 @@ namespace engine
 
 	render_service* render_service::instance_allocate_vulkan() { return new render_vulkan_service(); }
 
-	bool render_vulkan_service::service_init(const service_create_info_t& info)
+	bool render_vulkan_service::service_init()
 	{
-		if (!super_t::service_init(info))
+		if (!super_t::service_init())
 		{
 			return false;
 		}
 
 		auto& event_bus = engine::instance().events();
-		if (!create_instance(info))
+		if (!create_instance())
 		{
 			Log.fatal("Failed to create Vulkan instance!");
 			return false;
@@ -91,10 +91,11 @@ namespace engine
 		super_t::service_clear();
 	}
 
-	bool render_vulkan_service::create_instance(const service_create_info_t& info)
+	bool render_vulkan_service::create_instance()
 	{
+    	const auto& cfg = engine::instance().config();
 		auto instance = vulkan::instance_builder()
-			.set_application_name(info.appName)
+			.set_application_name(cfg.appName)
 			.set_engine_name("RatsEngine")
 			.set_application_version(0, 1, 0)
 			.set_engine_version(0, 1, 0)

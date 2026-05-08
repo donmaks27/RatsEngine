@@ -2,8 +2,9 @@
 
 #include <engine/core.h>
 
-#include <engine/utils/type_storage.h>
+#include <engine/engine.h>
 #include <engine/render/render_api.h>
+#include <engine/utils/type_storage.h>
 
 #include <EASTL/array.h>
 
@@ -13,13 +14,13 @@ namespace engine
     constexpr service_type invalid_service_type = utils::type_storage<service_type>::invalid_id;
 
     class engine;
-    template<typename T, typename... CreateInfo>
+    template<typename T>
     class service_impl;
 
     class RATS_ENGINE_EXPORT service
     {
         friend engine;
-        template<typename T, typename... CreateInfo>
+        template<typename T>
         friend class service_impl;
 
     protected:
@@ -45,7 +46,7 @@ namespace engine
         static bool ServiceAllocateEnabled;
     };
 
-    template<typename T, typename... CreateArgs>
+    template<typename T>
     class service_impl : public service
     {
     public:
@@ -55,7 +56,7 @@ namespace engine
             return id;
         }
 
-        [[nodiscard]] static bool instance_create(CreateArgs&&... args)
+        [[nodiscard]] static bool instance_create()
         {
             if (!ServiceAllocateEnabled)
             {
@@ -65,14 +66,14 @@ namespace engine
             if (serviceInstance == nullptr)
             {
                 T::Log.log("Creating service...");
-                service_impl* instance = T::instance_allocate_impl(args...);
+                service_impl* instance = T::instance_allocate_impl();
                 if (instance == nullptr)
                 {
                     T::Log.fatal("Failed to allocate service!");
                     return false;
                 }
                 serviceInstance = instance;
-                if (!instance->service_init(args...))
+                if (!instance->service_init())
                 {
                     T::Log.fatal("Failed to initialize service!");
                     serviceInstance->service_clear();
@@ -99,66 +100,30 @@ namespace engine
 
     protected:
 
-        virtual bool service_init(CreateArgs&&... info) = 0;
+        virtual bool service_init() = 0;
     };
 
-    template<typename T, typename CreateInfo>
-    class service_of : public service_impl<T, const CreateInfo&>
-    {
-        friend service_impl<T, const CreateInfo&>;
-
-    public:
-        static_assert(std::is_class_v<CreateInfo>, "CreateInfo must be a class/struct");
-        using service_create_info = CreateInfo;
-
-    private:
-
-        [[nodiscard]] static T* instance_allocate_impl(const service_create_info& info)
-        {
-            return T::instance_allocate(info);
-        }
-    };
     template<typename T>
-    class service_of<T, void> : public service_impl<T>
+    class service_of : public service_impl<T>
     {
         friend service_impl<T>;
 
-        [[nodiscard]] static T* instance_allocate_impl()
-        {
-            return T::instance_allocate();
-        }
-    };
-
-    template<typename CreateInfo>
-    concept render_api_class = requires(CreateInfo info) {
-        { info.renderApi } -> std::convertible_to<render_api>;
-    };
-    struct render_api_service_create_info
-    {
-        render_api renderApi = render_api::vulkan;
-    };
-
-    template<typename T, render_api_class CreateInfo>
-    class service_of<T, CreateInfo> : public service_impl<T, const CreateInfo&>
-    {
-        friend service_impl<T, const CreateInfo&>;
-
     public:
-        using service_create_info_t = CreateInfo;
         using this_t = service_of;
     private:
 
-        [[nodiscard]] static T* instance_allocate_impl(const service_create_info_t& info)
+        [[nodiscard]] static T* instance_allocate_impl()
         {
             T* result = nullptr;
-            switch (info.renderApi)
+            const auto& cfg = engine::instance().config();
+            switch (cfg.renderApi)
             {
                 case render_api::vulkan: result = T::instance_allocate_vulkan(); break;
                 default:;
             }
             if (result == nullptr)
             {
-                T::Log.fatal("Render API '{}' is not implemented", info.renderApi);
+                T::Log.fatal("Render API '{}' is not implemented", cfg.renderApi);
             }
             return result;
         }

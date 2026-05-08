@@ -32,9 +32,10 @@ namespace engine
             return engineInstance;
         }
 
-        bool start();
+        bool start(engine_config&& cfg = {});
         [[nodiscard]] bool is_started() const { return m_engineStarted; }
 
+        [[nodiscard]] const engine_config& config() const { return m_engineConfig; }
         [[nodiscard]] event_bus& events() { return m_engineEventBus; }
 
         void signal_shutdown() { m_signalShutdown = true; }
@@ -43,6 +44,7 @@ namespace engine
 
         static const log::logger Log;
 
+        engine_config m_engineConfig;
         event_bus m_engineEventBus{};
 
         bool m_engineStarted = false;

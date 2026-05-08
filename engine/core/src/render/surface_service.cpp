@@ -10,7 +10,7 @@ namespace engine
 	surface_backend_service* surface_backend_service::instance_allocate_vulkan() { return nullptr; }
 #endif
 
-	bool surface_service::service_init(const service_create_info_t& info)
+	bool surface_service::service_init()
 	{
 		return true;
 	}
@@ -37,7 +37,7 @@ namespace engine
 		}
 	}
 
-	bool surface_backend_service::service_init(const render_api_service_create_info&)
+	bool surface_backend_service::service_init()
 	{
 		m_primarySurfaceId = m_surfaceIdGenerator.generate();
 		return true;

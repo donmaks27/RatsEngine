@@ -26,7 +26,7 @@ namespace engine
 
     protected:
 
-        virtual bool service_init(const service_create_info_t& info) override;
+        virtual bool service_init() override;
         virtual void service_clear() override;
 
     private:
@@ -54,7 +54,7 @@ namespace engine
         eastl::array<frame_data, 2> m_framesInFlight;
         std::uint8_t m_currentFrameIndex = 0;
 
-        [[nodiscard]] bool create_instance(const service_create_info_t& info);
+        [[nodiscard]] bool create_instance();
         [[nodiscard]] bool create_device();
         [[nodiscard]] bool create_command_pools();
         [[nodiscard]] bool create_frame_data();

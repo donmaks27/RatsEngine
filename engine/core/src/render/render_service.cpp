@@ -1,5 +1,6 @@
 #include <engine/render/render_service.h>
 
+#include <engine/engine.h>
 #include <engine/render/surface_service.h>
 #include <engine/render/window_service.h>
 
@@ -11,14 +12,14 @@ namespace engine
     render_service* render_service::instance_allocate_vulkan() { return nullptr; }
 #endif
 
-    bool render_service::service_init(const service_create_info_t& info)
+    bool render_service::service_init()
     {
-        if (!surface_service::instance_create({ .renderApi = info.renderApi }))
+        if (!surface_service::instance_create())
         {
             Log.fatal("Failed to create surface service!");
             return false;
         }
-        if (!surface_backend_service::instance_create({ .renderApi = info.renderApi }))
+        if (!surface_backend_service::instance_create())
         {
             Log.fatal("Failed to create surface backend service!");
             surface_service::instance_clear();

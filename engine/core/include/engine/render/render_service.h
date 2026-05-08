@@ -11,7 +11,7 @@ namespace engine
         render_api renderApi = render_api::vulkan;
     };
 
-    class RATS_ENGINE_EXPORT render_service : public service_of<render_service, render_service_instance_create_info>
+    class RATS_ENGINE_EXPORT render_service : public service_of<render_service>
     {
         RATS_ENGINE_SERVICE_BASE(render_service, "render")
 
@@ -21,7 +21,7 @@ namespace engine
 
     protected:
 
-        virtual bool service_init(const service_create_info_t& info) override;
+        virtual bool service_init() override;
         virtual void service_clear() override;
 
     private:

@@ -4,9 +4,9 @@ namespace engine
 {
     RATS_ENGINE_SERVICE_IMPL(window_service)
 
-    bool window_service::service_init(const service_create_info_t& info)
+    bool window_service::service_init()
     {
-        if (!super_t::service_init(info))
+        if (!super_t::service_init())
         {
             return false;
         }

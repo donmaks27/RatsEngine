@@ -31,7 +31,7 @@ namespace engine
 
     protected:
 
-        virtual bool service_init(const render_api_service_create_info&) override;
+        virtual bool service_init() override;
         virtual void service_clear() override;
 
         [[nodiscard]] virtual bool create_window_impl(surface_id id, const window_create_info& info);

@@ -11,7 +11,7 @@ namespace engine
 {
 	class surface_backend_service;
 
-	class RATS_ENGINE_EXPORT surface_service : public service_of<surface_service, render_api_service_create_info>
+	class RATS_ENGINE_EXPORT surface_service : public service_of<surface_service>
 	{
 		RATS_ENGINE_SERVICE_BASE(surface_service, "surface")
 
@@ -43,7 +43,7 @@ namespace engine
 
 	protected:
 
-		virtual bool service_init(const service_create_info_t& info) override;
+		virtual bool service_init() override;
 
 		virtual void service_clear() override;
 
@@ -62,7 +62,7 @@ namespace engine
 		eastl::vector_map<surface_id, surface_data> m_surfaces;
 	};
 
-	class surface_backend_service : public service_of<surface_backend_service, render_api_service_create_info>
+	class surface_backend_service : public service_of<surface_backend_service>
 	{
 		RATS_ENGINE_SERVICE_BASE(surface_backend_service, "surface_backend")
 
@@ -76,7 +76,7 @@ namespace engine
 
 		utils::id<surface_id> m_surfaceIdGenerator;
 
-		virtual bool service_init(const render_api_service_create_info&) override;
+		virtual bool service_init() override;
 		virtual void service_clear() override;
 
 		static void destroy_surface(const surface_id id) { surface_service::instance().destroy_surface(id); }

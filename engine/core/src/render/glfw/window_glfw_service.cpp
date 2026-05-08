@@ -14,7 +14,7 @@ namespace engine
         }
     }
 
-    bool window_glfw_service::service_init(const render_api_service_create_info& info)
+    bool window_glfw_service::service_init()
     {
         glfwSetErrorCallback(glfw_error_callback);
         if (!glfwInit())
@@ -24,7 +24,7 @@ namespace engine
         }
         glfwWindowHint(GLFW_CLIENT_API, glfw_client_api());
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        return super_t::service_init(info);
+        return super_t::service_init();
     }
     void window_glfw_service::service_clear()
     {

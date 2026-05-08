@@ -19,9 +19,9 @@ namespace engine
         return { extensions, extensions + extensionCount };
     }
 
-    bool window_glfw_vulkan_service::service_init(const render_api_service_create_info& createInfo)
+    bool window_glfw_vulkan_service::service_init()
     {
-        return super_t::service_init(createInfo);
+        return super_t::service_init();
     }
     void window_glfw_vulkan_service::service_clear()
     {

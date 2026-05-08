@@ -24,7 +24,7 @@ namespace engine
         }
     }
 
-    bool engine::start()
+    bool engine::start(engine_config&& cfg)
     {
         if (is_started())
         {
@@ -33,6 +33,7 @@ namespace engine
         }
 
         RATS_ENGINE_DEFER([this] { clear_engine(); });
+        m_engineConfig = std::move(cfg);
 
         Log.log("Initializing engine...");
         if (!init_engine())
@@ -66,7 +67,7 @@ namespace engine
         m_engineStarted = true;
         service::ServiceAllocateEnabled = true;
 
-        if (!render_service::instance_create({ .renderApi = render_api::vulkan }))
+        if (!render_service::instance_create())
         {
             return false;
         }

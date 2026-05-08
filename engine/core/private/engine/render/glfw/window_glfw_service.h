@@ -19,7 +19,7 @@ namespace engine
 
     protected:
 
-        virtual bool service_init(const render_api_service_create_info& info) override;
+        virtual bool service_init() override;
         virtual void service_clear() override;
 
         [[nodiscard]] virtual int glfw_client_api() const { return GLFW_NO_API; }
