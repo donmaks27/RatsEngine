@@ -3,9 +3,16 @@
 #include <engine/core.h>
 
 #include <engine/events.h>
+#include <engine/render/render_api.h>
 
 namespace engine
 {
+    struct engine_config
+    {
+        std::string appName = "RatsEngine";
+        render_api renderApi = render_api::vulkan;
+    };
+
     class RATS_ENGINE_EXPORT engine final
     {
         engine() = default;

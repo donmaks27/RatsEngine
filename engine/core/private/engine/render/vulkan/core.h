@@ -1,7 +1,5 @@
 #pragma once
 
-#include <engine/render/types.h>
-
 #include <EASTL/vector_set.h>
 #include <vulkan/vulkan.hpp>
 

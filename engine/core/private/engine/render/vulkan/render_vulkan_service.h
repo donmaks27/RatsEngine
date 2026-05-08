@@ -3,8 +3,9 @@
 #include <engine/core.h>
 #include <engine/render/vulkan/core.h>
 
-#include <engine/render/render_service.h>
 #include <engine/events.h>
+#include <engine/render/render_service.h>
+#include <engine/render/surface_id.h>
 
 #include <EASTL/array.h>
 

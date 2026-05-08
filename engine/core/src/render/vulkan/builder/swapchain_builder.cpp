@@ -1,5 +1,7 @@
 #include <engine/render/vulkan/builder/swapchain_builder.h>
 
+#include <engine/render/render_api.h>
+
 #include <EASTL/span.h>
 
 namespace engine::vulkan

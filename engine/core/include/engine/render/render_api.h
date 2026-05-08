@@ -2,8 +2,6 @@
 
 #include <engine/core.h>
 
-#include <engine/utils/id.h>
-
 #include <fmt/format.h>
 
 namespace engine
@@ -13,9 +11,9 @@ namespace engine
     {
         switch (api)
         {
-        case render_api::vulkan: return "Vulkan";
-        case render_api::directx12: return "DirectX12";
-        default:;
+            case render_api::vulkan: return "Vulkan";
+            case render_api::directx12: return "DirectX12";
+            default:;
         }
         return "NONE";
     }
@@ -25,11 +23,6 @@ namespace engine
     {
         return { render_api_to_string(Api), parent };
     }
-
-    using surface_id = std::uint8_t;
-    constexpr surface_id invalid_surface_id = utils::id<surface_id>::invalid_id;
-
-    enum class surface_type : std::uint8_t { editor, render_target };
 }
 
 template<>

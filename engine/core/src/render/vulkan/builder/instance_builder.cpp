@@ -1,5 +1,7 @@
 #include <engine/render/vulkan/builder/instance_builder.h>
 
+#include <engine/render/render_api.h>
+
 namespace engine::vulkan
 {
 	namespace
