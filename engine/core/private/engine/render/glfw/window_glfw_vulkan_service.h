@@ -9,6 +9,8 @@ namespace engine
 {
     class window_glfw_vulkan_service : public window_glfw_service, public engine_event_listener
     {
+        friend surface_backend_service* allocate_surface_backend_service_vulkan();
+
         RATS_ENGINE_SERVICE(window_glfw_vulkan_service, render_api_to_string(render_api::vulkan))
 
     protected:

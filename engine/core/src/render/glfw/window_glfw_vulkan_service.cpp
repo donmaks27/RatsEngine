@@ -7,6 +7,10 @@ namespace engine
 {
     RATS_ENGINE_SERVICE_IMPL(window_glfw_vulkan_service)
 
+    surface_backend_service* allocate_surface_backend_service_vulkan()
+    {
+        return new window_glfw_vulkan_service();
+    }
     surface_backend_service* surface_backend_service::instance_allocate_vulkan()
     {
         return new window_glfw_vulkan_service();

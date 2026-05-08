@@ -11,8 +11,6 @@ namespace engine
     utils::type_storage<event_id> event::TypeIds;
 
     utils::type_storage<service_type> service::ServiceTypes;
-    eastl::array<service*, std::numeric_limits<service_type>::max()> service::ServiceInstances;
-    bool service::ServiceAllocateEnabled = false;
 
     const log::logger engine::Log = engine::logger();
 
@@ -65,33 +63,30 @@ namespace engine
     bool engine::init_engine()
     {
         m_engineStarted = true;
-        service::ServiceAllocateEnabled = true;
 
-        if (!render_service::instance_create())
-        {
-            return false;
-        }
-        return true;
+        m_serviceInstances[surface_service::type()] = allocate_surface_service(m_engineConfig.renderApi);
+        m_serviceInstances[surface_backend_service::type()] = allocate_surface_backend_service(m_engineConfig.renderApi);
+        m_serviceInstances[render_service::type()] = allocate_render_service(m_engineConfig.renderApi);
+        return m_serviceInstances[surface_service::type()]->service_init()
+            && m_serviceInstances[surface_backend_service::type()]->service_init()
+            && m_serviceInstances[render_service::type()]->service_init();
     }
 
     void engine::clear_engine()
     {
         Log.log("Clearing engine...");
 
-        render_service::instance_clear();
+        m_serviceInstances[surface_service::type()]->service_clear();
+        m_serviceInstances[surface_backend_service::type()]->service_clear();
+        m_serviceInstances[render_service::type()]->service_clear();
+        for (auto& service : m_serviceInstances)
+        {
+            delete service;
+            service = nullptr;
+        }
 
         Log.log("Engine cleared successfully");
 
-        for (auto& instance : service::ServiceInstances)
-        {
-            if (instance != nullptr)
-            {
-                instance->service_clear();
-                delete instance;
-                instance = nullptr;
-            }
-        }
-        service::ServiceAllocateEnabled = false;
         m_engineStarted = false;
     }
 

@@ -3,7 +3,10 @@
 #include <engine/core.h>
 
 #include <engine/events.h>
+#include <engine/service.h>
 #include <engine/render/render_api.h>
+
+#include <EASTL/array.h>
 
 namespace engine
 {
@@ -44,7 +47,8 @@ namespace engine
 
         static const log::logger Log;
 
-        engine_config m_engineConfig;
+        engine_config m_engineConfig{};
+        eastl::array<service*, std::numeric_limits<service_type>::max()> m_serviceInstances{};
         event_bus m_engineEventBus{};
 
         bool m_engineStarted = false;

@@ -44,7 +44,6 @@ namespace engine
 	protected:
 
 		virtual bool service_init() override;
-
 		virtual void service_clear() override;
 
 		[[nodiscard]] bool create_surface(surface_id id, const surface_create_info& info);
@@ -87,4 +86,10 @@ namespace engine
 
 		[[nodiscard]] static surface_backend_service* instance_allocate_vulkan();
 	};
+
+	[[nodiscard]] surface_service* allocate_surface_service_vulkan();
+	[[nodiscard]] surface_backend_service* allocate_surface_backend_service_vulkan();
+
+	[[nodiscard]] surface_service* allocate_surface_service(render_api renderApi);
+	[[nodiscard]] surface_backend_service* allocate_surface_backend_service(render_api renderApi);
 }

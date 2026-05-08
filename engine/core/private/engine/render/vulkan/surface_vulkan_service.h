@@ -9,8 +9,10 @@ namespace engine
 {
 	class surface_vulkan_service final : public surface_service, public engine_event_listener
 	{
-		RATS_ENGINE_SERVICE(surface_vulkan_service, render_api_to_string(render_api::vulkan))
+		friend surface_service* allocate_surface_service_vulkan();
 
+		RATS_ENGINE_SERVICE(surface_vulkan_service, render_api_to_string(render_api::vulkan))
+	
 	public:
 
 		struct surface_vulkan_create_info : surface_create_info
@@ -34,6 +36,8 @@ namespace engine
 		[[nodiscard]] bool recreate_outdated_swapchains(const vulkan::context& ctx);
 
 	protected:
+
+		virtual void service_clear() override;
 
 		virtual bool on_event(const event_info& event) override;
 

@@ -19,6 +19,7 @@ namespace engine
 
 	RATS_ENGINE_SERVICE_IMPL(render_vulkan_service)
 
+	render_service* allocate_render_service_vulkan() { return new render_vulkan_service(); }
 	render_service* render_service::instance_allocate_vulkan() { return new render_vulkan_service(); }
 
 	bool render_vulkan_service::service_init()

@@ -16,6 +16,8 @@ namespace engine
 
     class render_vulkan_service final : public render_service
     {
+        friend render_service* allocate_render_service_vulkan();
+
         RATS_ENGINE_SERVICE(render_vulkan_service, render_api_to_string(render_api::vulkan))
 
     public:

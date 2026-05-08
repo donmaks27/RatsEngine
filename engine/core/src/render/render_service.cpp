@@ -9,29 +9,27 @@ namespace engine
     RATS_ENGINE_SERVICE_IMPL(render_service)
 
 #if !RATS_ENGINE_VULKAN_ENABLE
+    render_service* allocate_render_service_vulkan() { return nullptr; }
     render_service* render_service::instance_allocate_vulkan() { return nullptr; }
 #endif
 
+    render_service* allocate_render_service(const render_api renderApi)
+    {
+        switch (renderApi)
+        {
+        case render_api::vulkan: return allocate_render_service_vulkan();
+        default: ;
+        }
+        return nullptr;
+    }
+
     bool render_service::service_init()
     {
-        if (!surface_service::instance_create())
-        {
-            Log.fatal("Failed to create surface service!");
-            return false;
-        }
-        if (!surface_backend_service::instance_create())
-        {
-            Log.fatal("Failed to create surface backend service!");
-            surface_service::instance_clear();
-            return false;
-        }
         window_service::instance().create_window({ .size = { 1024, 768 } });
         return true;
     }
 
     void render_service::service_clear()
     {
-        surface_backend_service::instance_clear();
-        surface_service::instance_clear();
     }
 }

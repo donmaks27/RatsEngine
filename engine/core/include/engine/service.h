@@ -2,11 +2,8 @@
 
 #include <engine/core.h>
 
-#include <engine/engine.h>
 #include <engine/render/render_api.h>
 #include <engine/utils/type_storage.h>
-
-#include <EASTL/array.h>
 
 namespace engine
 {
@@ -37,13 +34,12 @@ namespace engine
 
     protected:
 
+        [[nodiscard]] virtual bool service_init() = 0;
         virtual void service_clear() = 0;
 
     private:
 
         static utils::type_storage<service_type> ServiceTypes;
-        static eastl::array<service*, std::numeric_limits<service_type>::max()> ServiceInstances;
-        static bool ServiceAllocateEnabled;
     };
 
     template<typename T>
@@ -55,78 +51,13 @@ namespace engine
             static const service_type id = ServiceTypes.type_id<T>();
             return id;
         }
-
-        [[nodiscard]] static bool instance_create()
-        {
-            if (!ServiceAllocateEnabled)
-            {
-                return false;
-            }
-            auto& serviceInstance = ServiceInstances[type()];
-            if (serviceInstance == nullptr)
-            {
-                T::Log.log("Creating service...");
-                service_impl* instance = T::instance_allocate_impl();
-                if (instance == nullptr)
-                {
-                    T::Log.fatal("Failed to allocate service!");
-                    return false;
-                }
-                serviceInstance = instance;
-                if (!instance->service_init())
-                {
-                    T::Log.fatal("Failed to initialize service!");
-                    serviceInstance->service_clear();
-                    delete serviceInstance;
-                    serviceInstance = nullptr;
-                    return false;
-                }
-                T::Log.info("Service created successfully");
-            }
-            return true;
-        }
-        static void instance_clear()
-        {
-            auto& serviceInstance = ServiceInstances[type()];
-            if (serviceInstance != nullptr)
-            {
-                T::Log.log("Clearing service...");
-                serviceInstance->service_clear();
-                delete serviceInstance;
-                serviceInstance = nullptr;
-                T::Log.log("Service cleared successfully");
-            }
-        }
-
-    protected:
-
-        virtual bool service_init() = 0;
     };
 
     template<typename T>
     class service_of : public service_impl<T>
     {
-        friend service_impl<T>;
-
     public:
         using this_t = service_of;
-    private:
-
-        [[nodiscard]] static T* instance_allocate_impl()
-        {
-            T* result = nullptr;
-            const auto& cfg = engine::instance().config();
-            switch (cfg.renderApi)
-            {
-                case render_api::vulkan: result = T::instance_allocate_vulkan(); break;
-                default:;
-            }
-            if (result == nullptr)
-            {
-                T::Log.fatal("Render API '{}' is not implemented", cfg.renderApi);
-            }
-            return result;
-        }
     };
 }
 
