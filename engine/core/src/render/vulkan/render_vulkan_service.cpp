@@ -20,7 +20,6 @@ namespace engine
 	RATS_ENGINE_SERVICE_IMPL(render_vulkan_service)
 
 	render_service* allocate_render_service_vulkan() { return new render_vulkan_service(); }
-	render_service* render_service::instance_allocate_vulkan() { return new render_vulkan_service(); }
 
 	bool render_vulkan_service::service_init()
 	{
@@ -346,7 +345,7 @@ namespace engine
     	return true;
 	}
 
-	bool render_vulkan_service::present_swapchain(const surface_id surfaceId, vulkan::swapchain& swapchain, const vulkan::queue& queue)
+	bool render_vulkan_service::present_swapchain(const surface_id surfaceId, vulkan::swapchain& swapchain, const vulkan::queue& queue) const
 	{
     	const std::uint32_t swapchainImageIndex = swapchain.image_index();
     	const auto result = queue->presentKHR({

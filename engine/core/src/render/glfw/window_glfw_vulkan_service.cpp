@@ -11,10 +11,6 @@ namespace engine
     {
         return new window_glfw_vulkan_service();
     }
-    surface_backend_service* surface_backend_service::instance_allocate_vulkan()
-    {
-        return new window_glfw_vulkan_service();
-    }
 
     eastl::vector<const char*> surface_vulkan_service::required_instance_extensions()
     {

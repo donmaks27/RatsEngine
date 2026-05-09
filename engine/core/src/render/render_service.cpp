@@ -6,7 +6,7 @@
 
 namespace engine
 {
-    RATS_ENGINE_SERVICE_IMPL(render_service)
+    RATS_ENGINE_BASE_SERVICE_IMPL(render_service)
 
 #if !RATS_ENGINE_VULKAN_ENABLE
     render_service* allocate_render_service_vulkan() { return nullptr; }

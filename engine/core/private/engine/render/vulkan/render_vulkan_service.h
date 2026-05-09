@@ -65,7 +65,7 @@ namespace engine
         [[nodiscard]] bool allocate_frame_swapchain_data(surface_id requestedIndex, surface_id surfaceId);
         [[nodiscard]] bool acquire_swapchain_image(surface_id surfaceId, vulkan::swapchain& swapchain,
             const frame_swapchain_data& frameSwapchainData) const;
-        [[nodiscard]] static bool present_swapchain(surface_id surfaceId, vulkan::swapchain& swapchain,
-            const vulkan::queue& queue);
+        [[nodiscard]] bool present_swapchain(surface_id surfaceId, vulkan::swapchain& swapchain,
+            const vulkan::queue& queue) const;
     };
 }

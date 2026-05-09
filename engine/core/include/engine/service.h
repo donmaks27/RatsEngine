@@ -7,18 +7,20 @@
 
 namespace engine
 {
+    class engine;
+    class service;
+
     using service_type = std::uint8_t;
     constexpr service_type invalid_service_type = utils::type_storage<service_type>::invalid_id;
 
-    class engine;
     template<typename T>
-    class service_impl;
+    concept service_class = std::derived_from<T, service>;
+    template<typename T>
+    concept base_service_class = service_class<T> && std::is_same_v<typename T::super_t, service>;
 
     class RATS_ENGINE_EXPORT service
     {
         friend engine;
-        template<typename T>
-        friend class service_impl;
 
     protected:
         service() = default;
@@ -30,56 +32,66 @@ namespace engine
         service& operator=(const service&) = delete;
         service& operator=(service&&) = delete;
 
+        using this_t = service;
+
         [[nodiscard]] static constexpr auto logger() { return log::logger("service"); }
 
     protected:
 
-        [[nodiscard]] virtual bool service_init() = 0;
+        template<typename T> requires base_service_class<T>
+        [[nodiscard]] static service_type type() { return ServiceTypes.type_id<T>(); }
+        template<typename T> requires service_class<T>
+        [[nodiscard]] static log::logger logger(const std::string_view category)
+        {
+            if constexpr (base_service_class<T>)
+            {
+                return { category, log::logger("service") };
+            }
+            else
+            {
+                return { category, T::super_t::instance().Log };
+            }
+        }
+
+        virtual bool service_init() = 0;
         virtual void service_clear() = 0;
 
     private:
 
         static utils::type_storage<service_type> ServiceTypes;
     };
-
-    template<typename T>
-    class service_impl : public service
-    {
-    public:
-        [[nodiscard]] static service_type type()
-        {
-            static const service_type id = ServiceTypes.type_id<T>();
-            return id;
-        }
-    };
-
-    template<typename T>
-    class service_of : public service_impl<T>
-    {
-    public:
-        using this_t = service_of;
-    };
 }
 
-#define RATS_ENGINE_SERVICE(Type, LogCategory)                                                              \
-    public:                                                                                                 \
-        using super_t = this_t;                                                                             \
-        using this_t = Type;                                                                                \
-        Type() { Instance = this; }                                                                         \
-        virtual ~Type() override { Instance = nullptr; }                                                    \
-    public:                                                                                                 \
-        static const log::logger Log;                                                                       \
-        [[nodiscard]] static constexpr log::logger logger() { return { LogCategory, super_t::logger() }; }  \
-        [[nodiscard]] static auto& instance() { return *Instance; }                                         \
-    private:                                                                                                \
-        static Type* Instance;
+#define RATS_ENGINE_SERVICE(ServiceType, LogCategory)                   \
+        friend service;                                                 \
+    protected:                                                          \
+        ServiceType() { Instance = this; }                              \
+        virtual ~ServiceType() override { Instance = nullptr; }         \
+    public:                                                             \
+        ServiceType(const ServiceType&) = delete;                       \
+        ServiceType(ServiceType&&) = delete;                            \
+        ServiceType& operator=(const ServiceType&) = delete;            \
+        ServiceType& operator=(ServiceType&&) = delete;                 \
+        using super_t = this_t;                                         \
+        using this_t = ServiceType;                                     \
+        [[nodiscard]] static auto& instance() { return *Instance; }     \
+    protected:                                                          \
+        const log::logger Log = service::logger<this_t>(LogCategory);   \
+    private:                                                            \
+        static ServiceType* Instance;
 
-#define RATS_ENGINE_SERVICE_BASE(Type, LogCategory) \
-    RATS_ENGINE_SERVICE(Type, LogCategory)          \
-    public:                                         \
-        friend super_t;                             \
+#define RATS_ENGINE_BASE_SERVICE(ServiceType, LogCategory)  \
+        RATS_ENGINE_SERVICE(ServiceType, LogCategory)       \
+    public:                                                 \
+        [[nodiscard]] static service_type type();           \
     private:
 
-#define RATS_ENGINE_SERVICE_IMPL(Type)                      \
-    Type* Type::Instance = nullptr;                         \
-    const ::engine::log::logger Type::Log = Type::logger();
+#define RATS_ENGINE_SERVICE_IMPL(ServiceType) ServiceType* ServiceType::Instance = nullptr;
+
+#define RATS_ENGINE_BASE_SERVICE_IMPL(ServiceType)          \
+    RATS_ENGINE_SERVICE_IMPL(ServiceType)                   \
+    service_type ServiceType::type()                        \
+    {                                                       \
+        static const auto id = service::type<ServiceType>();\
+        return id;                                          \
+    }

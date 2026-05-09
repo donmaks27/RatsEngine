@@ -2,8 +2,8 @@
 
 namespace engine
 {
-	RATS_ENGINE_SERVICE_IMPL(surface_service)
-	RATS_ENGINE_SERVICE_IMPL(surface_backend_service)
+	RATS_ENGINE_BASE_SERVICE_IMPL(surface_service)
+	RATS_ENGINE_BASE_SERVICE_IMPL(surface_backend_service)
 
 #if !RATS_ENGINE_VULKAN_ENABLE
 	surface_service* allocate_surface_service_vulkan() { return nullptr; }

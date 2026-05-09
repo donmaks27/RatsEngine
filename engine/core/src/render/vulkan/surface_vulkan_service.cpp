@@ -8,7 +8,6 @@ namespace engine
 	RATS_ENGINE_SERVICE_IMPL(surface_vulkan_service)
 
 	surface_service* allocate_surface_service_vulkan() { return new surface_vulkan_service(); }
-	surface_service* surface_service::instance_allocate_vulkan() { return new surface_vulkan_service(); }
 
 	void surface_vulkan_service::service_clear()
 	{

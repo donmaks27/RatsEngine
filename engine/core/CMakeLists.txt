@@ -97,9 +97,7 @@ if(${RATS_ENGINE_GLFW_ENABLE})
 
 endif()
 
-add_library(rats-engine SHARED
-	src/service1.cpp
-	include/engine/service1.h)
+add_library(rats-engine SHARED)
 target_link_libraries(rats-engine
 	PUBLIC ${RATS_ENGINE_PUBLIC_LIBS}
 	PRIVATE ${RATS_ENGINE_PRIVATE_LIBS})

@@ -11,9 +11,9 @@ namespace engine
 {
 	class surface_backend_service;
 
-	class RATS_ENGINE_EXPORT surface_service : public service_of<surface_service>
+	class RATS_ENGINE_EXPORT surface_service : public service
 	{
-		RATS_ENGINE_SERVICE_BASE(surface_service, "surface")
+		RATS_ENGINE_BASE_SERVICE(surface_service, "surface")
 
 		friend surface_backend_service;
 
@@ -51,8 +51,6 @@ namespace engine
 
 	private:
 
-		[[nodiscard]] static surface_service* instance_allocate_vulkan();
-
 		struct surface_data
 		{
 			glm::uvec2 size = { 0, 0 };
@@ -61,9 +59,9 @@ namespace engine
 		eastl::vector_map<surface_id, surface_data> m_surfaces;
 	};
 
-	class surface_backend_service : public service_of<surface_backend_service>
+	class surface_backend_service : public service
 	{
-		RATS_ENGINE_SERVICE_BASE(surface_backend_service, "surface_backend")
+		RATS_ENGINE_BASE_SERVICE(surface_backend_service, "surface_backend")
 
 	public:
 
@@ -83,8 +81,6 @@ namespace engine
 	private:
 
 		surface_id m_primarySurfaceId = invalid_surface_id;
-
-		[[nodiscard]] static surface_backend_service* instance_allocate_vulkan();
 	};
 
 	[[nodiscard]] surface_service* allocate_surface_service_vulkan();
