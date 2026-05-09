@@ -3,8 +3,6 @@ include(GenerateExportHeader)
 
 project(rats-engine CXX)
 
-include(cmake/utils.cmake)
-
 option(RATS_ENGINE_GLFW_ENABLE "Use GLFW for window managing" OFF)
 option(RATS_ENGINE_VULKAN_ENABLE "Add support of Vulkan render API" OFF)
 option(RATS_ENGINE_VULKAN_ENABLE_VALIDATION_LAYERS "Enable validation layers for Vulkan render API" OFF)

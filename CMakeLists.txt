@@ -13,6 +13,8 @@ if(MSVC)
 	add_compile_options(/Zc:__cplusplus /permissive- /Zc:preprocessor)
 endif()
 
+include(cmake/utils.cmake)
+
 add_subdirectory(engine/core)
 add_subdirectory(engine/runtime)
 add_subdirectory(apps/editor)
