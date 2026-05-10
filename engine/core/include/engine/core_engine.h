@@ -16,26 +16,22 @@ namespace engine
         render_api renderApi = render_api::vulkan;
     };
 
-    class RATS_ENGINE_EXPORT engine final
+    class RATS_ENGINE_EXPORT core_engine
     {
-        engine() = default;
-        ~engine();
+    protected:
+        explicit core_engine(engine_config&& cfg);
+        virtual ~core_engine();
     public:
-        engine(const engine&) = delete;
-        engine(engine&&) = delete;
+        core_engine() = delete;
+        core_engine(const core_engine&) = delete;
+        core_engine(core_engine&&) = delete;
 
-        engine& operator=(const engine&) = delete;
-        engine& operator=(engine&&) = delete;
+        core_engine& operator=(const core_engine&) = delete;
+        core_engine& operator=(core_engine&&) = delete;
 
-        [[nodiscard]] static constexpr log::logger logger() { return logger_engine(); }
+        [[nodiscard]] static auto& instance() { return *Instance; }
 
-        static engine& instance()
-        {
-            static engine engineInstance;
-            return engineInstance;
-        }
-
-        bool start(engine_config&& cfg = {});
+        bool start();
         [[nodiscard]] bool is_started() const { return m_engineStarted; }
 
         [[nodiscard]] const engine_config& config() const { return m_engineConfig; }
@@ -45,7 +41,9 @@ namespace engine
 
     private:
 
-        static const log::logger Log;
+        static core_engine* Instance;
+
+        const log::logger Log = logger_engine();
 
         engine_config m_engineConfig{};
         eastl::array<service*, std::numeric_limits<service_type>::max()> m_serviceInstances{};

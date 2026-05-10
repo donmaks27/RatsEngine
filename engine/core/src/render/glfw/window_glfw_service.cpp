@@ -1,6 +1,6 @@
 #include <engine/render/glfw/window_glfw_service.h>
 
-#include <engine/engine.h>
+#include <engine/core_engine.h>
 
 namespace engine
 {
@@ -92,7 +92,7 @@ namespace engine
                 }
                 else
                 {
-                    engine::instance().signal_shutdown();
+                    core_engine::instance().signal_shutdown();
                 }
             }
         }

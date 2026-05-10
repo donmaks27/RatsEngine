@@ -3,6 +3,8 @@
 #include <engine/core.h>
 #include <engine/service.h>
 
+#include <engine/render/render_api.h>
+
 namespace engine
 {
     class RATS_ENGINE_EXPORT render_service : public service

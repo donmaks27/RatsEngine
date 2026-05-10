@@ -1,6 +1,6 @@
 #include <engine/render/vulkan/render_vulkan_service.h>
 
-#include <engine/engine.h>
+#include <engine/core_engine.h>
 #include <engine/render/vulkan/surface_vulkan_service.h>
 #include <engine/render/vulkan/builder/instance_builder.h>
 #include <engine/render/vulkan/builder/device_builder.h>
@@ -28,7 +28,7 @@ namespace engine
 			return false;
 		}
 
-		auto& event_bus = engine::instance().events();
+		auto& event_bus = core_engine::instance().events();
 		if (!create_instance())
 		{
 			Log.fatal("Failed to create Vulkan instance!");
@@ -93,7 +93,7 @@ namespace engine
 
 	bool render_vulkan_service::create_instance()
 	{
-    	const auto& cfg = engine::instance().config();
+    	const auto& cfg = core_engine::instance().config();
 		auto instance = vulkan::instance_builder()
 			.set_application_name(cfg.appName)
 			.set_engine_name("RatsEngine")

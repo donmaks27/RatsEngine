@@ -2,12 +2,11 @@
 
 #include <engine/core.h>
 
-#include <engine/render/render_api.h>
 #include <engine/utils/type_storage.h>
 
 namespace engine
 {
-    class engine;
+    class core_engine;
     class service;
 
     using service_type = std::uint8_t;
@@ -20,7 +19,7 @@ namespace engine
 
     class RATS_ENGINE_EXPORT service
     {
-        friend engine;
+        friend core_engine;
 
     protected:
         service() = default;

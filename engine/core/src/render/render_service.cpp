@@ -1,6 +1,6 @@
 #include <engine/render/render_service.h>
 
-#include <engine/engine.h>
+#include <engine/core_engine.h>
 #include <engine/render/surface_service.h>
 #include <engine/render/window_service.h>
 

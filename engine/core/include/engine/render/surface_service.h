@@ -3,6 +3,7 @@
 #include <engine/core.h>
 #include <engine/service.h>
 
+#include <engine/render/render_api.h>
 #include <engine/render/surface_id.h>
 
 #include <glm/vec2.hpp>

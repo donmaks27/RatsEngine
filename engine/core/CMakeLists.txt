@@ -27,7 +27,7 @@ list(APPEND RATS_ENGINE_PRIVATE_PCH
 list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 	"include/engine/core.h"
 	"include/engine/eastl_config.h"
-	"include/engine/engine.h"
+	"include/engine/core_engine.h"
 	"include/engine/events.h"
 	"include/engine/engine_event_listener.h"
 	"include/engine/service.h"
@@ -43,7 +43,7 @@ list(APPEND RATS_ENGINE_PUBLIC_HEADERS
 list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 	"private/engine/render/window_service.h")
 list(APPEND RATS_ENGINE_SRC_FILES
-	"src/engine.cpp"
+	"src/core_engine.cpp"
 	"src/render/render_service.cpp"
 	"src/render/surface_service.cpp"
 	"src/render/window_service.cpp")

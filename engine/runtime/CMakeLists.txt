@@ -20,14 +20,14 @@ list(APPEND RATS_ENGINE_RUNTIME_PRIVATE_DEFINITIONS)
 list(APPEND RATS_ENGINE_RUNTIME_PRIVATE_PCH
     "src/pch.h")
 list(APPEND RATS_ENGINE_RUNTIME_PUBLIC_HEADERS
-    "include/engine_runtime/core.h"
-    "include/engine_runtime/engine.h")
+    "include/engine/runtime/core.h"
+    "include/engine/runtime/runtime_engine.h")
 list(APPEND RATS_ENGINE_RUNTIME_PRIVATE_HEADERS)
 list(APPEND RATS_ENGINE_RUNTIME_SRC_FILES
-    "src/engine.cpp")
+    "src/runtime_engine.cpp")
 list(APPEND RATS_ENGINE_RUNTIME_SRC_FILES_NO_PCH)
 
-add_library(rats-engine-runtime STATIC dummy.cpp)
+add_library(rats-engine-runtime STATIC)
 target_link_libraries(rats-engine-runtime
     PUBLIC ${RATS_ENGINE_RUNTIME_PUBLIC_LIBS}
     PRIVATE ${RATS_ENGINE_RUNTIME_PRIVATE_LIBS})
@@ -38,14 +38,14 @@ target_compile_definitions(rats-engine-runtime
 set_target_properties(rats-engine-runtime PROPERTIES
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN ON)
-generate_export_header(rats-engine-runtime EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/include/engine_runtime/engine_runtime_export.h")
+generate_export_header(rats-engine-runtime EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/include/engine/runtime/engine_export.h")
 configure_file(
     "cmake/configs/config.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/private/engine_runtime/config.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/include/engine/runtime/config.h"
     @ONLY)
 configure_file(
     "cmake/configs/config_macro.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/private/engine_runtime/config_macro.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/include/engine/runtime/config_macro.h"
     @ONLY)
 target_include_directories(rats-engine-runtime
     PUBLIC "include" "${CMAKE_CURRENT_BINARY_DIR}/include"

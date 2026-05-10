@@ -1,5 +1,4 @@
-#include <typeindex>
-#include <engine/engine.h>
+#include <engine/core_engine.h>
 
 #include <engine/engine_event_listener.h>
 #include <engine/render/render_service.h>
@@ -9,20 +8,25 @@
 namespace engine
 {
     utils::type_storage<event_id> event::TypeIds;
-
     utils::type_storage<service_type> service::ServiceTypes;
 
-    const log::logger engine::Log = engine::logger();
+    core_engine* core_engine::Instance = nullptr;
 
-    engine::~engine()
+    core_engine::core_engine(engine_config&& cfg)
+    {
+        Instance = this;
+        m_engineConfig = std::move(cfg);
+    }
+    core_engine::~core_engine()
     {
         if (is_started())
         {
-            clear_engine();
+            Log.fatal("Engine was not properly cleared before destruction!");
         }
+        Instance = nullptr;
     }
 
-    bool engine::start(engine_config&& cfg)
+    bool core_engine::start()
     {
         if (is_started())
         {
@@ -31,7 +35,6 @@ namespace engine
         }
 
         RATS_ENGINE_DEFER([this] { clear_engine(); });
-        m_engineConfig = std::move(cfg);
 
         Log.log("Initializing engine...");
         if (!init_engine())
@@ -60,7 +63,7 @@ namespace engine
         return true;
     }
 
-    bool engine::init_engine()
+    bool core_engine::init_engine()
     {
         m_engineStarted = true;
 
@@ -72,7 +75,7 @@ namespace engine
             && m_serviceInstances[render_service::type()]->service_init();
     }
 
-    void engine::clear_engine()
+    void core_engine::clear_engine()
     {
         Log.log("Clearing engine...");
 
@@ -92,10 +95,10 @@ namespace engine
 
     engine_event_listener::engine_event_listener()
     {
-        engine::instance().events().add_listener(this);
+        core_engine::instance().events().add_listener(this);
     }
     engine_event_listener::~engine_event_listener()
     {
-        engine::instance().events().remove_listener(this);
+        core_engine::instance().events().remove_listener(this);
     }
 }
