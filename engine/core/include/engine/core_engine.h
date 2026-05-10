@@ -39,6 +39,29 @@ namespace engine
 
         void signal_shutdown() { m_signalShutdown = true; }
 
+    protected:
+
+        [[nodiscard]] virtual bool allocate_services();
+        template<typename Func> requires service_class<std::remove_pointer_t<std::invoke_result_t<Func>>>
+        [[nodiscard]] bool register_service(Func&& allocator)
+        {
+            using T = std::remove_pointer_t<std::invoke_result_t<Func>>;
+            const service_type serviceType = T::type();
+            if (m_serviceInstances[serviceType] != nullptr)
+            {
+                Log.fatal("Service \"{}\" already registered", T::type_name());
+                return false;
+            }
+            service* instance = allocator();
+            if (instance == nullptr)
+            {
+                Log.fatal("Failed to allocate service \"{}\"", T::type_name());
+                return false;
+            }
+            m_serviceInstances[serviceType] = instance;
+            return true;
+        }
+
     private:
 
         static core_engine* Instance;

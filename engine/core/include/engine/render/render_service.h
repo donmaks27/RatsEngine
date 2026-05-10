@@ -22,5 +22,5 @@ namespace engine
     };
 
     [[nodiscard]] render_service* allocate_render_service_vulkan();
-    [[nodiscard]] render_service* allocate_render_service(render_api renderApi);
+    [[nodiscard]] render_service* allocate_render_service();
 }

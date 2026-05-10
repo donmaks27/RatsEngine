@@ -1,5 +1,7 @@
 #include <engine/render/surface_service.h>
 
+#include <engine/core_engine.h>
+
 namespace engine
 {
 	RATS_ENGINE_BASE_SERVICE_IMPL(surface_service)
@@ -12,18 +14,20 @@ namespace engine
 	surface_backend_service* surface_backend_service::instance_allocate_vulkan() { return nullptr; }
 #endif
 
-	surface_service* allocate_surface_service(const render_api renderApi)
+	surface_service* allocate_surface_service()
 	{
-		switch (renderApi)
+		const auto& cfg = core_engine::instance().config();
+		switch (cfg.renderApi)
 		{
 		case render_api::vulkan: return allocate_surface_service_vulkan();
 		default: ;
 		}
 		return nullptr;
 	}
-	surface_backend_service* allocate_surface_backend_service(const render_api renderApi)
+	surface_backend_service* allocate_surface_backend_service()
 	{
-		switch (renderApi)
+		const auto& cfg = core_engine::instance().config();
+		switch (cfg.renderApi)
 		{
 		case render_api::vulkan: return allocate_surface_backend_service_vulkan();
 		default: ;

@@ -13,9 +13,10 @@ namespace engine
     render_service* render_service::instance_allocate_vulkan() { return nullptr; }
 #endif
 
-    render_service* allocate_render_service(const render_api renderApi)
+    render_service* allocate_render_service()
     {
-        switch (renderApi)
+        const auto& cfg = core_engine::instance().config();
+        switch (cfg.renderApi)
         {
         case render_api::vulkan: return allocate_render_service_vulkan();
         default: ;

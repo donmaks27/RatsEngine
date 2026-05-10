@@ -87,6 +87,6 @@ namespace engine
 	[[nodiscard]] surface_service* allocate_surface_service_vulkan();
 	[[nodiscard]] surface_backend_service* allocate_surface_backend_service_vulkan();
 
-	[[nodiscard]] surface_service* allocate_surface_service(render_api renderApi);
-	[[nodiscard]] surface_backend_service* allocate_surface_backend_service(render_api renderApi);
+	[[nodiscard]] surface_service* allocate_surface_service();
+	[[nodiscard]] surface_backend_service* allocate_surface_backend_service();
 }

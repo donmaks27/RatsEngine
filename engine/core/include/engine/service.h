@@ -79,10 +79,11 @@ namespace engine
     private:                                                            \
         static ServiceType* Instance;
 
-#define RATS_ENGINE_BASE_SERVICE(ServiceType, LogCategory)  \
-        RATS_ENGINE_SERVICE(ServiceType, LogCategory)       \
-    public:                                                 \
-        [[nodiscard]] static service_type type();           \
+#define RATS_ENGINE_BASE_SERVICE(ServiceType, LogCategory)                  \
+        RATS_ENGINE_SERVICE(ServiceType, LogCategory)                       \
+    public:                                                                 \
+        [[nodiscard]] static service_type type();                           \
+        [[nodiscard]] static const char* type_name() { return LogCategory; }\
     private:
 
 #define RATS_ENGINE_SERVICE_IMPL(ServiceType) ServiceType* ServiceType::Instance = nullptr;

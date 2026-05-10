@@ -67,12 +67,16 @@ namespace engine
     {
         m_engineStarted = true;
 
-        m_serviceInstances[surface_service::type()] = allocate_surface_service(m_engineConfig.renderApi);
-        m_serviceInstances[surface_backend_service::type()] = allocate_surface_backend_service(m_engineConfig.renderApi);
-        m_serviceInstances[render_service::type()] = allocate_render_service(m_engineConfig.renderApi);
-        return m_serviceInstances[surface_service::type()]->service_init()
+        return allocate_services()
+            && m_serviceInstances[surface_service::type()]->service_init()
             && m_serviceInstances[surface_backend_service::type()]->service_init()
             && m_serviceInstances[render_service::type()]->service_init();
+    }
+    bool core_engine::allocate_services()
+    {
+        return register_service(allocate_surface_service)
+            && register_service(allocate_surface_backend_service)
+            && register_service(allocate_render_service);
     }
 
     void core_engine::clear_engine()
