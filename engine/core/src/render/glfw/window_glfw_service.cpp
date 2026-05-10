@@ -34,9 +34,11 @@ namespace engine
 
     bool window_glfw_service::create_window_impl(const surface_id id, const window_create_info& info)
     {
+        const auto& cfg = core_engine::instance().config();
+
         const auto window = glfwCreateWindow(
             static_cast<int>(info.size.x), static_cast<int>(info.size.y),
-            "RatsEngine", nullptr, nullptr
+            cfg.appName.c_str(), nullptr, nullptr
         );
         if (window == nullptr)
         {

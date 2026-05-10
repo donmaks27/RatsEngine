@@ -2,7 +2,9 @@
 
 int main()
 {
-	game::game_engine instance;
+	game::game_engine instance({
+		.appName = "RatsGame"
+	});
 	if (!instance.start())
 	{
 		engine::log::fatal("[Game] Some error happened!");
