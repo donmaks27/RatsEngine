@@ -9,9 +9,7 @@ namespace engine
 
 #if !RATS_ENGINE_VULKAN_ENABLE
 	surface_service* allocate_surface_service_vulkan() { return nullptr; }
-	surface_backend_service* allocate_surface_backend_service() { return nullptr; }
-	surface_service* surface_service::instance_allocate_vulkan() { return nullptr; }
-	surface_backend_service* surface_backend_service::instance_allocate_vulkan() { return nullptr; }
+	surface_backend_service* allocate_surface_backend_service_vulkan() { return nullptr; }
 #endif
 
 	surface_service* allocate_surface_service()

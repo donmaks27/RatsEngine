@@ -4,6 +4,8 @@
 
 #include <engine/utils/type_storage.h>
 
+#include <functional>
+
 namespace engine
 {
     class core_engine;
@@ -59,6 +61,87 @@ namespace engine
 
         static utils::type_storage<service_type> ServiceTypes;
     };
+
+    namespace registration
+    {
+        class service_storage;
+
+        class service final
+        {
+            friend core_engine;
+            friend service_storage;
+
+        public:
+            service() = delete;
+            service(service_type type);
+            service(const service&) = delete;
+            service(service&&) = delete;
+            ~service() = default;
+
+            service& operator=(const service&) = delete;
+            service& operator=(service&&) = delete;
+
+            template<typename Func> requires std::predicate<Func> && base_service_class<std::remove_pointer_t<std::invoke_result_t<Func>>>
+            service& allocator(Func&& func)
+            {
+                if (m_type == std::remove_pointer_t<std::invoke_result_t<Func>>::type())
+                {
+                    m_allocator = [f = std::forward<Func>(func)]() -> engine::service* { return f(); };
+                }
+                return *this;
+            }
+
+            template<typename T> requires base_service_class<T>
+            service& init_before()
+            {
+                if (m_type != T::type())
+                {
+                    m_initBefore.push_back(T::type());
+                }
+                return *this;
+            }
+            template<typename T> requires base_service_class<T>
+            service& init_after()
+            {
+                if (m_type != T::type())
+                {
+                    m_initAfter.push_back(T::type());
+                }
+                return *this;
+            }
+
+        private:
+
+            std::function<engine::service*()> m_allocator = nullptr;
+            eastl::vector<service_type> m_initBefore;
+            eastl::vector<service_type> m_initAfter;
+
+            service_type m_type = invalid_service_type;
+        };
+
+        class service_storage final
+        {
+            friend core_engine;
+
+            service_storage() = default;
+            ~service_storage() = default;
+        public:
+            service_storage(const service_storage&) = delete;
+            service_storage(service_storage&&) = delete;
+
+            service_storage& operator=(const service_storage&) = delete;
+            service_storage& operator=(service_storage&&) = delete;
+
+            template<typename T> requires base_service_class<T>
+            [[nodiscard]] service& register_service() { return register_service(T::type()); }
+
+        private:
+
+            eastl::unordered_map<service_type, service> m_services;
+
+            [[nodiscard]] service& register_service(service_type type);
+        };
+    }
 }
 
 #define RATS_ENGINE_SERVICE(ServiceType, LogCategory)                   \

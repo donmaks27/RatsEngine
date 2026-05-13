@@ -44,6 +44,7 @@ list(APPEND RATS_ENGINE_PRIVATE_HEADERS
 	"private/engine/render/window_service.h")
 list(APPEND RATS_ENGINE_SRC_FILES
 	"src/core_engine.cpp"
+	"src/service.cpp"
 	"src/render/render_service.cpp"
 	"src/render/surface_service.cpp"
 	"src/render/window_service.cpp")

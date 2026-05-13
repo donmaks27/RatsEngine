@@ -41,26 +41,7 @@ namespace engine
 
     protected:
 
-        [[nodiscard]] virtual bool allocate_services();
-        template<typename Func> requires service_class<std::remove_pointer_t<std::invoke_result_t<Func>>>
-        [[nodiscard]] bool register_service(Func&& allocator)
-        {
-            using T = std::remove_pointer_t<std::invoke_result_t<Func>>;
-            const service_type serviceType = T::type();
-            if (m_serviceInstances[serviceType] != nullptr)
-            {
-                Log.fatal("Service \"{}\" already registered", T::type_name());
-                return false;
-            }
-            service* instance = allocator();
-            if (instance == nullptr)
-            {
-                Log.fatal("Failed to allocate service \"{}\"", T::type_name());
-                return false;
-            }
-            m_serviceInstances[serviceType] = instance;
-            return true;
-        }
+        virtual void register_services(registration::service_storage& storage);
 
     private:
 
@@ -68,15 +49,19 @@ namespace engine
 
         const log::logger Log = logger_engine();
 
-        engine_config m_engineConfig{};
+        engine_config m_engineConfig;
+        event_bus m_engineEventBus;
+
         eastl::array<service*, std::numeric_limits<service_type>::max()> m_serviceInstances{};
-        event_bus m_engineEventBus{};
+        eastl::vector<service_type> m_serviceInitOrder;
 
         bool m_engineStarted = false;
         bool m_signalShutdown = false;
 
 
-        bool init_engine();
+        [[nodiscard]] bool init_engine();
+        [[nodiscard]] bool init_services(registration::service_storage& storage);
+
         void clear_engine();
     };
 }
