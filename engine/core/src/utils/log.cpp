@@ -1,6 +1,9 @@
 #include <engine/utils/log.h>
+#include <engine/private_config_macro.h>
 
-#include <fmt/color.h>
+#if RATS_ENGINE_COLOR_LOGS
+    #include <fmt/color.h>
+#endif
 
 namespace engine::log
 {
@@ -18,6 +21,7 @@ namespace engine::log
             }
             return					   "       ";
         }
+#if RATS_ENGINE_COLOR_LOGS
         constexpr fmt::color typeToColor(const type value)
         {
             switch (value)
@@ -30,10 +34,15 @@ namespace engine::log
             }
             return fmt::color::gray;
         }
+#endif
     }
 
     void print(const type t, std::string_view msg)
     {
+#if RATS_ENGINE_COLOR_LOGS
         fmt::print(fmt::fg(typeToColor(t)), "{} {}\n", typeToString(t), msg);
+#else
+        fmt::print("{} {}\n", typeToString(t), msg);
+#endif
     }
 }

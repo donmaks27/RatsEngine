@@ -3,10 +3,12 @@ include(GenerateExportHeader)
 
 project(rats-engine CXX)
 
+option(RATS_ENGINE_COLOR_LOGS "Print colored logs to console" ON)
 option(RATS_ENGINE_GLFW_ENABLE "Use GLFW for window managing" OFF)
 option(RATS_ENGINE_VULKAN_ENABLE "Add support of Vulkan render API" OFF)
 option(RATS_ENGINE_VULKAN_ENABLE_VALIDATION_LAYERS "Enable validation layers for Vulkan render API" OFF)
 
+cmake_option_to_bool(RATS_ENGINE_COLOR_LOGS)
 cmake_option_to_bool(RATS_ENGINE_GLFW_ENABLE)
 cmake_option_to_bool(RATS_ENGINE_VULKAN_ENABLE)
 cmake_option_to_bool(RATS_ENGINE_VULKAN_ENABLE_VALIDATION_LAYERS)
