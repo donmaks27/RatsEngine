@@ -28,10 +28,10 @@ namespace engine
         super_t::service_clear();
     }
 
-    bool window_glfw_vulkan_service::on_event(const event_info& event)
+    void window_glfw_vulkan_service::on_event(const event_info& event)
     {
-        return event.dispatch<vulkan_instance_created_event>([this] {
-            return on_instance_created();
+        event.dispatch<vulkan_instance_created_event>([this] {
+            create_missing_surfaces();
         });
     }
 
@@ -56,12 +56,13 @@ namespace engine
         return true;
     }
 
-    bool window_glfw_vulkan_service::on_instance_created() const
+    void window_glfw_vulkan_service::create_missing_surfaces() const
     {
         const auto& ctx = render_vulkan_service::instance().vk_ctx();
-        return std::ranges::all_of(window_ids(), [this, &ctx](const surface_id id) {
+        const bool allSurfacesCreated = std::ranges::all_of(window_ids(), [this, &ctx](const surface_id id) {
             return create_surface(ctx, id);
         });
+        RATS_ENGINE_ASSERT(allSurfacesCreated);
     }
     bool window_glfw_vulkan_service::create_surface(const vulkan::context& ctx, const surface_id id) const
     {

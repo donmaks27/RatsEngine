@@ -34,19 +34,13 @@ namespace engine
 			Log.fatal("Failed to create Vulkan instance!");
 			return false;
 		}
-		if (!event_bus.post_immediate<vulkan_instance_created_event>({}))
-		{
-			return false;
-		}
+    	event_bus.post_immediate<vulkan_instance_created_event>({});
     	if (!create_device())
     	{
 			Log.fatal("Failed to create Vulkan device!");
     		return false;
     	}
-		if (!event_bus.post_immediate<vulkan_device_created_event>({}))
-		{
-			return false;
-		}
+    	event_bus.post_immediate<vulkan_device_created_event>({});
 		if (!create_command_pools())
 		{
 			Log.fatal("Failed to create Vulkan command pools!");

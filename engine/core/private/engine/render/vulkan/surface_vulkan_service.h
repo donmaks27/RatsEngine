@@ -39,7 +39,7 @@ namespace engine
 
 		virtual void service_clear() override;
 
-		virtual bool on_event(const event_info& event) override;
+		virtual void on_event(const event_info& event) override;
 
 		virtual void destroy_surface(surface_id id) override;
 
@@ -55,6 +55,6 @@ namespace engine
 
 
 		[[nodiscard]] bool create_swapchain(const vulkan::context& ctx, surface_id id);
-		[[nodiscard]] bool on_device_created();
+		void create_missing_swapchains();
 	};
 }

@@ -18,13 +18,13 @@ namespace engine
         virtual bool service_init() override;
         virtual void service_clear() override;
 
-        virtual bool on_event(const event_info& event) override;
+        virtual void on_event(const event_info& event) override;
 
         virtual bool create_window_impl(surface_id id, const window_create_info& info) override;
 
     private:
 
-        [[nodiscard]] bool on_instance_created() const;
+        void create_missing_surfaces() const;
         [[nodiscard]] bool create_surface(const vulkan::context& ctx, surface_id id) const;
     };
 }

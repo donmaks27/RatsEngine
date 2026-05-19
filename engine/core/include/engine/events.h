@@ -49,19 +49,11 @@ namespace engine
         const event_id t;
 
         template<typename EventType, typename Func> requires event_type<EventType> && (std::invocable<Func, const EventType&> || std::invocable<Func>)
-        bool dispatch(Func&& func) const
+        const event_info& dispatch(Func&& func) const
         {
             if (t == EventType::type())
             {
-                if constexpr (std::predicate<Func, const EventType&>)
-                {
-                    return func(static_cast<const EventType&>(e));
-                }
-                else if constexpr (std::predicate<Func>)
-                {
-                    return func();
-                }
-                else if constexpr (std::invocable<Func, const EventType&>)
+                if constexpr (std::invocable<Func, const EventType&>)
                 {
                     func(static_cast<const EventType&>(e));
                 }
@@ -70,7 +62,7 @@ namespace engine
                     func();
                 }
             }
-            return true;
+            return *this;
         }
     };
 
@@ -82,7 +74,7 @@ namespace engine
         event_listener() = default;
         virtual ~event_listener() = default;
 
-        virtual bool on_event(const event_info& event) = 0;
+        virtual void on_event(const event_info& event) = 0;
     };
 
     class RATS_ENGINE_EXPORT event_bus final
@@ -127,11 +119,13 @@ namespace engine
             m_listeners.erase(listener);
         }
         template<typename EventType> requires event_type<EventType>
-        bool post_immediate(const EventType& event)
+        void post_immediate(const EventType& event)
         {
-            return std::ranges::all_of(m_listeners, [&event](event_listener* listener) {
-                return listener->on_event(event_info{event, EventType::type()});
-            });
+            const auto eventInfo = event_info{event, EventType::type()};
+            for (const auto& listener : m_listeners)
+            {
+                listener->on_event(eventInfo);
+            }
         }
 
         template<typename EventType> requires event_type<EventType>

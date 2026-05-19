@@ -16,10 +16,10 @@ namespace engine
 		super_t::service_clear();
 	}
 
-	bool surface_vulkan_service::on_event(const event_info& event)
+	void surface_vulkan_service::on_event(const event_info& event)
 	{
-		return event.dispatch<vulkan_device_created_event>([this] {
-			return on_device_created();
+		event.dispatch<vulkan_device_created_event>([this] {
+			create_missing_swapchains();
 		});
 	}
 
@@ -73,12 +73,13 @@ namespace engine
 		}
 		return true;
 	}
-	bool surface_vulkan_service::on_device_created()
+	void surface_vulkan_service::create_missing_swapchains()
 	{
 		const auto& ctx = render_vulkan_service::instance().vk_ctx();
-		return std::ranges::all_of(surface_ids(), [this, &ctx](const surface_id id) {
+		const bool allSwapchainsCreated = std::ranges::all_of(surface_ids(), [this, &ctx](const surface_id id) {
 			return create_swapchain(ctx, id);
 		});
+		RATS_ENGINE_ASSERT(allSwapchainsCreated);
 	}
 
 	bool surface_vulkan_service::recreate_outdated_swapchains(const vulkan::context& ctx)
